@@ -1,0 +1,24 @@
+{
+  "name": "clear402",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.2",
+  "engines": {
+    "node": ">=22.5.0",
+    "pnpm": ">=10.33.2"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel --stream --if-present --filter \"./apps/*\" --filter \"./services/*\" dev",
+    "lint": "pnpm -r --if-present typecheck",
+    "test": "vitest run --config vitest.config.ts",
+    "build": "pnpm -r --if-present build",
+    "db:init": "pnpm --filter @clear402/runtime db:init"
+  },
+  "devDependencies": {
+    "@types/node": "25.9.3",
+    "tsup": "8.5.1",
+    "tsx": "4.22.4",
+    "typescript": "5.9.3",
+    "vitest": "4.1.8"
+  }
+}

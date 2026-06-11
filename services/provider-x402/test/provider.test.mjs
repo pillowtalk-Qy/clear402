@@ -117,6 +117,61 @@ describe("provider-x402 HTTP service", () => {
     assert.equal(paidBody.report.challengeHash, challengeBody.details.normalized.rawChallengeHash);
   });
 
+  it("verifies payment through the public provider verification endpoint", async () => {
+    const challengeResponse = await fetch(`${baseUrl}/paid/report`);
+    const challengeBody = await challengeResponse.json();
+    const verificationResponse = await fetch(`${baseUrl}/verify-payment`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        challengeHash: challengeBody.details.normalized.rawChallengeHash,
+        paymentHeader: challengeBody.details.fallbackDebugPaymentHeader
+      })
+    });
+    const verificationBody = await verificationResponse.json();
+
+    assert.equal(verificationResponse.status, 200);
+    assert.equal(verificationBody.ok, true);
+    assert.equal(verificationBody.decision, "allow");
+    assert.equal(verificationBody.challengeHash, challengeBody.details.normalized.rawChallengeHash);
+    assert.equal(verificationBody.receipt.status, "delivered");
+    assert.equal(verificationBody.evidenceMode, "fallback");
+  });
+
+  it("serves a substitution attack fixture for Guard and Attack Lab replay", async () => {
+    const response = await fetch(`${baseUrl}/attack-fixtures/substitution`);
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.version, "clear402.attack_fixture.v1");
+    assert.equal(body.name, "substitution");
+    assert.equal(body.evidenceMode, "mock");
+    assert.equal(body.expected.decision, "block");
+    assert.equal(body.substituted.verificationRequest.paymentHeader, body.original.paymentHeader);
+  });
+
+  it("blocks the substitution fixture through the public verification endpoint", async () => {
+    const fixtureResponse = await fetch(`${baseUrl}/attack-fixtures/substitution`);
+    const fixture = await fixtureResponse.json();
+    const response = await fetch(`${baseUrl}/verify-payment`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json"
+      },
+      body: JSON.stringify(fixture.substituted.verificationRequest)
+    });
+    const body = await response.json();
+
+    assert.equal(response.status, 400);
+    assert.equal(body.ok, false);
+    assert.equal(body.decision, "block");
+    assert.equal(body.verification.reason, "payment_verification_failed");
+    assert.match(body.verification.failures.join(","), /challenge_hash_mismatch/);
+    assert.match(body.verification.failures.join(","), /amount_mismatch/);
+  });
+
   it("does not let an invalid proof choose a delivered status", async () => {
     const response = await fetch(`${baseUrl}/paid/report`, {
       headers: {

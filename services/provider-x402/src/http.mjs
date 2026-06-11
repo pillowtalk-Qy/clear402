@@ -1,5 +1,6 @@
 import { createServer } from "node:http";
-import { createProblem } from "../../../packages/shared/src/index.mjs";
+import { createProblem, normalizeX402Challenge } from "../../../packages/shared/src/index.mjs";
+import { createAttackFixture } from "./attack-fixtures.mjs";
 import { createDebugChallenge, createProviderChallenge, requestResourceUrl } from "./challenge.mjs";
 import { DEFAULT_PROVIDER_CONFIG } from "./config.mjs";
 import { createDebugPaymentHeader, decodePaymentHeader, verifyPaymentProof } from "./payment-proof.mjs";
@@ -56,14 +57,49 @@ export function createProviderHttpHandler({
         return handlePaidReport({ request, response, requestId, config, state, clock });
       }
 
+      if (request.method === "POST" && url.pathname === "/verify-payment") {
+        const body = await readJsonBody(request);
+
+        return handleVerifyPayment({
+          request,
+          response,
+          body,
+          requestId,
+          config,
+          state,
+          clock
+        });
+      }
+
       if (request.method === "POST" && url.pathname === "/debug/verify") {
         const body = await readJsonBody(request);
-        const challenge = state.issuedChallenges.get(body?.challengeHash);
-        const verification = challenge
-          ? verifyPaymentProof(body?.paymentHeader, challenge, { config, now: clock() })
-          : { ok: false, reason: "unknown_challenge" };
 
-        return sendJson(response, verification.ok ? 200 : 400, verification);
+        return handleVerifyPayment({
+          request,
+          response,
+          body,
+          requestId,
+          config,
+          state,
+          clock
+        });
+      }
+
+      if (request.method === "GET" && url.pathname.startsWith("/attack-fixtures/")) {
+        const name = decodeURIComponent(url.pathname.slice("/attack-fixtures/".length));
+        const fixture = createAttackFixture(name, {
+          baseUrl: originFromRequest(request, config),
+          config,
+          issuedAt: clock()
+        });
+
+        if (!fixture) {
+          return sendJson(response, 404, createProblem("ATTACK_FIXTURE_NOT_FOUND", "Attack fixture not found.", {
+            name
+          }, requestId));
+        }
+
+        return sendJson(response, 200, fixture);
       }
 
       return sendJson(response, 404, createProblem("NOT_FOUND", "Route not found", {
@@ -80,6 +116,59 @@ export function createProviderHttpHandler({
 
 export function createProviderServer(options = {}) {
   return createServer(createProviderHttpHandler(options));
+}
+
+function handleVerifyPayment({ request, response, body, requestId, config, state, clock }) {
+  const paymentHeader = paymentHeaderFromRequest(request, body);
+  const decoded = decodePaymentHeader(paymentHeader);
+  const challenge = decoded.ok
+    ? resolveChallengeForVerification({ body, proof: decoded.proof, request, config, state })
+    : undefined;
+  const verification = challenge
+    ? verifyPaymentProof(paymentHeader, challenge, { config, now: clock() })
+    : {
+        ok: false,
+        reason: decoded.reason ?? "unknown_challenge",
+        ...(decoded.proof?.challengeHash ? { challengeHash: decoded.proof.challengeHash } : {})
+      };
+
+  if (!verification.ok) {
+    return sendJson(response, 400, {
+      ok: false,
+      decision: "block",
+      providerId: config.providerId,
+      verification,
+      evidenceMode: "fallback",
+      requestId
+    });
+  }
+
+  const providerResponse = {
+    verification: {
+      ok: true,
+      challengeHash: challenge.normalized.rawChallengeHash,
+      settlementMode: verification.settlementMode
+    }
+  };
+  const receipt = createServiceReceipt({
+    challenge,
+    verification,
+    providerResponse,
+    config,
+    deliveredAt: clock()
+  });
+
+  return sendJson(response, 200, {
+    ok: true,
+    decision: "allow",
+    providerId: config.providerId,
+    challengeHash: challenge.normalized.rawChallengeHash,
+    normalized: challenge.normalized,
+    verification,
+    receipt,
+    evidenceMode: verification.evidenceMode,
+    requestId
+  });
 }
 
 function handlePaidReport({ request, response, requestId, config, state, clock }) {
@@ -152,6 +241,54 @@ function resolveChallengeForProof(proof, request, config, state) {
   }
 
   return undefined;
+}
+
+function resolveChallengeForVerification({ body, proof, request, config, state }) {
+  const bodyChallenge = challengeFromBody(body, config);
+
+  if (bodyChallenge) {
+    rememberChallenge(state, bodyChallenge);
+    return bodyChallenge;
+  }
+
+  if (proof?.challengeHash && state.issuedChallenges.has(proof.challengeHash)) {
+    return state.issuedChallenges.get(proof.challengeHash);
+  }
+
+  return resolveChallengeForProof(proof, request, config, state);
+}
+
+function challengeFromBody(body, config) {
+  const rawChallenge = body?.challenge ?? body?.rawChallenge;
+  const normalized = body?.normalized ?? body?.normalizedChallenge;
+
+  if (rawChallenge) {
+    const normalizedChallenge = normalizeX402Challenge(rawChallenge, {
+      evidenceMode: rawChallenge.paymentRequirements?.extra?.evidenceMode ?? normalized?.evidenceMode,
+      providerId: rawChallenge.paymentRequirements?.extra?.providerId ?? normalized?.providerId,
+      expiresAt: rawChallenge.paymentRequirements?.expiresAt ?? normalized?.expiresAt
+    });
+
+    return {
+      rawChallenge,
+      normalized: normalizedChallenge
+    };
+  }
+
+  if (normalized?.rawChallengeHash) {
+    return {
+      rawChallenge: normalized,
+      normalized
+    };
+  }
+
+  return undefined;
+}
+
+function paymentHeaderFromRequest(request, body) {
+  return body?.paymentHeader
+    ?? body?.debugPaymentHeader
+    ?? request.headers["x-clear402-payment"];
 }
 
 function rememberChallenge(state, challenge) {

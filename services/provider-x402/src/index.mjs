@@ -1,3 +1,4 @@
+export { ATTACK_FIXTURE_NAMES, createAttackFixture } from "./attack-fixtures.mjs";
 export { createProviderChallenge, createDebugChallenge } from "./challenge.mjs";
 export { createDebugPaymentHeader, createDebugPaymentProof, verifyPaymentProof } from "./payment-proof.mjs";
 export { createPaidReport, createServiceReceipt } from "./receipt.mjs";

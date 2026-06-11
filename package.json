@@ -9,6 +9,7 @@
   },
   "scripts": {
     "dev": "pnpm -r --parallel --stream --if-present --filter \"./apps/*\" --filter \"./services/*\" dev",
+    "attack:all": "node scripts/run_attack_lab.ts",
     "lint": "pnpm -r --if-present typecheck",
     "test": "vitest run --config vitest.config.ts",
     "build": "pnpm -r --if-present build",

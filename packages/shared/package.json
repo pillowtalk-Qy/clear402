@@ -1,0 +1,13 @@
+{
+  "name": "@clear402/shared",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.mjs"
+  },
+  "scripts": {
+    "lint": "node --check src/index.mjs",
+    "test": "node scripts/build.mjs",
+    "build": "node scripts/build.mjs"
+  }
+}

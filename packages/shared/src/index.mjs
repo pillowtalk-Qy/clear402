@@ -2,6 +2,13 @@ import { createHash } from "node:crypto";
 
 export const EVIDENCE_MODES = Object.freeze(["live", "fallback", "mock"]);
 
+export const CAPABILITY_STATUSES = Object.freeze([
+  "verified",
+  "needs_manual_step",
+  "unavailable",
+  "fallback_required"
+]);
+
 export const RECEIPT_STATUSES = Object.freeze([
   "paid",
   "delivered",
@@ -14,6 +21,14 @@ export const RECEIPT_STATUSES = Object.freeze([
 export function assertEvidenceMode(value) {
   if (!EVIDENCE_MODES.includes(value)) {
     throw new TypeError(`Unsupported evidenceMode: ${String(value)}`);
+  }
+
+  return value;
+}
+
+export function assertCapabilityStatus(value) {
+  if (!CAPABILITY_STATUSES.includes(value)) {
+    throw new TypeError(`Unsupported capability status: ${String(value)}`);
   }
 
   return value;

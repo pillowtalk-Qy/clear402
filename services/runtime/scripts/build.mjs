@@ -3,6 +3,7 @@ import { readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 const roots = ["src", "scripts"];
+const extensions = [".mjs", ".ts"];
 
 for (const file of findModuleFiles(roots)) {
   const result = spawnSync(process.execPath, ["--check", file], { stdio: "inherit" });
@@ -21,7 +22,7 @@ function* findModuleFiles(paths) {
       for (const child of readdirSync(fullPath)) {
         yield* findModuleFiles([join(path, child)]);
       }
-    } else if (fullPath.endsWith(".mjs")) {
+    } else if (extensions.some((extension) => fullPath.endsWith(extension))) {
       yield fullPath;
     }
   }

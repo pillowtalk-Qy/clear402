@@ -45,6 +45,33 @@ function receiptHasRawPii(receipt: ServiceReceipt): boolean {
   return piiPatterns.some((pattern) => pattern.test(serialized));
 }
 
+function responseBodyHasExpectedShape(responseBody: unknown): boolean {
+  if (!responseBody || typeof responseBody !== "object") {
+    return false;
+  }
+
+  const record = responseBody as Record<string, unknown>;
+  return ["verification", "report", "ok", "receipt", "status"].some((key) => key in record);
+}
+
+function responseBodyExplicitlyDeniesDelivery(responseBody: unknown): boolean {
+  if (!responseBody || typeof responseBody !== "object") {
+    return false;
+  }
+
+  const record = responseBody as Record<string, unknown>;
+  if (record.ok === false || record.status === "denied" || record.status === "failed") {
+    return true;
+  }
+
+  const verification = record.verification;
+  if (verification && typeof verification === "object") {
+    return (verification as Record<string, unknown>).ok === false;
+  }
+
+  return false;
+}
+
 export function signReceiptForDemo(
   providerPublicKey: string,
   receipt: Omit<ServiceReceipt, "providerSignature">
@@ -81,17 +108,24 @@ export function verifyServiceReceipt(
     responseSchema:
       input.responseSchemaHash === undefined ||
       input.receipt.responseSchemaHash === input.responseSchemaHash,
+    responseBodyShape:
+      input.responseSchemaHash === undefined || responseBodyHasExpectedShape(input.responseBody),
+    deliveryNotDenied: !responseBodyExplicitlyDeniesDelivery(input.responseBody),
     cawCompleted: input.receipt.cawRequestId !== undefined || input.receipt.txHash !== undefined,
     noRawPii: !receiptHasRawPii(input.receipt)
   };
   const failed = Object.entries(checks).find(([, passed]) => !passed);
 
   if (failed) {
+    const paidButNotDelivered =
+      failed[0] === "deliveryNotDenied" ||
+      (failed[0] === "responseBodyShape" && checks.deliveryNotDenied === false) ||
+      (failed[0] === "responseSchema" && checks.deliveryNotDenied === false);
     return {
       decision: "block",
-      status: failed[0] === "cawCompleted" ? "paid_but_not_delivered" : "failed",
+      status: paidButNotDelivered ? "paid_but_not_delivered" : "failed",
       reason: `Service receipt check failed: ${failed[0]}`,
-      receipt: { ...input.receipt, status: "failed" },
+      receipt: { ...input.receipt, status: paidButNotDelivered ? "paid_but_not_delivered" : "failed" },
       checks
     };
   }

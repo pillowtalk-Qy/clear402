@@ -14,6 +14,19 @@ export {
 } from "./caw-adapter.mjs";
 
 export { clearSign } from "./clearsig/adapter.ts";
+export {
+  ATTACK_NAMES,
+  ATTACK_SCENARIOS
+} from "./attack_lab/scenarios.ts";
+export {
+  createAttackLabRouteHandler,
+  createRuntimeHttpHandler,
+  createRuntimeServer,
+  getAttackLabCapabilityReport,
+  listAttackLabScenarios,
+  runAllAttackLabScenarios,
+  runAttackLabScenario
+} from "./attack_lab/runner.ts";
 export { buildPaymentContext } from "./guard/payment_context.ts";
 export { runGuardPipeline } from "./guard/pipeline.ts";
 export { scanMetadata } from "./guard/metadata_firewall.ts";

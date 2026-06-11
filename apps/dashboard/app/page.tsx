@@ -1,15 +1,9 @@
 export const dynamic = "force-dynamic";
 
-type HealthSnapshot = {
-  service: string;
-  status: "ok" | "down";
-  evidenceMode: "live" | "fallback" | "mock";
-  timestamp: string;
-  version: string;
-  details?: Record<string, unknown>;
-  endpoint: string;
-  error?: string;
-};
+import { headers } from "next/headers";
+
+import { DashboardShell } from "./dashboard-shell";
+import { createInitialWorkspace, type DashboardPreset, type HealthSnapshot } from "./dashboard-data";
 
 const runtimeHealthUrl =
   process.env.RUNTIME_HEALTH_URL ?? "http://127.0.0.1:4000/health";
@@ -27,7 +21,7 @@ async function fetchHealth(endpoint: string, service: string): Promise<HealthSna
 
     return {
       service: payload.service ?? service,
-      status: "ok",
+      status: payload.status === "ok" ? "ok" : "down",
       evidenceMode: (payload.evidenceMode ?? "live") as HealthSnapshot["evidenceMode"],
       timestamp: payload.timestamp ?? new Date().toISOString(),
       version: payload.version ?? "unknown",
@@ -41,85 +35,34 @@ async function fetchHealth(endpoint: string, service: string): Promise<HealthSna
       evidenceMode: "fallback",
       timestamp: new Date().toISOString(),
       version: "unavailable",
-      details: {},
+      details: { fallbackReason: "runtime API unavailable" },
       endpoint,
       error: error instanceof Error ? error.message : "Unknown error"
     };
   }
 }
 
-function Badge({ snapshot }: { snapshot: HealthSnapshot }) {
-  const className =
-    snapshot.status === "ok"
-      ? "badge badge-live"
-      : snapshot.evidenceMode === "mock"
-        ? "badge badge-mock"
-        : "badge badge-fallback";
+function resolvePreset(value: string | undefined): DashboardPreset {
+  if (value === "investigate" || value === "attack" || value === "evidence") {
+    return value;
+  }
 
-  return <span className={className}>{snapshot.evidenceMode}</span>;
-}
-
-function HealthPanel({ snapshot }: { snapshot: HealthSnapshot }) {
-  return (
-    <article className="panel">
-      <div className="panel-head">
-        <h2 className="panel-title">{snapshot.service}</h2>
-        <Badge snapshot={snapshot} />
-      </div>
-
-      <div className="field-list">
-        <div className="field-row">
-          <div className="field-label">Status</div>
-          <p className="field-value">{snapshot.status}</p>
-        </div>
-        <div className="field-row">
-          <div className="field-label">Endpoint</div>
-          <p className="field-value">{snapshot.endpoint}</p>
-        </div>
-        <div className="field-row">
-          <div className="field-label">Version</div>
-          <p className="field-value">{snapshot.version}</p>
-        </div>
-        <div className="field-row">
-          <div className="field-label">Timestamp</div>
-          <p className="field-value">{snapshot.timestamp}</p>
-        </div>
-      </div>
-
-      <pre className="details">{JSON.stringify(snapshot.details ?? {}, null, 2)}</pre>
-
-      {snapshot.error ? (
-        <p className="footer-note">Fallback reason: {snapshot.error}</p>
-      ) : null}
-    </article>
-  );
+  return "demo";
 }
 
 export default async function Page() {
+  const requestHeaders = await headers();
+  const preset = resolvePreset(requestHeaders.get("x-clear402-dashboard-preset") ?? undefined);
   const [runtime, provider] = await Promise.all([
     fetchHealth(runtimeHealthUrl, "runtime"),
     fetchHealth(providerHealthUrl, "provider-x402")
   ]);
 
-  return (
-    <main>
-      <div className="shell">
-        <header className="header">
-          <h1 className="title">Clear402 Foundation</h1>
-          <p className="subtitle">
-            Monorepo base, shared contracts, SQLite initialization, and service health.
-          </p>
-        </header>
+  const initialWorkspace = createInitialWorkspace({
+    runtime,
+    provider,
+    preset
+  });
 
-        <section className="status-grid" aria-label="service health">
-          <HealthPanel snapshot={runtime} />
-          <HealthPanel snapshot={provider} />
-        </section>
-
-        <p className="footer-note">
-          Runtime and provider are the only live services in this foundation slice.
-        </p>
-      </div>
-    </main>
-  );
+  return <DashboardShell initialWorkspace={initialWorkspace} runtime={runtime} provider={provider} />;
 }

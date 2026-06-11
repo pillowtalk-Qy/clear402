@@ -1,0 +1,15 @@
+{
+  "name": "provider-x402",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.mjs"
+  },
+  "scripts": {
+    "dev": "node src/server.mjs",
+    "start": "node dist/server.mjs",
+    "lint": "node scripts/lint.mjs",
+    "test": "node --test test/*.test.mjs",
+    "build": "node scripts/build.mjs"
+  }
+}

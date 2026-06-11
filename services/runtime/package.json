@@ -7,7 +7,7 @@
   },
   "scripts": {
     "lint": "node scripts/lint.mjs",
-    "test": "node --test test/*.test.mjs",
+    "test": "node scripts/test.mjs",
     "build": "node scripts/build.mjs"
   }
 }

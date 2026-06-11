@@ -14,7 +14,11 @@ import type {
 } from "../../../../packages/shared/src/index.mjs";
 import { compareDecimalStrings, subtractDecimalStrings } from "./amount.ts";
 import { clearSign, type ClearSignInput, type ClearSignResult } from "../clearsig/adapter.ts";
-import { buildPaymentContext, type BuiltPaymentContext } from "./payment_context.ts";
+import {
+  buildPaymentContext,
+  canonicalizeUrl,
+  type BuiltPaymentContext
+} from "./payment_context.ts";
 import { normalizeX402Challenge, type NormalizedX402Challenge } from "../x402/challenge_normalizer.ts";
 import { validateProviderRegistry, type ProviderRegistryValidationResult } from "../x402/provider_registry.ts";
 import { validateERC8004Trust, type ERC8004TrustRecord } from "../x402/erc8004_trust_adapter.ts";
@@ -95,8 +99,9 @@ export interface GuardPipelineInput {
     method: "GET" | "POST";
     url: string;
     body?: unknown;
-    headers?: Record<string, string | undefined>;
+    headers?: Record<string, string | string[] | undefined>;
     boundHeaders?: string[];
+    rawHeaders?: string[];
   };
   metadata: MetadataTriple;
   budgetLimitUsd: string;
@@ -109,6 +114,7 @@ export interface GuardPipelineInput {
   providerChallenge?: {
     rawChallengeHash: string;
     responseSchemaHash?: string;
+    responseHeaders?: Record<string, string | string[] | undefined>;
     providerCalldata?: string;
     providerSignature?: string;
     providerPublicKey?: string;
@@ -210,6 +216,105 @@ function ensureReceiptBody(receipt: ServiceReceipt | undefined): ServiceReceipt 
   return receipt;
 }
 
+function normalizeHeaderValue(value: string | string[] | undefined): string[] {
+  if (value === undefined) {
+    return [];
+  }
+
+  return Array.isArray(value) ? value.map((entry) => entry.trim()) : [value.trim()];
+}
+
+function readHeader(
+  headers: Record<string, string | string[] | undefined> | undefined,
+  name: string
+): string | undefined {
+  if (!headers) {
+    return undefined;
+  }
+
+  const value = headers[name.toLowerCase()];
+  const values = normalizeHeaderValue(value);
+  return values.length > 0 ? values[0] : undefined;
+}
+
+function detectDuplicatePaymentHeader(
+  headers: Record<string, string | string[] | undefined> | undefined,
+  rawHeaders: string[] | undefined
+): { headerName: string; values: string[] } | undefined {
+  const names = ["x-payment", "x-clear402-payment"];
+  for (const name of names) {
+    const values: string[] = [];
+    const headerValue = headers?.[name];
+    if (headerValue !== undefined) {
+      values.push(...normalizeHeaderValue(headerValue));
+    }
+
+    if (rawHeaders !== undefined) {
+      for (let index = 0; index < rawHeaders.length - 1; index += 2) {
+        if (rawHeaders[index]?.trim().toLowerCase() === name) {
+          values.push(rawHeaders[index + 1]?.trim() ?? "");
+        }
+      }
+    }
+
+    if (values.length > 1 || values.some((value) => value.includes(","))) {
+      return {
+        headerName: name,
+        values
+      };
+    }
+  }
+
+  return undefined;
+}
+
+function responseHeadersLookCacheSafe(
+  headers: Record<string, string | string[] | undefined> | undefined
+): { allowed: boolean; reason?: string; checks: Record<string, boolean> } {
+  if (headers === undefined) {
+    return { allowed: true, checks: {} };
+  }
+
+  const cacheControl = readHeader(headers, "cache-control") ?? "";
+  const vary = readHeader(headers, "vary") ?? "";
+  const cacheTokens = cacheControl
+    .split(",")
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean);
+  const varyTokens = vary
+    .split(",")
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean);
+  const hasNoStoreOrPrivate =
+    cacheTokens.includes("no-store") || cacheTokens.includes("private");
+  const variesOnPayment = varyTokens.some((entry) =>
+    ["x-payment", "x-clear402-payment", "authorization"].includes(entry)
+  );
+
+  const checks = {
+    cacheControl: hasNoStoreOrPrivate,
+    vary: variesOnPayment
+  };
+
+  if (!checks.cacheControl) {
+    return {
+      allowed: false,
+      reason: "Cache confusion blocked by response cache-control policy",
+      checks
+    };
+  }
+
+  if (!checks.vary) {
+    return {
+      allowed: false,
+      reason: "Cache confusion blocked by missing Vary payment binding",
+      checks
+    };
+  }
+
+  return { allowed: true, checks };
+}
+
 export async function runGuardPipeline(
   database: DatabaseSync,
   input: GuardPipelineInput
@@ -219,6 +324,82 @@ export async function runGuardPipeline(
     rawChallenge: input.challenge,
     now
   });
+  const duplicatePaymentHeader = detectDuplicatePaymentHeader(
+    input.request.headers,
+    input.request.rawHeaders
+  );
+  if (duplicatePaymentHeader !== undefined) {
+    const event = createFailure(database, {
+      missionId: input.missionId,
+      layer: "http_headers",
+      reason: "Duplicate payment header rejected",
+      decision: "block",
+      evidence: {
+        duplicatePaymentHeader,
+        request: input.request,
+        challenge
+      }
+    });
+
+    return {
+      decision: "block",
+      status: "blocked",
+      reason: "Duplicate payment header rejected",
+      guardEventId: event.id,
+      evidenceBundle: evidenceBundleForMission(database, input.missionId)
+    };
+  }
+
+  let requestUrl: ReturnType<typeof canonicalizeUrl>;
+  let challengeUrl: ReturnType<typeof canonicalizeUrl>;
+
+  try {
+    requestUrl = canonicalizeUrl(input.request.url);
+    challengeUrl = canonicalizeUrl(challenge.resource);
+  } catch (error) {
+    const event = createFailure(database, {
+      missionId: input.missionId,
+      layer: "resource_binding",
+      reason: error instanceof Error ? error.message : "Invalid request or challenge URL",
+      decision: "block",
+      evidence: {
+        challenge,
+        request: input.request
+      }
+    });
+
+    return {
+      decision: "block",
+      status: "blocked",
+      reason: error instanceof Error ? error.message : "Invalid request or challenge URL",
+      guardEventId: event.id,
+      evidenceBundle: evidenceBundleForMission(database, input.missionId)
+    };
+  }
+
+  if (requestUrl.canonicalUrl !== challengeUrl.canonicalUrl) {
+    const event = createFailure(database, {
+      missionId: input.missionId,
+      layer: "resource_binding",
+      reason: "Cross-resource substitution blocked by canonical request binding",
+      decision: "block",
+      evidence: {
+        challengeResource: challengeUrl.canonicalUrl,
+        requestResource: requestUrl.canonicalUrl,
+        challenge,
+        request: input.request
+      }
+    });
+
+    return {
+      decision: "block",
+      status: "blocked",
+      reason: "Cross-resource substitution blocked by canonical request binding",
+      guardEventId: event.id,
+      evidenceBundle: evidenceBundleForMission(database, input.missionId)
+    };
+  }
+
   const challengeOrigin = new URL(challenge.resource).origin.toLowerCase();
   const providerEntry =
     (challenge.providerId !== undefined
@@ -490,6 +671,50 @@ export async function runGuardPipeline(
       decision: "block",
       status: "blocked",
       reason: cawEvidence.denial?.reason ?? "CAW denied payment",
+      guardEventId: event.id,
+      providerRegistryResult: registryResult,
+      trustResult,
+      metadataFirewall,
+      paymentContext: builtContext.context,
+      paymentContextHash: builtContext.paymentContextHash,
+      cawRequestId: builtContext.cawRequestId,
+      reservation: {
+        quoteId: reservationResult.reservation.quoteId,
+        paymentContextHash: reservationResult.reservation.paymentContextHash,
+        nonce: reservationResult.reservation.nonce,
+        reservedBudget: reservationResult.reservation.reservedBudget
+      },
+      clearsig: clearSignResult,
+      cawEvidence,
+      evidenceBundle: evidenceBundleForMission(database, input.missionId)
+    };
+  }
+
+  const cachePolicy = responseHeadersLookCacheSafe(input.providerChallenge?.responseHeaders);
+  if (!cachePolicy.allowed) {
+    const event = createFailure(database, {
+      missionId: input.missionId,
+      layer: "cache_policy",
+      reason: cachePolicy.reason ?? "Cache confusion blocked by response policy",
+      decision: "block",
+      evidence: {
+        challenge,
+        registryResult,
+        trustResult,
+        metadataFirewall,
+        paymentContext: builtContext.context,
+        clearSignResult,
+        cawEvidence,
+        responseHeaders: input.providerChallenge?.responseHeaders,
+        cachePolicy
+      }
+    });
+    markReservationDisputed(database, builtContext.paymentContextHash);
+
+    return {
+      decision: "block",
+      status: "disputed",
+      reason: cachePolicy.reason ?? "Cache confusion blocked by response policy",
       guardEventId: event.id,
       providerRegistryResult: registryResult,
       trustResult,

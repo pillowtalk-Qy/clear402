@@ -6,6 +6,7 @@ import { afterAll, describe, expect, test } from "vitest";
 
 import { healthResponseSchema } from "../../../packages/shared/src/index.js";
 import { initializeRuntimeDatabase } from "./db/init.js";
+import { canonicalJson, hashObject } from "./guard/hash.js";
 import { startRuntimeServer } from "./server.js";
 
 describe("runtime", () => {
@@ -49,4 +50,409 @@ describe("runtime", () => {
       await server.close();
     }
   });
+
+  test("exports DB-backed mission evidence as JSON and markdown from one structured bundle", async () => {
+    const seededDatabasePath = join(databaseDir, "evidence-export.sqlite");
+    const handle = initializeRuntimeDatabase({ databasePath: seededDatabasePath });
+    seedEvidenceMission(handle.database, "mission-export-1");
+    handle.database.close();
+
+    const server = await startRuntimeServer({
+      host: "127.0.0.1",
+      port: 0,
+      databasePath: seededDatabasePath
+    });
+
+    try {
+      const jsonResponse = await fetch(
+        `http://127.0.0.1:${server.port}/api/evidence/mission-export-1/export.json`
+      );
+      expect(jsonResponse.status).toBe(200);
+      expect(jsonResponse.headers.get("content-type")).toContain("application/json");
+
+      const payload = (await jsonResponse.json()) as any;
+      expect(payload.version).toBe("clear402.evidence-export.v1");
+      expect(payload.missionId).toBe("mission-export-1");
+      expect(payload.source).toBe("runtime_db");
+      expect(payload.providerChallenge.provider.providerId).toBe("provider-export");
+      expect(payload.paymentContext.paymentContextHash).toBe(
+        "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      );
+      expect(payload.guard.decision).toBe("allow");
+      expect(payload.guard.guardEventId).toBe("guard-export-1");
+      expect(payload.serviceReceipt.receiptId).toBe("receipt-export-1");
+      expect(payload.serviceReceipt.providerSignature).toBeUndefined();
+      expect(payload.serviceReceipt.providerSignaturePresent).toBe(true);
+      expect(payload.cawCapabilitySummary.rawEvidenceRefsOmitted).toBe(true);
+
+      const serialized = JSON.stringify(payload);
+      expect(serialized).not.toContain("sk-test-secret");
+      expect(serialized).not.toContain("CLEAR402_CAW_API_KEY=");
+      expect(serialized).not.toContain("provider-signature-secret");
+
+      const mdResponse = await fetch(
+        `http://127.0.0.1:${server.port}/api/evidence/mission-export-1/export.md`
+      );
+      expect(mdResponse.status).toBe(200);
+      expect(mdResponse.headers.get("content-type")).toContain("text/markdown");
+
+      const markdown = await mdResponse.text();
+      expect(markdown).toContain("# Clear402 Evidence Export");
+      expect(markdown).toContain("Mission ID: `mission-export-1`");
+      expect(markdown).toContain("Guard event ID: `guard-export-1`");
+      expect(markdown).toContain("Raw evidence refs omitted: `true`");
+      expect(markdown).not.toContain("sk-test-secret");
+      expect(markdown).not.toContain("CLEAR402_CAW_API_KEY=");
+    } finally {
+      await server.close();
+    }
+  });
+
+  test("exports explicit demo evidence without pretending it is live", async () => {
+    const server = await startRuntimeServer({
+      host: "127.0.0.1",
+      port: 0,
+      databasePath: join(databaseDir, "demo-export.sqlite")
+    });
+
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:${server.port}/api/evidence/mission-demo-402/export.json`
+      );
+      expect(response.status).toBe(200);
+      const payload = (await response.json()) as any;
+
+      expect(payload.source).toBe("demo_fixture");
+      expect(payload.evidenceMode).not.toBe("live");
+      expect(payload.evidenceModeSummary.components).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            component: "mission",
+            evidenceMode: "fallback"
+          }),
+          expect.objectContaining({
+            component: "attackLab",
+            evidenceMode: "mock"
+          })
+        ])
+      );
+      expect(payload.limitations.claimsForbidden).toContain("Do not claim mainnet CAW execution.");
+    } finally {
+      await server.close();
+    }
+  });
+
+  test("returns problem JSON for unknown evidence missions", async () => {
+    const server = await startRuntimeServer({
+      host: "127.0.0.1",
+      port: 0,
+      databasePath: join(databaseDir, "missing-export.sqlite")
+    });
+
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:${server.port}/api/evidence/not-here/export.json`
+      );
+      expect(response.status).toBe(404);
+      const payload = (await response.json()) as any;
+      expect(payload.code).toBe("EVIDENCE_NOT_FOUND");
+    } finally {
+      await server.close();
+    }
+  });
 });
+
+function seedEvidenceMission(database: ReturnType<typeof initializeRuntimeDatabase>["database"], missionId: string) {
+  const now = 1_800_000_000_000;
+  const paymentContextHash = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+  const rawChallengeHash = hashObject("export-raw-challenge");
+  const paymentContext = {
+    version: "clear402.payment.v1",
+    missionId,
+    providerId: "provider-export",
+    quoteId: "quote-export-1",
+    method: "GET",
+    origin: "https://provider.example",
+    resourcePath: "/paid/report",
+    canonicalUrlHash: hashObject("https://provider.example/paid/report"),
+    bodyHash: hashObject(""),
+    sanitizedResourceHash: hashObject("https://provider.example/paid/report"),
+    merchantAddress: "0xA882b939c4Ca15c904760b8c240124Cb68cc2A88",
+    facilitatorUrlHash: hashObject("https://facilitator.example/x402"),
+    chainId: "84532",
+    tokenId: "USDC",
+    amount: "5",
+    amountDecimals: 6,
+    nonce: "nonce-export-1",
+    issuedAt: now,
+    expiresAt: now + 600_000,
+    quoteTermsHash: hashObject("export-quote-terms"),
+    piiPolicyHash: hashObject("export-pii-policy"),
+    clearSignDigest: hashObject("export-clearsig"),
+    cawPactId: "pact-export-1",
+    serviceMode: "caw-fetch"
+  };
+  const receipt = {
+    receiptId: "receipt-export-1",
+    paymentContextHash,
+    cawRequestId: "clear402:export-request",
+    cawWalletAddress: "0xCAW0000000000000000000000000000000000001",
+    pactId: "pact-export-1",
+    providerAddress: "0xA882b939c4Ca15c904760b8c240124Cb68cc2A88",
+    txHash: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    chainId: "84532",
+    tokenId: "USDC",
+    amount: "5",
+    providerResponseHash: hashObject("export-provider-response"),
+    providerSignature: "provider-signature-secret",
+    responseSchemaHash: hashObject("clear402.provider.report.v1"),
+    deliveryTimestamp: now,
+    status: "delivered",
+    clearsigDigest: hashObject("export-clearsig"),
+    auditLogIds: ["audit-export-1"],
+    redactionSummaryHash: hashObject("export-redaction-summary"),
+    evidenceMode: "fallback"
+  };
+
+  database
+    .prepare(
+      `insert into missions (
+        id,
+        user_prompt,
+        budget_usd,
+        status,
+        caw_wallet_uuid,
+        caw_wallet_address,
+        pact_id,
+        created_at,
+        updated_at
+      ) values (?, ?, ?, 'complete', ?, ?, ?, ?, ?)`
+    )
+    .run(
+      missionId,
+      "Fetch the paid market report without leaking secrets.",
+      "25",
+      "wallet-export",
+      "0xCAW0000000000000000000000000000000000001",
+      "pact-export-1",
+      now,
+      now
+    );
+
+  database
+    .prepare(
+      `insert into provider_registry (
+        provider_id,
+        origin,
+        merchant_address,
+        facilitator_url,
+        chain_id,
+        token_id,
+        public_key,
+        allowed_resources,
+        caw_allowlist_status,
+        erc8004_agent_id,
+        erc8004_agent_uri,
+        reputation_threshold,
+        validation_tags,
+        created_at,
+        updated_at
+      ) values (?, ?, ?, ?, ?, ?, ?, ?, 'allowed', ?, ?, ?, ?, ?, ?)`
+    )
+    .run(
+      "provider-export",
+      "https://provider.example",
+      "0xA882b939c4Ca15c904760b8c240124Cb68cc2A88",
+      "https://facilitator.example/x402",
+      "84532",
+      "USDC",
+      "0x04publickey-export",
+      canonicalJson(["/paid/report"]),
+      "erc8004:agent:export",
+      "https://erc8004.example/agents/export",
+      "80",
+      canonicalJson(["x402_endpoint_verified", "delivery_receipt_verified"]),
+      now,
+      now
+    );
+
+  database
+    .prepare(
+      `insert into x402_quotes (
+        quote_id,
+        mission_id,
+        provider_id,
+        resource_url,
+        amount_usd,
+        status,
+        raw_challenge_hash,
+        created_at,
+        expires_at
+      ) values (?, ?, ?, ?, ?, 'spent', ?, ?, ?)`
+    )
+    .run(
+      "quote-export-1",
+      missionId,
+      "provider-export",
+      "https://provider.example/paid/report",
+      "5",
+      rawChallengeHash,
+      now,
+      now + 600_000
+    );
+
+  database
+    .prepare(
+      `insert into payment_contexts (
+        payment_context_hash,
+        mission_id,
+        provider_id,
+        quote_id,
+        method,
+        origin,
+        resource_path,
+        canonical_url_hash,
+        body_hash,
+        sanitized_resource_hash,
+        merchant_address,
+        facilitator_url_hash,
+        chain_id,
+        token_id,
+        amount,
+        amount_decimals,
+        nonce,
+        issued_at,
+        expires_at,
+        quote_terms_hash,
+        pii_policy_hash,
+        clear_sign_digest,
+        caw_pact_id,
+        service_mode,
+        raw_context_json
+      ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+    .run(
+      paymentContextHash,
+      missionId,
+      paymentContext.providerId,
+      paymentContext.quoteId,
+      paymentContext.method,
+      paymentContext.origin,
+      paymentContext.resourcePath,
+      paymentContext.canonicalUrlHash,
+      paymentContext.bodyHash,
+      paymentContext.sanitizedResourceHash,
+      paymentContext.merchantAddress,
+      paymentContext.facilitatorUrlHash,
+      paymentContext.chainId,
+      paymentContext.tokenId,
+      paymentContext.amount,
+      paymentContext.amountDecimals,
+      paymentContext.nonce,
+      paymentContext.issuedAt,
+      paymentContext.expiresAt,
+      paymentContext.quoteTermsHash,
+      paymentContext.piiPolicyHash,
+      paymentContext.clearSignDigest,
+      paymentContext.cawPactId,
+      paymentContext.serviceMode,
+      canonicalJson(paymentContext)
+    );
+
+  database
+    .prepare(
+      `insert into guard_events (
+        id,
+        mission_id,
+        layer,
+        decision,
+        reason,
+        evidence_json,
+        created_at
+      ) values (?, ?, 'guard_pipeline', 'allow', ?, ?, ?)`
+    )
+    .run(
+      "guard-export-1",
+      missionId,
+      "Export fixture allowed by guard pipeline.",
+      canonicalJson({
+        challenge: {
+          scheme: "exact",
+          network: "base-sepolia",
+          asset: "USDC",
+          amount: "5",
+          payTo: "0xA882b939c4Ca15c904760b8c240124Cb68cc2A88",
+          resource: "https://provider.example/paid/report",
+          facilitatorUrl: "https://facilitator.example/x402",
+          description: "Paid report",
+          expiresAt: now + 600_000,
+          providerId: "provider-export",
+          rawChallengeHash,
+          evidenceMode: "fallback"
+        },
+        paymentContext,
+        cawEvidence: {
+          evidenceMode: "fallback",
+          requestId: "clear402:export-request",
+          walletAddress: "0xCAW0000000000000000000000000000000000001",
+          txHash: receipt.txHash,
+          auditLogId: "audit-export-1"
+        },
+        receipt,
+        environmentValue: "CLEAR402_CAW_API_KEY=sk-test-secret"
+      }),
+      now
+    );
+
+  database
+    .prepare(
+      `insert into receipts (
+        receipt_id,
+        mission_id,
+        payment_context_hash,
+        caw_request_id,
+        caw_wallet_address,
+        pact_id,
+        provider_address,
+        facilitator_url_hash,
+        tx_hash,
+        chain_id,
+        token_id,
+        amount,
+        provider_response_hash,
+        provider_signature,
+        response_schema_hash,
+        delivery_timestamp,
+        status,
+        clearsig_digest,
+        audit_log_ids,
+        redaction_summary_hash,
+        evidence_mode,
+        created_at
+      ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+    .run(
+      receipt.receiptId,
+      missionId,
+      paymentContextHash,
+      receipt.cawRequestId,
+      receipt.cawWalletAddress,
+      receipt.pactId,
+      receipt.providerAddress,
+      paymentContext.facilitatorUrlHash,
+      receipt.txHash,
+      receipt.chainId,
+      receipt.tokenId,
+      receipt.amount,
+      receipt.providerResponseHash,
+      receipt.providerSignature,
+      receipt.responseSchemaHash,
+      receipt.deliveryTimestamp,
+      receipt.status,
+      receipt.clearsigDigest,
+      canonicalJson(receipt.auditLogIds),
+      receipt.redactionSummaryHash,
+      receipt.evidenceMode,
+      now
+    );
+}

@@ -1,6 +1,6 @@
 # Clear402 Interface Contracts
 
-This document freezes the foundation interface surface for the Clear402 monorepo.
+This document freezes the integration interface surface for the Clear402 monorepo.
 
 ## 1. Contract Principles
 
@@ -8,8 +8,8 @@ This document freezes the foundation interface surface for the Clear402 monorepo
 2. IDs stay opaque and stable.
 3. Environment-dependent responses carry `evidenceMode`.
 4. Errors use Problem JSON.
-5. Dashboard renders runtime truth; it does not invent state.
-6. CAW, Guard, and Attack Lab are explicitly out of scope for this branch.
+5. Dashboard renders runtime truth when a runtime API exists and labels fallback/mock demo state when it does not.
+6. Guard Pipeline and Attack Lab contracts are in scope for the current integration branch; CAW-side payment execution remains fallback-only until the capability report is verified.
 
 ## 2. Shared Types
 
@@ -41,11 +41,11 @@ Implemented contract families:
 - `ERC8004TrustResult`
 - `EvidenceBundle`
 
-These types are the source of truth for the runtime, provider, and dashboard foundation slice.
+These types are the source of truth for the runtime, provider, and dashboard integration slice.
 
 ## 3. API Surface
 
-### 3.1 Live Endpoints
+### 3.1 Long-Lived Service Endpoints
 
 - `GET /health`
 
@@ -54,7 +54,15 @@ Implemented by:
 - `services/runtime`
 - `services/provider-x402`
 
-### 3.2 Foundation Response Rules
+### 3.2 Attack Lab Handler
+
+The attack lab runner starts a local runtime handler that exposes:
+
+- `POST /api/attacks/:attackName/run`
+
+This route is used by `scripts/run_attack_lab.ts` and runtime tests. It is an operator/test surface for the attack lab, not evidence of a production payment API.
+
+### 3.3 Response Rules
 
 - Health payloads must validate against `HealthResponse`.
 - Failure responses must use `ProblemJSON`.
@@ -80,12 +88,12 @@ Implemented tables and views:
 
 The following are reserved for later phases and are not implemented here:
 
-- CawAdapter business logic
-- Guard Pipeline orchestration
-- Attack Lab flows
-- complex dashboard interactions
-- live CAW execution paths
+- CAW-side payment execution against official CAW/funds
+- verified CAW audit lookup
+- live ERC-8004 network data
+- long-lived runtime mission/payment endpoints beyond health
+- server-side evidence export endpoint
 
 ## 6. Stability Note
 
-This document is the contract freeze for the foundation branch. Any future change to these interfaces should update this file first, then update the shared Zod schemas and downstream consumers.
+This document is the contract freeze for the integration branch. Any future change to these interfaces should update this file first, then update the shared Zod schemas and downstream consumers.

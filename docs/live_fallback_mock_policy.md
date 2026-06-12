@@ -6,16 +6,18 @@ This policy freezes how the repo labels evidence and behavior.
 
 ### Live
 
-`live` means the action was executed against the real intended system and the repo has evidence of that external execution.
+`live` means the action was executed against the real intended system or code path and the repo has evidence of that execution.
 
 Examples:
 
+- a local runtime/provider health response,
+- a real guard pipeline decision,
 - a real CAW-approved transaction,
 - a real provider 402 challenge,
 - a real audit lookup,
 - or a real receipt verification.
 
-Live always needs raw evidence, not just a success message.
+Live always needs evidence, not just a success message. CAW/funds claims need raw external evidence such as an audit record or verified transaction reference.
 
 ### Fallback
 
@@ -111,7 +113,36 @@ If a capability is not verified, it must be labeled `fallback_required` or `need
 | ERC-8004 missing, local registry used instead | fallback or mock, never live |
 | Demo screenshot with fake tx hash | mock |
 
-## 8. Safety Summary
+## 8. Current Demo Gate Classification
+
+This section records the current integration branch status for demo operators.
+
+### Live In The Current Demo
+
+- Runtime and provider `GET /health` responses from local services.
+- Guard pipeline execution in tests and in `pnpm run attack:all`.
+- Provider registry validation, metadata firewall, PaymentContext resource binding, quote/nonce/budget checks, clearsig, and service receipt verification when run by the guard pipeline.
+- The P0 `metadata.resourceUrl` override defense: mismatched metadata is blocked before PaymentContext creation.
+
+These live claims describe code paths that actually execute. Some of those paths run over demo seed records; the seed data itself is not live external data.
+
+### Fallback In The Current Demo
+
+- CAW-side payment execution. The `caw` CLI is not on `PATH`, `docs/caw_capability_report.md` says `Live ready: false`, and `payment_execution` is `fallback_required`.
+- Dashboard mission, payment, receipt, and export actions unless they are explicitly backed by a runtime response.
+- CAW audit lookup and CAW policy denial evidence until the capability report is verified.
+
+### Mock In The Current Demo
+
+- Attack fixtures.
+- Demo provider registry entries, ERC-8004 trust records, CAW capability seed records, sample wallet IDs, sample hashes, and sample transaction references.
+- Dashboard attack cards and sample evidence preview records.
+
+### Demo Rule
+
+Say "16/16 attacks blocked" only as: 16 mock attack fixtures were executed through the real guard pipeline, and each returned a blocked decision with evidence. Do not say or imply that CAW moved funds, that external attackers were tested, or that demo seed data is live registry data.
+
+## 9. Safety Summary
 
 The rule is simple:
 

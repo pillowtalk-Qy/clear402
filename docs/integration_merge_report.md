@@ -1,5 +1,7 @@
 # Clear402 Integration Merge Report
 
+Historical note: this report describes the foundation-to-integration merge at commit `94e65d7`. Current demo-gate status is tracked in `README.md`, `docs/demo_operator_runbook.md`, `docs/demo_narrative_talk_track.md`, and `docs/live_fallback_mock_policy.md`.
+
 Merged:
 
 - `clear402/foundation` -> `clear402/integration`

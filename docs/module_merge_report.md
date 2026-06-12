@@ -1,5 +1,7 @@
 # Module Merge Report
 
+Historical note: this report describes the original `clear402/foundation` merge scope. Current demo-gate status is tracked in `README.md`, `docs/demo_operator_runbook.md`, `docs/demo_narrative_talk_track.md`, and `docs/live_fallback_mock_policy.md`.
+
 Branch:
 
 - `clear402/foundation`

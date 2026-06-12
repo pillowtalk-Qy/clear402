@@ -173,5 +173,5 @@ The integration branch is only stable when shared contracts are owned centrally.
 1. Every risk must remain visible until the relevant phase proves it false.
 2. `fallback` is allowed only when it is labeled and explained.
 3. `mock` is allowed only for fixtures, lab data, or component labs.
-4. `live` requires real external execution plus raw evidence.
+4. `live` requires real execution evidence; CAW/funds claims require external raw evidence.
 5. ERC-8004 is a P1 trust layer only and never a substitute for CAW policy.

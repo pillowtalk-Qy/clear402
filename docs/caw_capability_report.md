@@ -18,4 +18,4 @@ This report records what Clear402 can truthfully claim about the local CAW bound
 
 ## Consequence
 
-Clear402 must not claim live CAW execution. Payment attempts must stop with explicit denial or `fallback_required` evidence until the missing capabilities are verified.
+Clear402 must not claim that the CAW side moved funds or approved a payment in this environment. Payment attempts must stop with explicit denial or `fallback_required` evidence until the missing capabilities are verified.

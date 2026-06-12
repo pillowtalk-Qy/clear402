@@ -6,7 +6,8 @@ import {
   buildEvidenceExport,
   createInitialWorkspace,
   formatRequestId,
-  loadPreferredEvidenceExport
+  loadPreferredEvidenceExport,
+  runPreferredMissionFlowAction
 } from "./dashboard-data";
 
 const runtime = {
@@ -146,6 +147,141 @@ describe("dashboard data", () => {
     expect(result.evidence.markdown).toContain("destination-allowlist policy denial");
     expect(result.evidence.markdown).toContain("does not cover every policy denial type");
     expect(result.evidence.markdown).not.toContain("needs_manual_step / fallback / not-run");
+  });
+
+  test("uses runtime mission flow action when the API succeeds without upgrading evidenceMode", async () => {
+    const workspace = createInitialWorkspace({
+      runtime,
+      provider,
+      preset: "demo"
+    });
+    const fetcher: typeof fetch = async (input) => {
+      expect(String(input)).toBe("/api/missions");
+
+      return new Response(
+        JSON.stringify({
+          source: "runtime_api",
+          evidenceMode: "fallback",
+          mission: {
+            id: "mission-runtime-1",
+            userPrompt: "Runtime mission",
+            budgetUsd: "0.10",
+            resourceUrl: "https://127.0.0.1:4010/paid/report?topic=market-intel",
+            status: "active",
+            cawWalletUuid: "runtime-demo-wallet",
+            cawWalletAddress: "0xCAW0000000000000000000000000000000000001",
+            pactId: "runtime-demo-pact",
+            createdAt: 1_800_000_000_000,
+            evidenceMode: "fallback",
+            source: "runtime_api"
+          }
+        }),
+        { status: 201, headers: { "content-type": "application/json" } }
+      );
+    };
+
+    const result = await runPreferredMissionFlowAction(workspace, "create-mission", {
+      fetcher,
+      now: 1_800_000_000_100
+    });
+
+    expect(result.usedRuntime).toBe(true);
+    expect(result.source).toBe("runtime_api");
+    expect(result.workspace.actionSource).toBe("runtime_api");
+    expect(result.workspace.mission.id).toBe("mission-runtime-1");
+    expect(result.workspace.mission.evidenceMode).toBe("fallback");
+    expect(result.workspace.mission.evidenceMode).not.toBe("live");
+  });
+
+  test("falls back to frontend mission flow when runtime API is unavailable", async () => {
+    const workspace = createInitialWorkspace({
+      runtime,
+      provider,
+      preset: "demo"
+    });
+    const fetcher: typeof fetch = async () =>
+      new Response(JSON.stringify({ code: "NOT_FOUND" }), {
+        status: 404,
+        headers: { "content-type": "application/json" }
+      });
+
+    const result = await runPreferredMissionFlowAction(workspace, "create-mission", {
+      fetcher,
+      now: 1_800_000_000_100
+    });
+
+    expect(result.usedRuntime).toBe(false);
+    expect(result.source).toBe("frontend_fallback");
+    expect(result.fallbackReason).toContain("HTTP 404");
+    expect(result.workspace.actionSource).toBe("frontend_fallback");
+    expect(result.workspace.mission.id).toBe("mission-demo-402");
+    expect(result.workspace.mission.evidenceMode).toBe("mock");
+  });
+
+  test("maps runtime guard fallback evidence without turning it live", async () => {
+    let workspace = createInitialWorkspace({
+      runtime,
+      provider,
+      preset: "demo"
+    });
+    workspace = applyDashboardAction(workspace, { type: "create-mission" }, 1_800_000_000_000);
+
+    const fetcher: typeof fetch = async (input) => {
+      expect(String(input)).toContain("/api/missions/mission-demo-402/guard");
+
+      return new Response(
+        JSON.stringify({
+          source: "runtime_api",
+          evidenceMode: "fallback",
+          mission: {
+            id: "mission-demo-402",
+            userPrompt: workspace.mission.userPrompt,
+            budgetUsd: workspace.mission.budgetUsd,
+            resourceUrl: workspace.mission.resourceUrl,
+            status: "blocked",
+            cawWalletUuid: "runtime-demo-wallet",
+            cawWalletAddress: "0xCAW0000000000000000000000000000000000001",
+            pactId: "runtime-demo-pact",
+            createdAt: 1_800_000_000_000,
+            evidenceMode: "fallback",
+            source: "runtime_api"
+          },
+          paymentContext: {
+            ...workspace.paymentContext,
+            evidenceMode: "fallback"
+          },
+          paymentContextHash: workspace.paymentContext.paymentContextHash,
+          cawRequestId: workspace.paymentContext.requestId,
+          guard: {
+            decision: "fallback_required",
+            status: "prepared",
+            guardEventId: "guard-runtime-1",
+            reason: "Mission Flow Runtime API is in fallback/demo mode and does not execute real CAW payments.",
+            evidenceMode: "fallback"
+          },
+          cawEvidence: {
+            evidenceMode: "fallback",
+            decision: "fallback_required",
+            requestId: workspace.paymentContext.requestId,
+            walletAddress: "0xCAW0000000000000000000000000000000000001"
+          }
+        }),
+        { status: 200, headers: { "content-type": "application/json" } }
+      );
+    };
+
+    const result = await runPreferredMissionFlowAction(workspace, "prepare-guard", {
+      fetcher,
+      now: 1_800_000_000_100
+    });
+
+    expect(result.usedRuntime).toBe(true);
+    expect(result.workspace.actionSource).toBe("runtime_api");
+    expect(result.workspace.mission.status).toBe("blocked");
+    expect(result.workspace.paymentContext.evidenceMode).toBe("fallback");
+    expect(result.workspace.caw.evidenceMode).toBe("fallback");
+    expect(result.workspace.caw.auditLogs[0]?.note).toContain("does not execute real CAW payments");
+    expect(result.workspace.mission.evidenceMode).not.toBe("live");
   });
 
   test("does not rewrite server-side source or evidenceMode into live", () => {

@@ -143,6 +143,9 @@ describe("dashboard data", () => {
     expect(result.evidence.evidenceMode).toBe("fallback");
     expect(result.evidence.json).toContain('"liveFallbackMockLabels"');
     expect(result.evidence.markdown).toContain("Default dashboard demos and attack lab runs use fallback/mock evidence");
+    expect(result.evidence.markdown).toContain("destination-allowlist policy denial");
+    expect(result.evidence.markdown).toContain("does not cover every policy denial type");
+    expect(result.evidence.markdown).not.toContain("needs_manual_step / fallback / not-run");
   });
 
   test("does not rewrite server-side source or evidenceMode into live", () => {

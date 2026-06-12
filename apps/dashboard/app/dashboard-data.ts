@@ -1164,8 +1164,10 @@ export function buildEvidenceExport(workspace: DashboardWorkspace, now = Date.no
     },
     limitations: [
       "This branch records one live CAW Sepolia testnet tiny transfer in docs/live_caw_testnet_smoke_report.md.",
+      "This branch also records one CAW Sepolia testnet destination-allowlist policy denial in docs/live_caw_policy_denial_report.md.",
+      "The policy_denial_evidence claim is limited to that recorded destination-allowlist denial evidence and does not cover every policy denial type.",
       "Default dashboard demos and attack lab runs use fallback/mock evidence and do not trigger real CAW payments.",
-      "Do not claim mainnet, production-ready, or unrestricted CAW execution; policy_denial_evidence remains needs_manual_step / fallback / not-run until dedicated live denial evidence is recorded."
+      "Do not claim mainnet, production-ready, or unrestricted CAW execution."
     ]
   };
 

@@ -51,6 +51,109 @@ describe("runtime", () => {
     }
   });
 
+  test("serves mission create, dry-run, guard, verify, get without live CAW execution", async () => {
+    const keysToClear = Object.keys(process.env).filter(
+      (key) => key.startsWith("CLEAR402_CAW_") || key === "CLEAR402_TEST_MERCHANT_ADDRESS"
+    );
+    const previousEnv = Object.fromEntries(keysToClear.map((key) => [key, process.env[key]]));
+    for (const key of keysToClear) {
+      delete process.env[key];
+    }
+
+    const server = await startRuntimeServer({
+      host: "127.0.0.1",
+      port: 0,
+      databasePath: join(databaseDir, "mission-flow.sqlite")
+    });
+    const baseUrl = `http://127.0.0.1:${server.port}`;
+
+    try {
+      const createResponse = await fetch(`${baseUrl}/api/missions`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          missionId: "mission-flow-api-1",
+          userPrompt: "Runtime mission flow API test.",
+          budgetUsd: "1",
+          resourceUrl: "https://127.0.0.1:4010/paid/report?topic=market-intel"
+        })
+      });
+      expect(createResponse.status).toBe(201);
+      const create = (await createResponse.json()) as any;
+      expect(create.source).toBe("runtime_api");
+      expect(create.evidenceMode).toBe("fallback");
+      expect(create.mission.id).toBe("mission-flow-api-1");
+
+      const dryRunResponse = await fetch(
+        `${baseUrl}/api/missions/mission-flow-api-1/dry-run`,
+        { method: "POST" }
+      );
+      expect(dryRunResponse.status).toBe(200);
+      const dryRun = (await dryRunResponse.json()) as any;
+      expect(dryRun.source).toBe("runtime_api");
+      expect(dryRun.evidenceMode).toBe("fallback");
+      expect(dryRun.normalizedChallenge.evidenceMode).toBe("fallback");
+      expect(dryRun.providerRegistryResult.evidenceMode).toBe("fallback");
+
+      const guardResponse = await fetch(
+        `${baseUrl}/api/missions/mission-flow-api-1/guard`,
+        { method: "POST" }
+      );
+      expect(guardResponse.status).toBe(200);
+      const guard = (await guardResponse.json()) as any;
+      expect(guard.source).toBe("runtime_api");
+      expect(guard.evidenceMode).toBe("fallback");
+      expect(guard.guard.decision).toBe("fallback_required");
+      expect(guard.cawEvidence.decision).toBe("fallback_required");
+      expect(guard.cawEvidence.denial.details.paymentAttempted).toBe(false);
+      expect(guard.cawEvidence.txHash).toBeUndefined();
+      expect(guard.paymentContext.evidenceMode).toBeUndefined();
+
+      const verifyResponse = await fetch(
+        `${baseUrl}/api/missions/mission-flow-api-1/verify`,
+        { method: "POST" }
+      );
+      expect(verifyResponse.status).toBe(200);
+      const verify = (await verifyResponse.json()) as any;
+      expect(verify.source).toBe("runtime_api");
+      expect(verify.evidenceMode).toBe("fallback");
+      expect(verify.receipt.evidenceMode).toBe("fallback");
+      expect(verify.receipt.paymentReceipt.txHash).toBeUndefined();
+      expect(verify.receipt.finalStatus).toBe("failed");
+
+      const getResponse = await fetch(`${baseUrl}/api/missions/mission-flow-api-1`);
+      expect(getResponse.status).toBe(200);
+      const get = (await getResponse.json()) as any;
+      expect(get.source).toBe("runtime_api");
+      expect(get.evidenceMode).toBe("fallback");
+      expect(get.receipt.evidenceMode).toBe("fallback");
+
+      const evidenceResponse = await fetch(
+        `${baseUrl}/api/evidence/mission-flow-api-1/export.json`
+      );
+      expect(evidenceResponse.status).toBe(200);
+      const evidence = (await evidenceResponse.json()) as any;
+      expect(evidence.source).toBe("runtime_db");
+      expect(evidence.evidenceMode).not.toBe("live");
+      expect(evidence.guard.decision).toBe("fallback_required");
+      expect(evidence.serviceReceipt.evidenceMode).toBe("fallback");
+      expect(evidence.serviceReceipt.txHash).toBeUndefined();
+
+      const serializedEvidence = JSON.stringify(evidence);
+      expect(serializedEvidence).not.toContain("CLEAR402_CAW_");
+      expect(serializedEvidence).not.toContain("sk-");
+    } finally {
+      await server.close();
+      for (const [key, value] of Object.entries(previousEnv)) {
+        if (value === undefined) {
+          delete process.env[key];
+        } else {
+          process.env[key] = value;
+        }
+      }
+    }
+  });
+
   test("exports DB-backed mission evidence as JSON and markdown from one structured bundle", async () => {
     const seededDatabasePath = join(databaseDir, "evidence-export.sqlite");
     const handle = initializeRuntimeDatabase({ databasePath: seededDatabasePath });

@@ -2,6 +2,7 @@ import type { DatabaseSync } from "node:sqlite";
 
 import type {
   CawPolicyDenialEvidence,
+  EvidenceMode,
   ERC8004TrustResult,
   EvidenceBundle,
   GuardDecision,
@@ -55,7 +56,7 @@ export interface CawAdapterLike {
     walletAddress: string;
     auditLogId?: string;
     rawEvidenceRef?: string;
-    decision?: "allow" | "block" | "require_approval";
+    decision?: "allow" | "block" | "require_approval" | "fallback_required";
     denial?: CawPolicyDenialEvidence;
   }>;
   contractCall?(input: {
@@ -77,7 +78,7 @@ export interface CawAdapterLike {
     walletAddress: string;
     auditLogId?: string;
     rawEvidenceRef?: string;
-    decision?: "allow" | "block" | "require_approval";
+    decision?: "allow" | "block" | "require_approval" | "fallback_required";
     denial?: CawPolicyDenialEvidence;
   }>;
   getTransactionByRequestId?(requestId: string): Promise<{
@@ -116,6 +117,7 @@ export interface GuardPipelineInput {
   cawPactId: string;
   serviceMode: "caw-fetch" | "direct-transfer" | "escrowed-delivery";
   cawAdapter: CawAdapterLike;
+  evidenceMode?: EvidenceMode;
   now?: number;
   providerChallenge?: {
     responseSchemaHash?: string;
@@ -131,7 +133,7 @@ export interface GuardPipelineInput {
 }
 
 export interface GuardPipelineResult {
-  decision: "allow" | "block" | "require_approval";
+  decision: "allow" | "block" | "require_approval" | "fallback_required";
   status: "prepared" | "executed" | "completed" | "blocked" | "disputed";
   reason?: string;
   guardEventId?: string;
@@ -489,12 +491,13 @@ export async function runGuardPipeline(
   const challenge = normalizeX402Challenge({
     providerId: providerEntry.providerId,
     rawChallenge: rawChallenge,
-    now
+    now,
+    ...(input.evidenceMode !== undefined ? { evidenceMode: input.evidenceMode } : {})
   });
 
   const challengeOrigin = new URL(challenge.resource).origin.toLowerCase();
 
-  const registryResult = validateProviderRegistry({
+  const registryValidation = validateProviderRegistry({
     entries: input.providerRegistryEntries,
     providerId: providerEntry.providerId,
     origin: challengeOrigin,
@@ -505,6 +508,10 @@ export async function runGuardPipeline(
     cawAllowedMerchantAddresses: [providerEntry.merchantAddress],
     ...(challenge.facilitatorUrl !== undefined ? { facilitatorUrl: challenge.facilitatorUrl } : {})
   });
+  const registryResult =
+    input.evidenceMode === undefined
+      ? registryValidation
+      : { ...registryValidation, evidenceMode: input.evidenceMode };
 
   if (registryResult.decision !== "allow") {
     const event = createFailure(database, {
@@ -553,7 +560,11 @@ export async function runGuardPipeline(
     };
   }
 
-  const metadataFirewall = scanMetadata(input.metadata);
+  const scannedMetadata = scanMetadata(input.metadata);
+  const metadataFirewall =
+    input.evidenceMode === undefined
+      ? scannedMetadata
+      : { ...scannedMetadata, evidenceMode: input.evidenceMode };
   if (metadataFirewall.decision === "block") {
     const event = createFailure(database, {
       missionId: input.missionId,
@@ -830,6 +841,49 @@ export async function runGuardPipeline(
       ...(cawEvidence.denial?.reason !== undefined
         ? { reason: cawEvidence.denial.reason }
         : { reason: "CAW requires owner approval" }),
+      guardEventId: event.id,
+      providerRegistryResult: registryResult,
+      trustResult,
+      metadataFirewall,
+      paymentContext: builtContext.context,
+      paymentContextHash: builtContext.paymentContextHash,
+      cawRequestId: builtContext.cawRequestId,
+      reservation: {
+        quoteId: reservationResult.reservation.quoteId,
+        paymentContextHash: reservationResult.reservation.paymentContextHash,
+        nonce: reservationResult.reservation.nonce,
+        reservedBudget: reservationResult.reservation.reservedBudget
+      },
+      clearsig: clearSignResult,
+      cawEvidence,
+      evidenceBundle: evidenceBundleForMission(database, input.missionId)
+    };
+  }
+
+  if (cawEvidence.decision === "fallback_required") {
+    const event = createFailure(database, {
+      missionId: input.missionId,
+      layer: "caw",
+      reason: cawEvidence.denial?.reason ?? "CAW fallback evidence required before payment execution",
+      decision: "fallback_required",
+      evidence: {
+        challenge,
+        registryResult,
+        trustResult,
+        metadataFirewall,
+        paymentContext: builtContext.context,
+        clearSignResult,
+        cawEvidence
+      }
+    });
+    releaseReservationBudget(database, builtContext.paymentContextHash);
+
+    return {
+      decision: "fallback_required",
+      status: "prepared",
+      ...(cawEvidence.denial?.reason !== undefined
+        ? { reason: cawEvidence.denial.reason }
+        : { reason: "CAW fallback evidence required before payment execution" }),
       guardEventId: event.id,
       providerRegistryResult: registryResult,
       trustResult,

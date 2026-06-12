@@ -14,6 +14,14 @@ import {
   renderEvidenceExportMarkdown,
   serializeEvidenceExportJson
 } from "./evidence_export.js";
+import {
+  createMission,
+  dryRunMission,
+  getMission,
+  guardMission,
+  MissionFlowError,
+  verifyMission
+} from "./mission_flow.js";
 
 const runtimeVersion = "0.1.0";
 const runtimeServiceName = "runtime";
@@ -67,7 +75,21 @@ function buildProblem(code: string, message: string, details?: Record<string, un
   });
 }
 
-function handleRequest(
+async function readJsonBody(request: IncomingMessage): Promise<unknown> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of request) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+
+  const body = Buffer.concat(chunks).toString("utf8");
+  if (body.trim().length === 0) {
+    return {};
+  }
+
+  return JSON.parse(body) as unknown;
+}
+
+async function handleRequest(
   request: IncomingMessage,
   response: ServerResponse,
   databasePath: string,
@@ -78,6 +100,79 @@ function handleRequest(
   if (request.method === "GET" && url.pathname === "/health") {
     jsonResponse(response, 200, buildRuntimeHealth(databasePath));
     return;
+  }
+
+  const missionRoute = url.pathname.match(/^\/api\/missions(?:\/([^/]+)(?:\/([^/]+))?)?$/);
+  if (missionRoute) {
+    try {
+      const missionId = missionRoute[1] ? decodeURIComponent(missionRoute[1]) : undefined;
+      const action = missionRoute[2] ? decodeURIComponent(missionRoute[2]) : undefined;
+
+      if (request.method === "POST" && missionId === undefined && action === undefined) {
+        const body = await readJsonBody(request);
+        jsonResponse(response, 201, createMission(database, body as Record<string, unknown>));
+        return;
+      }
+
+      if (request.method === "GET" && missionId !== undefined && action === undefined) {
+        jsonResponse(response, 200, getMission(database, missionId));
+        return;
+      }
+
+      if (request.method === "POST" && missionId !== undefined && action === "dry-run") {
+        jsonResponse(response, 200, dryRunMission(database, missionId));
+        return;
+      }
+
+      if (request.method === "POST" && missionId !== undefined && action === "guard") {
+        jsonResponse(response, 200, await guardMission(database, missionId));
+        return;
+      }
+
+      if (request.method === "POST" && missionId !== undefined && action === "verify") {
+        jsonResponse(response, 200, verifyMission(database, missionId));
+        return;
+      }
+
+      jsonResponse(
+        response,
+        405,
+        buildProblem("METHOD_NOT_ALLOWED", "Unsupported mission route method.", {
+          path: url.pathname,
+          method: request.method ?? "GET"
+        })
+      );
+      return;
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        jsonResponse(
+          response,
+          400,
+          buildProblem("INVALID_JSON", "Request body must be valid JSON.", {
+            path: url.pathname
+          })
+        );
+        return;
+      }
+
+      if (error instanceof MissionFlowError) {
+        jsonResponse(
+          response,
+          error.statusCode,
+          buildProblem(error.code, error.message, error.details)
+        );
+        return;
+      }
+
+      jsonResponse(
+        response,
+        500,
+        buildProblem("MISSION_FLOW_ERROR", "Mission flow request failed.", {
+          error: error instanceof Error ? error.message : String(error)
+        })
+      );
+      return;
+    }
   }
 
   const evidenceExportPath = parseEvidenceExportPath(url.pathname);
@@ -148,7 +243,7 @@ export function startRuntimeServer(options: {
   const { database, databasePath } = initializeRuntimeDatabase(databaseOptions);
 
   const server = createServer((request, response) => {
-    handleRequest(request, response, databasePath, database);
+    void handleRequest(request, response, databasePath, database);
   });
 
   return new Promise<{

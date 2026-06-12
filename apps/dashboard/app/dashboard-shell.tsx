@@ -35,6 +35,7 @@ import {
   getAttackById,
   loadPreferredEvidenceExport,
   recordEvidenceExport,
+  runPreferredMissionFlowAction,
   type AttackScenario,
   type DashboardPreset,
   type DashboardRuntimeSnapshot,
@@ -364,6 +365,17 @@ export function DashboardShell({ initialWorkspace, runtime, provider }: Dashboar
     setWorkspace((current) => applyDashboardAction(current, action));
   };
 
+  const runMissionFlow = (action: Parameters<typeof runPreferredMissionFlowAction>[1]) => {
+    const current = workspace;
+    setWorkspace({
+      ...current,
+      actionSource: "demo_fixture"
+    });
+    void runPreferredMissionFlowAction(current, action).then((result) => {
+      setWorkspace(result.workspace);
+    });
+  };
+
   const handleEvidenceExport = async () => {
     setIsExportOpen(true);
     setIsExporting(true);
@@ -447,6 +459,7 @@ export function DashboardShell({ initialWorkspace, runtime, provider }: Dashboar
               dense
             >
               <Metric label="Mode split" value={modePreview} />
+              <Metric label="Source" value={workspace.actionSource} />
               <Metric label="Runtime health" value={runtime.status} hint={runtime.endpoint} />
               <Metric label="Provider health" value={provider.status} hint={provider.endpoint} />
             </SectionCard>
@@ -490,11 +503,11 @@ export function DashboardShell({ initialWorkspace, runtime, provider }: Dashboar
           </header>
 
           <section className="action-bar">
-            <ActionButton label="Create mission" icon={<ClipboardList size={16} />} onClick={() => run({ type: "create-mission" })} tone="success" />
-            <ActionButton label="Dry run 402" icon={<FileSearch size={16} />} onClick={() => run({ type: "dry-run" })} />
-            <ActionButton label="Prepare guard" icon={<ShieldPlus size={16} />} onClick={() => run({ type: "prepare-guard" })} tone="warning" />
-            <ActionButton label="Execute payment" icon={<ArrowRightLeft size={16} />} onClick={() => run({ type: "execute-payment" })} tone="live" />
-            <ActionButton label="Verify receipt" icon={<ShieldCheck size={16} />} onClick={() => run({ type: "verify-receipt" })} tone="success" />
+            <ActionButton label="Create mission" icon={<ClipboardList size={16} />} onClick={() => runMissionFlow("create-mission")} tone="success" />
+            <ActionButton label="Dry run 402" icon={<FileSearch size={16} />} onClick={() => runMissionFlow("dry-run")} />
+            <ActionButton label="Prepare guard" icon={<ShieldPlus size={16} />} onClick={() => runMissionFlow("prepare-guard")} tone="warning" />
+            <ActionButton label="Execute payment" icon={<ArrowRightLeft size={16} />} onClick={() => runMissionFlow("execute-payment")} tone="live" />
+            <ActionButton label="Verify receipt" icon={<ShieldCheck size={16} />} onClick={() => runMissionFlow("verify-receipt")} tone="success" />
             <ActionButton label={isExporting ? "Exporting evidence" : "Export evidence"} icon={<ArrowDownToLine size={16} />} onClick={() => void handleEvidenceExport()} tone="fallback" disabled={isExporting} />
           </section>
 
@@ -510,7 +523,8 @@ export function DashboardShell({ initialWorkspace, runtime, provider }: Dashboar
                 <KV label="Environment" value={<code>{workspace.caw.environment}</code>} />
                 <KV label="Wallet address" value={<code>{formatCompactHash(workspace.caw.walletAddress)}</code>} />
                 <KV label="Wallet UUID" value={<code>{workspace.caw.walletUuid}</code>} />
-                <KV label="Pact-scoped API key" value={<StateChip state={workspace.caw.pactScopedApiKeyStatus} />} />
+              <KV label="Pact-scoped API key" value={<StateChip state={workspace.caw.pactScopedApiKeyStatus} />} />
+                <KV label="Source" value={<code>{workspace.actionSource}</code>} />
               </div>
               <div className="subpanel">
                 <div className="subpanel-head">

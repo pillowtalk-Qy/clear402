@@ -45,6 +45,8 @@ export interface MissionDraft {
   resourceUrl: string;
 }
 
+export type MissionFlowSource = "runtime_api" | "frontend_fallback" | "demo_fixture";
+
 export interface MissionState {
   id?: string;
   userPrompt: string;
@@ -252,6 +254,7 @@ export interface EvidenceExportState {
 
 export interface DashboardWorkspace {
   preset: DashboardPreset;
+  actionSource: MissionFlowSource;
   runtimeHealth: HealthSnapshot;
   providerHealth: HealthSnapshot;
   missionDraft: MissionDraft;
@@ -289,6 +292,26 @@ export interface PreferredEvidenceExportOptions {
   basePath?: string;
   now?: number;
 }
+
+export interface RuntimeMissionFlowOptions {
+  fetcher?: typeof fetch;
+  basePath?: string;
+  now?: number;
+}
+
+export interface RuntimeMissionFlowResult {
+  workspace: DashboardWorkspace;
+  usedRuntime: boolean;
+  source: MissionFlowSource;
+  fallbackReason?: string;
+}
+
+type MissionFlowActionType =
+  | "create-mission"
+  | "dry-run"
+  | "prepare-guard"
+  | "execute-payment"
+  | "verify-receipt";
 
 const sampleProviderId = "provider-markets-01";
 const sampleWalletUuid = "wallet-demo-402";
@@ -773,6 +796,7 @@ export function createInitialWorkspace(options: DashboardInitOptions): Dashboard
 
   return {
     preset: options.preset,
+    actionSource: "demo_fixture",
     runtimeHealth: options.runtime,
     providerHealth: options.provider,
     missionDraft,
@@ -820,6 +844,8 @@ export function applyDashboardAction(
     next.preset = action.preset;
     return next;
   }
+
+  next.actionSource = "frontend_fallback";
 
   if (action.type === "create-mission") {
     next.mission = {
@@ -1043,6 +1069,350 @@ export function applyDashboardAction(
 
 export function resolveEvidenceMissionId(workspace: DashboardWorkspace) {
   return workspace.mission.id ?? workspace.paymentContext.missionId;
+}
+
+export async function runPreferredMissionFlowAction(
+  workspace: DashboardWorkspace,
+  actionType: MissionFlowActionType,
+  options: RuntimeMissionFlowOptions = {}
+): Promise<RuntimeMissionFlowResult> {
+  const fetcher = options.fetcher ?? fetch;
+  const now = options.now ?? Date.now();
+  const basePath = options.basePath ?? "";
+
+  try {
+    const response =
+      actionType === "create-mission"
+        ? await fetcher(`${basePath}/api/missions`, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            cache: "no-store",
+            body: JSON.stringify({
+              userPrompt: workspace.missionDraft.prompt,
+              budgetUsd: workspace.missionDraft.budgetUsd,
+              resourceUrl: workspace.missionDraft.resourceUrl
+            })
+          })
+        : await fetcher(`${basePath}/api/missions/${encodeURIComponent(resolveEvidenceMissionId(workspace))}/${runtimeActionPath(actionType)}`, {
+            method: "POST",
+            cache: "no-store"
+          });
+
+    if (!response.ok) {
+      throw new Error(`Runtime mission flow unavailable: HTTP ${response.status}`);
+    }
+
+    const payload = sanitizeEvidenceForDisplay(await response.json()) as RuntimeMissionFlowPayload;
+    return {
+      workspace: applyRuntimeMissionFlowPayload(workspace, actionType, payload, now),
+      usedRuntime: true,
+      source: "runtime_api"
+    };
+  } catch (error) {
+    return {
+      workspace: {
+        ...applyDashboardAction(workspace, { type: actionType } as Parameters<typeof applyDashboardAction>[1], now),
+        actionSource: "frontend_fallback"
+      },
+      usedRuntime: false,
+      source: "frontend_fallback",
+      fallbackReason: error instanceof Error ? error.message : "Runtime mission flow unavailable"
+    };
+  }
+}
+
+interface RuntimeMissionFlowPayload {
+  source?: MissionFlowSource;
+  evidenceMode?: EvidenceMode;
+  mission?: Partial<MissionState> & {
+    userPrompt?: string;
+    cawWalletUuid?: string;
+    cawWalletAddress?: string;
+    pactId?: string;
+    source?: MissionFlowSource;
+  };
+  rawChallenge?: Record<string, unknown>;
+  normalizedChallenge?: Record<string, unknown>;
+  providerRegistryResult?: Record<string, unknown>;
+  trustResult?: Record<string, unknown>;
+  settlementPath?: string;
+  metadataFirewall?: Partial<FirewallState> & Record<string, unknown>;
+  paymentContext?: Partial<PaymentContextState> & Record<string, unknown>;
+  paymentContextHash?: string;
+  cawRequestId?: string;
+  guard?: {
+    decision?: string;
+    status?: string;
+    guardEventId?: string;
+    layer?: string;
+    reason?: string;
+    evidenceMode?: EvidenceMode;
+  };
+  clearSign?: Partial<ClearSignState["result"]> & Record<string, unknown>;
+  cawEvidence?: Record<string, unknown>;
+  receipt?: Partial<ReceiptState>;
+}
+
+function runtimeActionPath(actionType: MissionFlowActionType) {
+  if (actionType === "prepare-guard" || actionType === "execute-payment") {
+    return "guard";
+  }
+
+  if (actionType === "verify-receipt") {
+    return "verify";
+  }
+
+  return "dry-run";
+}
+
+function applyRuntimeMissionFlowPayload(
+  workspace: DashboardWorkspace,
+  actionType: MissionFlowActionType,
+  payload: RuntimeMissionFlowPayload,
+  now: number
+): DashboardWorkspace {
+  const next = structuredClone(workspace) as DashboardWorkspace;
+  const payloadMode = coerceEvidenceMode(payload.evidenceMode);
+  next.actionSource = "runtime_api";
+
+  if (payload.mission) {
+    const missionPatch: MissionState = {
+      ...next.mission,
+      ...(typeof payload.mission.id === "string" ? { id: payload.mission.id } : {}),
+      userPrompt: payload.mission.userPrompt ?? next.mission.userPrompt,
+      budgetUsd: payload.mission.budgetUsd ?? next.mission.budgetUsd,
+      resourceUrl: payload.mission.resourceUrl ?? next.mission.resourceUrl,
+      status: coerceMissionStatus(payload.mission.status, next.mission.status),
+      cawWalletUuid: payload.mission.cawWalletUuid ?? next.mission.cawWalletUuid,
+      cawWalletAddress: payload.mission.cawWalletAddress ?? next.mission.cawWalletAddress,
+      createdAt: payload.mission.createdAt ?? next.mission.createdAt ?? now,
+      evidenceMode: payloadMode
+    };
+    const pactId = payload.mission.pactId ?? next.mission.pactId;
+    if (pactId !== undefined) {
+      missionPatch.pactId = pactId;
+    }
+    next.mission = missionPatch;
+    next.caw.walletUuid = next.mission.cawWalletUuid;
+    next.caw.walletAddress = next.mission.cawWalletAddress;
+    next.caw.pactId = next.mission.pactId ?? next.caw.pactId;
+  }
+
+  if (payload.rawChallenge || payload.normalizedChallenge || payload.providerRegistryResult) {
+    next.challenge = {
+      rawChallenge: payload.rawChallenge ?? next.challenge.rawChallenge,
+      normalizedChallenge: payload.normalizedChallenge ?? next.challenge.normalizedChallenge,
+      providerRegistryResult: payload.providerRegistryResult ?? next.challenge.providerRegistryResult,
+      settlementPath: payload.settlementPath ?? next.challenge.settlementPath,
+      evidenceMode: payloadMode,
+      state: "success"
+    };
+  }
+
+  if (payload.providerRegistryResult || payload.trustResult) {
+    next.providerTrust = {
+      ...next.providerTrust,
+      providerId:
+        typeof payload.providerRegistryResult?.providerId === "string"
+          ? payload.providerRegistryResult.providerId
+          : next.providerTrust.providerId,
+      registryEntry: payload.providerRegistryResult ?? next.providerTrust.registryEntry,
+      trustResult: payload.trustResult ?? next.providerTrust.trustResult,
+      evidenceMode: payloadMode,
+      state: payload.guard?.decision === "fallback_required" ? "fallback" : "success"
+    };
+  }
+
+  if (payload.metadataFirewall) {
+    next.firewall = {
+      ...next.firewall,
+      ...coerceFirewallPayload(payload.metadataFirewall, next.firewall),
+      evidenceMode: payloadMode
+    };
+  }
+
+  if (payload.paymentContext) {
+    next.paymentContext = {
+      ...next.paymentContext,
+      ...coercePaymentContextPayload(payload.paymentContext, next.paymentContext),
+      paymentContextHash:
+        payload.paymentContextHash ??
+        payload.paymentContext.paymentContextHash ??
+        next.paymentContext.paymentContextHash,
+      requestId: payload.cawRequestId ?? payload.paymentContext.requestId ?? next.paymentContext.requestId,
+      evidenceMode: payloadMode
+    };
+  }
+
+  if (payload.clearSign) {
+    next.clearSign = {
+      ...next.clearSign,
+      result: {
+        ...next.clearSign.result,
+        ...payload.clearSign
+      },
+      evidenceMode: payloadMode
+    };
+  }
+
+  if (payload.guard || payload.cawEvidence) {
+    next.caw.transactionStatus = "prepared";
+    next.caw.pactScopedApiKeyStatus = "fallback_required";
+    next.caw.evidenceMode = payloadMode;
+    next.caw.auditLogs.unshift({
+      id: payload.guard?.guardEventId ?? `runtime-${actionType}-${now}`,
+      outcome: "fallback",
+      evidenceMode: payloadMode,
+      note: payload.guard?.reason ?? "Runtime API stopped at the fallback CAW boundary; no payment was attempted.",
+      timestamp: now
+    });
+  }
+
+  if (payload.receipt) {
+    next.receipt = {
+      ...next.receipt,
+      ...payload.receipt,
+      paymentReceipt: {
+        ...next.receipt.paymentReceipt,
+        ...(payload.receipt.paymentReceipt ?? {}),
+        evidenceMode: payloadMode
+      },
+      deliveryReceipt: {
+        ...next.receipt.deliveryReceipt,
+        ...(payload.receipt.deliveryReceipt ?? {}),
+        evidenceMode: payloadMode
+      },
+      finalStatus: coerceReceiptFinalStatus(payload.receipt.finalStatus, next.receipt.finalStatus),
+      auditLogIds: payload.receipt.auditLogIds ?? next.receipt.auditLogIds,
+      evidenceMode: payloadMode
+    };
+    next.caw.transactionStatus = "denied";
+  }
+
+  next.timeline.unshift(
+    buildTimelineItem(
+      `timeline-runtime-${actionType}-${now}`,
+      runtimeActionTitle(actionType),
+      runtimeActionDetail(actionType, payload),
+      payload.guard?.decision === "fallback_required" ? "fallback" : actionType === "verify-receipt" ? "blocked" : "success",
+      payloadMode,
+      now,
+      payload.guard?.guardEventId
+    )
+  );
+
+  return next;
+}
+
+function runtimeActionTitle(actionType: MissionFlowActionType) {
+  if (actionType === "create-mission") {
+    return "Mission created by runtime API";
+  }
+
+  if (actionType === "dry-run") {
+    return "Runtime dry-run completed";
+  }
+
+  if (actionType === "verify-receipt") {
+    return "Runtime receipt verified as fallback";
+  }
+
+  return "Runtime guard reached CAW boundary";
+}
+
+function runtimeActionDetail(actionType: MissionFlowActionType, payload: RuntimeMissionFlowPayload) {
+  if (actionType === "create-mission") {
+    return `Runtime API created ${payload.mission?.id ?? "the mission"} in fallback/demo mode.`;
+  }
+
+  if (actionType === "dry-run") {
+    return "Runtime API returned a fallback x402 challenge, provider check, and settlement path.";
+  }
+
+  if (actionType === "verify-receipt") {
+    return "Runtime API wrote fallback receipt evidence without a tx hash or live payment claim.";
+  }
+
+  return payload.guard?.reason ?? "Runtime guard prepared PaymentContext evidence and stopped before CAW payment execution.";
+}
+
+function coerceMissionStatus(
+  value: unknown,
+  fallback: MissionState["status"]
+): MissionState["status"] {
+  return value === "draft" ||
+    value === "active" ||
+    value === "blocked" ||
+    value === "complete" ||
+    value === "failed"
+    ? value
+    : fallback;
+}
+
+function coerceFirewallPayload(
+  value: Partial<FirewallState> & Record<string, unknown>,
+  fallback: FirewallState
+): Partial<FirewallState> {
+  return {
+    decision:
+      value.decision === "allow" ||
+      value.decision === "redact" ||
+      value.decision === "hash_only" ||
+      value.decision === "require_approval" ||
+      value.decision === "block"
+        ? value.decision
+        : fallback.decision,
+    findings: Array.isArray(value.findings) ? value.findings as FirewallState["findings"] : fallback.findings,
+    piiPolicyHash: typeof value.piiPolicyHash === "string" ? value.piiPolicyHash : fallback.piiPolicyHash,
+    latencyMs: typeof value.latencyMs === "number" ? value.latencyMs : fallback.latencyMs,
+    after: isRecord(value.sanitized)
+      ? {
+          resourceUrl:
+            typeof value.sanitized.resourceUrl === "string"
+              ? value.sanitized.resourceUrl
+              : fallback.after.resourceUrl,
+          description:
+            typeof value.sanitized.description === "string"
+              ? value.sanitized.description
+              : fallback.after.description,
+          reason:
+            typeof value.sanitized.reason === "string"
+              ? value.sanitized.reason
+              : fallback.after.reason
+        }
+      : fallback.after
+  };
+}
+
+function coercePaymentContextPayload(
+  value: Partial<PaymentContextState> & Record<string, unknown>,
+  fallback: PaymentContextState
+): Partial<PaymentContextState> {
+  return {
+    ...fallback,
+    ...value,
+    method: value.method === "GET" || value.method === "POST" ? value.method : fallback.method,
+    serviceMode:
+      value.serviceMode === "caw-fetch" ||
+      value.serviceMode === "direct-transfer" ||
+      value.serviceMode === "escrowed-delivery"
+        ? value.serviceMode
+        : fallback.serviceMode
+  };
+}
+
+function coerceReceiptFinalStatus(
+  value: unknown,
+  fallback: ReceiptState["finalStatus"]
+): ReceiptState["finalStatus"] {
+  return value === "paid" ||
+    value === "delivered" ||
+    value === "failed" ||
+    value === "refundable" ||
+    value === "refunded" ||
+    value === "paid_but_not_delivered"
+    ? value
+    : fallback;
 }
 
 export function recordEvidenceExport(

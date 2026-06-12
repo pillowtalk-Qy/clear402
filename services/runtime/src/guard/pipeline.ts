@@ -74,7 +74,7 @@ export interface CawAdapterLike {
     decision?: "allow" | "block" | "require_approval";
     denial?: CawPolicyDenialEvidence;
   }>;
-  getTransactionByRequestId(requestId: string): Promise<{
+  getTransactionByRequestId?(requestId: string): Promise<{
     requestId: string;
     txHash?: string;
     status: "submitted" | "confirmed" | "failed";
@@ -82,7 +82,7 @@ export interface CawAdapterLike {
     providerResponseHash?: string;
     walletAddress?: string;
   } | null>;
-  getAuditLogs(filter: { missionId?: string; requestId?: string }): Promise<Array<{
+  getAuditLogs?(filter: { missionId?: string; requestId?: string }): Promise<Array<{
     auditLogId: string;
     requestId?: string;
     decision: "allow" | "block" | "require_approval";
@@ -112,7 +112,6 @@ export interface GuardPipelineInput {
   cawAdapter: CawAdapterLike;
   now?: number;
   providerChallenge?: {
-    rawChallengeHash: string;
     responseSchemaHash?: string;
     responseHeaders?: Record<string, string | string[] | undefined>;
     providerCalldata?: string;
@@ -173,8 +172,24 @@ function createFailure(
     reason: input.reason,
     decision: input.decision,
     evidenceJson: input.evidence,
-    createdAt: input.now
+    ...(input.now !== undefined ? { createdAt: input.now } : {})
   });
+}
+
+function extractChallengeResource(rawChallenge: unknown): string | undefined {
+  if (!rawChallenge || typeof rawChallenge !== "object") {
+    return undefined;
+  }
+
+  const record = rawChallenge as Record<string, unknown>;
+  const accepts = Array.isArray(record.accepts) ? record.accepts : [record];
+  const first = accepts[0];
+  if (!first || typeof first !== "object") {
+    return undefined;
+  }
+
+  const firstRecord = first as Record<string, unknown>;
+  return typeof firstRecord.resource === "string" ? firstRecord.resource : undefined;
 }
 
 function evidenceBundleForMission(database: DatabaseSync, missionId: string): EvidenceBundle {
@@ -320,10 +335,55 @@ export async function runGuardPipeline(
   input: GuardPipelineInput
 ): Promise<GuardPipelineResult> {
   const now = input.now ?? Date.now();
-  const challenge = normalizeX402Challenge({
-    rawChallenge: input.challenge,
-    now
-  });
+  const challengeResource = extractChallengeResource(input.challenge);
+  if (challengeResource === undefined) {
+    const event = createFailure(database, {
+      missionId: input.missionId,
+      layer: "resource_binding",
+      reason: "x402 challenge is missing resource",
+      decision: "block",
+      evidence: {
+        challenge: input.challenge,
+        request: input.request
+      }
+    });
+
+    return {
+      decision: "block",
+      status: "blocked",
+      reason: "x402 challenge is missing resource",
+      guardEventId: event.id,
+      evidenceBundle: evidenceBundleForMission(database, input.missionId)
+    };
+  }
+
+  let requestUrl: ReturnType<typeof canonicalizeUrl>;
+  let challengeUrl: ReturnType<typeof canonicalizeUrl>;
+
+  try {
+    requestUrl = canonicalizeUrl(input.request.url);
+    challengeUrl = canonicalizeUrl(challengeResource);
+  } catch (error) {
+    const event = createFailure(database, {
+      missionId: input.missionId,
+      layer: "resource_binding",
+      reason: error instanceof Error ? error.message : "Invalid request or challenge URL",
+      decision: "block",
+      evidence: {
+        challenge: input.challenge,
+        request: input.request
+      }
+    });
+
+    return {
+      decision: "block",
+      status: "blocked",
+      reason: error instanceof Error ? error.message : "Invalid request or challenge URL",
+      guardEventId: event.id,
+      evidenceBundle: evidenceBundleForMission(database, input.missionId)
+    };
+  }
+
   const duplicatePaymentHeader = detectDuplicatePaymentHeader(
     input.request.headers,
     input.request.rawHeaders
@@ -337,7 +397,7 @@ export async function runGuardPipeline(
       evidence: {
         duplicatePaymentHeader,
         request: input.request,
-        challenge
+        challenge: input.challenge
       }
     });
 
@@ -350,33 +410,7 @@ export async function runGuardPipeline(
     };
   }
 
-  let requestUrl: ReturnType<typeof canonicalizeUrl>;
-  let challengeUrl: ReturnType<typeof canonicalizeUrl>;
-
-  try {
-    requestUrl = canonicalizeUrl(input.request.url);
-    challengeUrl = canonicalizeUrl(challenge.resource);
-  } catch (error) {
-    const event = createFailure(database, {
-      missionId: input.missionId,
-      layer: "resource_binding",
-      reason: error instanceof Error ? error.message : "Invalid request or challenge URL",
-      decision: "block",
-      evidence: {
-        challenge,
-        request: input.request
-      }
-    });
-
-    return {
-      decision: "block",
-      status: "blocked",
-      reason: error instanceof Error ? error.message : "Invalid request or challenge URL",
-      guardEventId: event.id,
-      evidenceBundle: evidenceBundleForMission(database, input.missionId)
-    };
-  }
-
+  const rawChallenge = input.challenge;
   if (requestUrl.canonicalUrl !== challengeUrl.canonicalUrl) {
     const event = createFailure(database, {
       missionId: input.missionId,
@@ -386,7 +420,7 @@ export async function runGuardPipeline(
       evidence: {
         challengeResource: challengeUrl.canonicalUrl,
         requestResource: requestUrl.canonicalUrl,
-        challenge,
+        challenge: rawChallenge,
         request: input.request
       }
     });
@@ -400,16 +434,10 @@ export async function runGuardPipeline(
     };
   }
 
-  const challengeOrigin = new URL(challenge.resource).origin.toLowerCase();
   const providerEntry =
-    (challenge.providerId !== undefined
-      ? input.providerRegistryEntries.find(
-          (candidate) => candidate.providerId === challenge.providerId
-        )
-      : undefined) ??
     input.providerRegistryEntries.find((candidate) => {
       try {
-        return new URL(candidate.origin).origin.toLowerCase() === challengeOrigin;
+        return new URL(candidate.origin).origin.toLowerCase() === requestUrl.origin;
       } catch {
         return false;
       }
@@ -421,7 +449,7 @@ export async function runGuardPipeline(
       layer: "provider_registry",
       reason: "Provider registry entry not found",
       decision: "block",
-      evidence: { challenge }
+      evidence: { challenge: rawChallenge }
     });
 
     return {
@@ -433,16 +461,24 @@ export async function runGuardPipeline(
     };
   }
 
+  const challenge = normalizeX402Challenge({
+    providerId: providerEntry.providerId,
+    rawChallenge: rawChallenge,
+    now
+  });
+
+  const challengeOrigin = new URL(challenge.resource).origin.toLowerCase();
+
   const registryResult = validateProviderRegistry({
     entries: input.providerRegistryEntries,
     providerId: providerEntry.providerId,
     origin: challengeOrigin,
     resourcePath: new URL(challenge.resource).pathname + new URL(challenge.resource).search,
     payTo: challenge.payTo,
-    facilitatorUrl: challenge.facilitatorUrl,
     chainId: providerEntry.chainId,
     tokenId: providerEntry.tokenId,
-    cawAllowedMerchantAddresses: [providerEntry.merchantAddress]
+    cawAllowedMerchantAddresses: [providerEntry.merchantAddress],
+    ...(challenge.facilitatorUrl !== undefined ? { facilitatorUrl: challenge.facilitatorUrl } : {})
   });
 
   if (registryResult.decision !== "allow") {
@@ -457,7 +493,7 @@ export async function runGuardPipeline(
     return {
       decision: "block",
       status: "blocked",
-      reason: registryResult.reason,
+      ...(registryResult.reason !== undefined ? { reason: registryResult.reason } : {}),
       guardEventId: event.id,
       providerRegistryResult: registryResult,
       evidenceBundle: evidenceBundleForMission(database, input.missionId)
@@ -484,7 +520,7 @@ export async function runGuardPipeline(
     return {
       decision: "block",
       status: "blocked",
-      reason: trustResult.reason,
+      ...(trustResult.reason !== undefined ? { reason: trustResult.reason } : {}),
       guardEventId: event.id,
       providerRegistryResult: registryResult,
       trustResult,
@@ -534,7 +570,31 @@ export async function runGuardPipeline(
 
   const reservationResult = reserveQuoteAndBudget(database, {
     missionId: input.missionId,
-    provider: providerEntry,
+    provider: {
+      providerId: providerEntry.providerId,
+      origin: providerEntry.origin,
+      merchantAddress: providerEntry.merchantAddress,
+      chainId: providerEntry.chainId,
+      tokenId: providerEntry.tokenId,
+      publicKey: providerEntry.publicKey,
+      allowedResources: [...providerEntry.allowedResources],
+      cawAllowlistStatus: providerEntry.cawAllowlistStatus,
+      ...(providerEntry.facilitatorUrl !== undefined
+        ? { facilitatorUrl: providerEntry.facilitatorUrl }
+        : {}),
+      ...(providerEntry.erc8004AgentId !== undefined
+        ? { erc8004AgentId: providerEntry.erc8004AgentId }
+        : {}),
+      ...(providerEntry.erc8004AgentUri !== undefined
+        ? { erc8004AgentUri: providerEntry.erc8004AgentUri }
+        : {}),
+      ...(providerEntry.reputationThreshold !== undefined
+        ? { reputationThreshold: providerEntry.reputationThreshold }
+        : {}),
+      ...(providerEntry.validationTags !== undefined
+        ? { validationTags: [...providerEntry.validationTags] }
+        : {})
+    },
     paymentContextHash: builtContext.paymentContextHash,
     cawRequestId: builtContext.cawRequestId,
     context: builtContext.context,
@@ -563,7 +623,7 @@ export async function runGuardPipeline(
     return {
       decision: "block",
       status: "blocked",
-      reason: reservationResult.reason,
+      ...(reservationResult.reason !== undefined ? { reason: reservationResult.reason } : {}),
       guardEventId: event.id,
       providerRegistryResult: registryResult,
       trustResult,
@@ -571,32 +631,40 @@ export async function runGuardPipeline(
       paymentContext: builtContext.context,
       paymentContextHash: builtContext.paymentContextHash,
       cawRequestId: builtContext.cawRequestId,
-      reservation: reservationResult.reservation
+      ...(reservationResult.reservation !== undefined
         ? {
-            quoteId: reservationResult.reservation.quoteId,
-            paymentContextHash: reservationResult.reservation.paymentContextHash,
-            nonce: reservationResult.reservation.nonce,
-            reservedBudget: reservationResult.reservation.reservedBudget
+            reservation: {
+              quoteId: reservationResult.reservation.quoteId,
+              paymentContextHash: reservationResult.reservation.paymentContextHash,
+              nonce: reservationResult.reservation.nonce,
+              reservedBudget: reservationResult.reservation.reservedBudget
+            }
           }
-        : undefined,
+        : {}),
       evidenceBundle: evidenceBundleForMission(database, input.missionId)
     };
   }
 
-  const clearSignResult = clearSign({
+  const clearSignInput = {
     chainId: providerEntry.chainId,
     to: providerEntry.merchantAddress,
-    calldata:
-      input.providerChallenge?.providerCalldata ?? input.providerChallenge?.providerSignature,
-    typedData: input.providerChallenge?.responseBody,
     expected: {
       merchantAddress: providerEntry.merchantAddress,
       amount: challenge.amount,
       tokenId: providerEntry.tokenId,
       allowedSelectors: ["0xa9059cbb", "0x095ea7b3", "0x23b872dd", "0xac9650d8"],
       paymentContextHash: builtContext.paymentContextHash
-    }
-  });
+    },
+    ...(input.providerChallenge?.providerCalldata !== undefined
+      ? { calldata: input.providerChallenge.providerCalldata }
+      : input.providerChallenge?.providerSignature !== undefined
+        ? { calldata: input.providerChallenge.providerSignature }
+        : {}),
+    ...(input.providerChallenge?.responseBody !== undefined
+      ? { typedData: input.providerChallenge.responseBody }
+      : {})
+  };
+  const clearSignResult = clearSign(clearSignInput);
 
   if (clearSignResult.decision === "block") {
     const event = createFailure(database, {
@@ -618,7 +686,7 @@ export async function runGuardPipeline(
     return {
       decision: "block",
       status: "blocked",
-      reason: clearSignResult.reason,
+      ...(clearSignResult.reason !== undefined ? { reason: clearSignResult.reason } : {}),
       guardEventId: event.id,
       providerRegistryResult: registryResult,
       trustResult,
@@ -670,7 +738,9 @@ export async function runGuardPipeline(
     return {
       decision: "block",
       status: "blocked",
-      reason: cawEvidence.denial?.reason ?? "CAW denied payment",
+      ...(cawEvidence.denial?.reason !== undefined
+        ? { reason: cawEvidence.denial.reason }
+        : { reason: "CAW denied payment" }),
       guardEventId: event.id,
       providerRegistryResult: registryResult,
       trustResult,
@@ -714,7 +784,9 @@ export async function runGuardPipeline(
     return {
       decision: "block",
       status: "disputed",
-      reason: cachePolicy.reason ?? "Cache confusion blocked by response policy",
+      ...(cachePolicy.reason !== undefined
+        ? { reason: cachePolicy.reason }
+        : { reason: "Cache confusion blocked by response policy" }),
       guardEventId: event.id,
       providerRegistryResult: registryResult,
       trustResult,
@@ -748,19 +820,26 @@ export async function runGuardPipeline(
             cawWalletAddress: cawEvidence.walletAddress,
             pactId: input.cawPactId,
             providerAddress: input.providerChallenge.providerAddress,
-            facilitatorUrlHash: challenge.facilitatorUrl
-              ? sha256Hex(challenge.facilitatorUrl)
-              : undefined,
-            txHash: cawEvidence.txHash,
+            ...(challenge.facilitatorUrl !== undefined
+              ? { facilitatorUrlHash: sha256Hex(challenge.facilitatorUrl) }
+              : {}),
+            ...(cawEvidence.txHash !== undefined ? { txHash: cawEvidence.txHash } : {}),
             chainId: providerEntry.chainId,
             tokenId: providerEntry.tokenId,
             amount: challenge.amount,
             providerResponseHash: sha256Hex(JSON.stringify(input.providerChallenge.responseBody)),
             providerSignature: input.providerChallenge.providerSignature,
-            responseSchemaHash: input.providerChallenge.responseSchemaHash,
+            ...(input.providerChallenge.responseSchemaHash !== undefined
+              ? { responseSchemaHash: input.providerChallenge.responseSchemaHash }
+              : {}),
             deliveryTimestamp: now,
             status: "paid",
-            clearsigDigest: clearSignResult.calldataDigest ?? clearSignResult.typedDataDigest,
+            ...(clearSignResult.calldataDigest ?? clearSignResult.typedDataDigest
+              ? {
+                  clearsigDigest:
+                    clearSignResult.calldataDigest ?? clearSignResult.typedDataDigest
+                }
+              : {}),
             auditLogIds: input.providerChallenge.auditLogIds ?? [],
             redactionSummaryHash: metadataFirewall.piiPolicyHash,
             evidenceMode: cawEvidence.evidenceMode
@@ -775,7 +854,9 @@ export async function runGuardPipeline(
     expectedAmount: challenge.amount,
     expectedChainId: providerEntry.chainId,
     expectedTokenId: providerEntry.tokenId,
-    responseSchemaHash: input.providerChallenge?.responseSchemaHash
+    ...(input.providerChallenge?.responseSchemaHash !== undefined
+      ? { responseSchemaHash: input.providerChallenge.responseSchemaHash }
+      : {})
   };
 
   const receiptResult = verifyServiceReceipt(receiptInput);
@@ -801,7 +882,7 @@ export async function runGuardPipeline(
     return {
       decision: "block",
       status: "disputed",
-      reason: receiptResult.reason,
+      ...(receiptResult.reason !== undefined ? { reason: receiptResult.reason } : {}),
       guardEventId: event.id,
       providerRegistryResult: registryResult,
       trustResult,

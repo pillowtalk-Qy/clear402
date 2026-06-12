@@ -29,20 +29,24 @@ export async function runAttackLabScenario(
     throw new Error(`Unknown attack: ${attackName}`);
   }
 
-  return runScenarioByName(attackName, {
+  const scenarioOptions = {
     capabilityReport: options.capabilityReport ?? getAttackLabCapabilityReport(),
-    now: options.now
-  });
+    ...(options.now !== undefined ? { now: options.now } : {})
+  };
+
+  return runScenarioByName(attackName, scenarioOptions);
 }
 
 export async function runAllAttackLabScenarios(options: {
   capabilityReport?: unknown;
   now?: number;
 } = {}) {
-  return runAllScenarios({
+  const scenarioOptions = {
     capabilityReport: options.capabilityReport ?? getAttackLabCapabilityReport(),
-    now: options.now
-  });
+    ...(options.now !== undefined ? { now: options.now } : {})
+  };
+
+  return runAllScenarios(scenarioOptions);
 }
 
 export function createAttackLabRouteHandler(options: {
@@ -76,12 +80,16 @@ export function createAttackLabRouteHandler(options: {
       );
     }
 
-    const attackName = decodeURIComponent(match[1]);
+    const attackName = decodeURIComponent(match[1] ?? "");
 
     try {
       const result = await runAttackLabScenario(attackName, {
         capabilityReport: options.capabilityReport,
-        now: body?.now ?? options.now
+        ...(body?.now !== undefined
+          ? { now: body.now }
+          : options.now !== undefined
+            ? { now: options.now }
+            : {})
       });
 
       return jsonResponse(200, {
@@ -138,11 +146,19 @@ export function createRuntimeServer(options: {
     try {
       const bodyText = await readNodeBody(request);
       const headers = normalizeNodeHeaders(request.headers);
-      const responseBody = await handler(new Request(`http://${request.headers.host ?? "127.0.0.1"}${request.url}`, {
-        method: request.method,
+      const requestInit = {
+        method: request.method ?? "GET",
         headers,
-        body: request.method === "GET" || request.method === "HEAD" ? undefined : bodyText
-      }));
+        ...(request.method === "GET" || request.method === "HEAD"
+          ? {}
+          : { body: bodyText })
+      };
+      const responseBody = await handler(
+        new Request(
+          `http://${request.headers.host ?? "127.0.0.1"}${request.url}`,
+          requestInit
+        )
+      );
 
       const text = await responseBody.text();
       response.writeHead(responseBody.status, Object.fromEntries(responseBody.headers.entries()));
@@ -185,7 +201,7 @@ async function readNodeBody(request: import("node:http").IncomingMessage) {
 
 function normalizeNodeHeaders(
   headers: import("node:http").IncomingHttpHeaders
-): HeadersInit {
+): Record<string, string> {
   const entries: Array<[string, string]> = [];
   for (const [name, value] of Object.entries(headers)) {
     if (value === undefined) {

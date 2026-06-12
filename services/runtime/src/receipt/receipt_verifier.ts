@@ -22,6 +22,14 @@ export interface ServiceReceiptVerificationResult {
   checks: Record<string, boolean>;
 }
 
+export interface DemoReceiptSignatureInput {
+  paymentContextHash: string;
+  providerResponseHash: string;
+  responseSchemaHash?: string;
+  deliveryTimestamp: number;
+  status: ServiceReceipt["status"];
+}
+
 const piiPatterns = [
   /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i,
   /\b(?:api[_-]?key|secret|token|jwt|bearer)[=: ]+[A-Za-z0-9._~+/=-]{12,}\b/i,
@@ -74,7 +82,7 @@ function responseBodyExplicitlyDeniesDelivery(responseBody: unknown): boolean {
 
 export function signReceiptForDemo(
   providerPublicKey: string,
-  receipt: Omit<ServiceReceipt, "providerSignature">
+  receipt: DemoReceiptSignatureInput
 ): string {
   return hmacSha256Hex(
     providerPublicKey,
@@ -91,10 +99,17 @@ export function signReceiptForDemo(
 export function verifyServiceReceipt(
   input: VerifyServiceReceiptInput
 ): ServiceReceiptVerificationResult {
-  const expectedSignature = signReceiptForDemo(input.providerPublicKey, {
-    ...input.receipt,
-    providerSignature: undefined as never
-  });
+  const signatureInput: DemoReceiptSignatureInput = {
+    paymentContextHash: input.receipt.paymentContextHash,
+    providerResponseHash: input.receipt.providerResponseHash,
+    deliveryTimestamp: input.receipt.deliveryTimestamp,
+    status: input.receipt.status,
+    ...(input.receipt.responseSchemaHash !== undefined
+      ? { responseSchemaHash: input.receipt.responseSchemaHash }
+      : {})
+  };
+
+  const expectedSignature = signReceiptForDemo(input.providerPublicKey, signatureInput);
   const checks = {
     paymentContextHash:
       input.receipt.paymentContextHash === input.expectedPaymentContextHash,

@@ -137,7 +137,7 @@ export function buildPaymentContext(input: BuildPaymentContextInput): BuiltPayme
   const canonicalRequest = canonicalizeRequest({
     method: input.method,
     url: input.metadata.sanitized.resourceUrl,
-    body: input.body
+    ...(input.body !== undefined ? { body: input.body } : {})
   });
   const issuedAt = input.issuedAt ?? Date.now();
   const facilitatorUrlHash =

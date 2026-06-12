@@ -9,7 +9,7 @@ import { runGuardPipeline } from "../guard/pipeline.ts";
 import { scanMetadata } from "../guard/metadata_firewall.ts";
 import { normalizeX402Challenge } from "../x402/challenge_normalizer.ts";
 import { validateERC8004Trust } from "../x402/erc8004_trust_adapter.ts";
-import { signReceiptForDemo } from "../receipt/receipt_verifier.ts";
+import { signReceiptForDemo, type DemoReceiptSignatureInput } from "../receipt/receipt_verifier.ts";
 import {
   buildAttackPaymentContext,
   collectCawBoundaryEvidence,
@@ -384,8 +384,12 @@ async function executeAttackScenario(
       request: config.request,
       metadata: {
         resourceUrl: metadata.sanitized.resourceUrl,
-        description: metadata.sanitized.description,
-        reason: metadata.sanitized.reason
+        ...(metadata.sanitized.description !== undefined
+          ? { description: metadata.sanitized.description }
+          : {}),
+        ...(metadata.sanitized.reason !== undefined
+          ? { reason: metadata.sanitized.reason }
+          : {})
       },
       budgetLimitUsd: config.budgetLimitUsd,
       reservedBudgetUsd: config.reservedBudgetUsd,
@@ -582,10 +586,20 @@ function makeSafeProviderChallengeArtifacts(input: {
     deliveryTimestamp: input.now,
     status: "paid" as const
   };
-  const providerSignature = signReceiptForDemo(input.providerPublicKey ?? input.provider.publicKey, {
-    ...receipt,
-    providerSignature: undefined as never
-  });
+  const signatureInput: DemoReceiptSignatureInput = {
+    paymentContextHash: receipt.paymentContextHash,
+    providerResponseHash: receipt.providerResponseHash,
+    deliveryTimestamp: receipt.deliveryTimestamp,
+    status: receipt.status,
+    ...(receipt.responseSchemaHash !== undefined
+      ? { responseSchemaHash: receipt.responseSchemaHash }
+      : {})
+  };
+
+  const providerSignature = signReceiptForDemo(
+    input.providerPublicKey ?? input.provider.publicKey,
+    signatureInput
+  );
 
   return {
     responseBody,

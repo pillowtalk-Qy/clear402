@@ -11,7 +11,8 @@
     "dev": "pnpm -r --parallel --stream --if-present --filter \"./apps/*\" --filter \"./services/*\" dev",
     "attack:all": "node scripts/run_attack_lab.ts",
     "lint": "pnpm -r --if-present typecheck",
-    "test": "vitest run --config vitest.config.ts",
+    "test": "vitest run --config vitest.config.ts && pnpm --filter @clear402/runtime test",
+    "test:e2e": "pnpm --filter @clear402/runtime test guard && pnpm run attack:all",
     "build": "pnpm -r --if-present build",
     "db:init": "pnpm --filter @clear402/runtime db:init"
   },

@@ -9,6 +9,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsup src/server.ts --format esm --platform node --target node25 --outDir dist --clean --sourcemap",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node scripts/test.mjs",
     "db:init": "tsx src/db/init-cli.ts"
   }
 }

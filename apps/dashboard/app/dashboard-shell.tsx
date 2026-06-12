@@ -33,6 +33,8 @@ import {
   formatIsoTimestamp,
   formatJson,
   getAttackById,
+  loadPreferredEvidenceExport,
+  recordEvidenceExport,
   type AttackScenario,
   type DashboardPreset,
   type DashboardRuntimeSnapshot,
@@ -316,6 +318,7 @@ function mapCountsLabel(counts: Record<EvidenceMode, number>) {
 export function DashboardShell({ initialWorkspace, runtime, provider }: DashboardShellProps) {
   const [workspace, setWorkspace] = useState(initialWorkspace);
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [isReceiptExpanded, setIsReceiptExpanded] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const selectedAttack = useMemo(
@@ -361,7 +364,38 @@ export function DashboardShell({ initialWorkspace, runtime, provider }: Dashboar
     setWorkspace((current) => applyDashboardAction(current, action));
   };
 
+  const handleEvidenceExport = async () => {
+    setIsExportOpen(true);
+    setIsExporting(true);
+
+    try {
+      const result = await loadPreferredEvidenceExport(workspace);
+      setWorkspace((current) =>
+        recordEvidenceExport(
+          current,
+          result.evidence,
+          Date.now(),
+          result.usedRuntime
+            ? `Server-side evidence export (${result.evidence.runtimeSource ?? "runtime"}) captured the current live / fallback / mock split.`
+            : `Runtime evidence export unavailable; frontend fallback export kept the demo available. ${result.fallbackReason ?? ""}`.trim()
+        )
+      );
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const exportEvidence = workspace.evidence ?? buildEvidenceExport(workspace);
+  const exportSourceLabel =
+    exportEvidence.source === "server_side"
+      ? `server-side${exportEvidence.runtimeSource ? ` / ${exportEvidence.runtimeSource}` : ""}`
+      : "frontend fallback";
+  const exportTone =
+    exportEvidence.evidenceMode === "live"
+      ? "live"
+      : exportEvidence.evidenceMode === "mock"
+        ? "mock"
+        : "fallback";
   const selectedAttackTitle = selectedAttackCard?.title ?? "attack";
   const selectedAttackResult = selectedAttackCard?.resultState ?? "idle";
   const selectedAttackDescription = selectedAttackCard?.resultDetail ?? selectedAttackCard?.summary ?? "";
@@ -461,7 +495,7 @@ export function DashboardShell({ initialWorkspace, runtime, provider }: Dashboar
             <ActionButton label="Prepare guard" icon={<ShieldPlus size={16} />} onClick={() => run({ type: "prepare-guard" })} tone="warning" />
             <ActionButton label="Execute payment" icon={<ArrowRightLeft size={16} />} onClick={() => run({ type: "execute-payment" })} tone="live" />
             <ActionButton label="Verify receipt" icon={<ShieldCheck size={16} />} onClick={() => run({ type: "verify-receipt" })} tone="success" />
-            <ActionButton label="Export evidence" icon={<ArrowDownToLine size={16} />} onClick={() => { run({ type: "export-evidence" }); setIsExportOpen(true); }} tone="fallback" />
+            <ActionButton label={isExporting ? "Exporting evidence" : "Export evidence"} icon={<ArrowDownToLine size={16} />} onClick={() => void handleEvidenceExport()} tone="fallback" disabled={isExporting} />
           </section>
 
           <section className="panels-grid">
@@ -681,37 +715,29 @@ export function DashboardShell({ initialWorkspace, runtime, provider }: Dashboar
               subtitle="Markdown and JSON export for the current evidence bundle."
               icon={<ArrowDownToLine size={18} />}
               state={workspace.evidence ? workspace.evidence.evidenceMode : "fallback"}
-              tone={workspace.evidence ? "fallback" : "neutral"}
+              tone={workspace.evidence ? exportTone : "neutral"}
               rightSlot={<Badge state={workspace.evidence ? workspace.evidence.evidenceMode : "fallback"} />}
             >
               <div className="export-meta">
                 <Metric label="Generated" value={workspace.evidence ? formatIsoTimestamp(workspace.evidence.generatedAt) : "not yet generated"} />
-                <Metric label="Status" value={workspace.evidence ? (workspace.evidence.stale ? "stale" : "ready") : "idle"} />
+                <Metric label="Status" value={isExporting ? "loading runtime" : workspace.evidence ? `${workspace.evidence.stale ? "stale" : "ready"} / ${exportSourceLabel}` : "idle"} />
+                <Metric label="Source" value={workspace.evidence ? exportSourceLabel : "runtime preferred"} />
                 <Metric label="Runtime" value={runtime.evidenceMode} />
                 <Metric label="Provider" value={provider.evidenceMode} />
               </div>
               <div className="export-buttons">
                 <ActionButton
-                  label="Open JSON"
+                  label={isExporting ? "Opening" : "Open JSON"}
                   icon={<ArrowDownToLine size={16} />}
-                  onClick={() => {
-                    setWorkspace((current) => ({
-                      ...current,
-                      evidence: buildEvidenceExport(current)
-                    }));
-                    setIsExportOpen(true);
-                  }}
+                  onClick={() => void handleEvidenceExport()}
                   tone="fallback"
+                  disabled={isExporting}
                 />
                 <ActionButton
-                  label="Refresh export"
+                  label={isExporting ? "Refreshing" : "Refresh export"}
                   icon={<TimerReset size={16} />}
-                  onClick={() =>
-                    setWorkspace((current) => ({
-                      ...current,
-                      evidence: buildEvidenceExport(current)
-                    }))
-                  }
+                  onClick={() => void handleEvidenceExport()}
+                  disabled={isExporting}
                 />
               </div>
               {isExportVisible ? (

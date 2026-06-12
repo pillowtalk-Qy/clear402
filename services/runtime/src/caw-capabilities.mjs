@@ -18,7 +18,8 @@ export const CAW_CAPABILITIES = Object.freeze([
 export function probeCawCapabilities({
   command = process.env.CLEAR402_CAW_BIN ?? "caw",
   runner = runCommand,
-  clock = () => Date.now()
+  clock = () => Date.now(),
+  env = process.env
 } = {}) {
   const collectedAt = clock();
   const help = runner(command, ["--help"], { timeoutMs: 5000 });
@@ -34,55 +35,79 @@ export function probeCawCapabilities({
   });
 
   if (help.ok) {
-    return [
-      createCapabilityRecord({
-        capability: "caw_cli",
-        status: "verified",
-        evidenceMode: "live",
-        rawEvidenceRef: evidenceRef,
-        notes: "Official CAW command responded to --help in this environment."
-      }),
-      createCapabilityRecord({
-        capability: "wallet_identity",
-        status: "needs_manual_step",
-        evidenceMode: "fallback",
-        rawEvidenceRef: evidenceRef,
-        notes: "CLI is present, but wallet identity was not verified by this non-interactive probe."
-      }),
-      createCapabilityRecord({
-        capability: "policy_enforcement",
-        status: "needs_manual_step",
-        evidenceMode: "fallback",
-        rawEvidenceRef: evidenceRef,
-        notes: "Policy behavior requires a real wallet or CAW audit run before it can be called live."
-      }),
-      createCapabilityRecord({
-        capability: "payment_execution",
-        status: "fallback_required",
-        evidenceMode: "fallback",
-        rawEvidenceRef: evidenceRef,
-        notes: "The CAW adapter will not execute payments until wallet, policy, and audit evidence are verified."
-      }),
-      createCapabilityRecord({
-        capability: "audit_lookup",
-        status: "needs_manual_step",
-        evidenceMode: "fallback",
-        rawEvidenceRef: evidenceRef,
-        notes: "Audit lookup must be verified with real CAW output before live evidence can be exported."
-      }),
-      createCapabilityRecord({
-        capability: "policy_denial_evidence",
-        status: "fallback_required",
-        evidenceMode: "fallback",
-        rawEvidenceRef: evidenceRef,
-        notes: "Fallback denial evidence is available locally; live CAW denial evidence requires an audited CAW request."
-      })
-    ];
+    return createManualCapabilityRecords({ env, evidenceRef });
   }
 
   return CAW_CAPABILITIES.map((capability) =>
     createUnavailableRecord({ capability, evidenceRef, command, help })
   );
+}
+
+export function createManualCapabilityRecords({ env = process.env, evidenceRef }) {
+  const manualEvidenceRef = env.CLEAR402_CAW_MANUAL_EVIDENCE_REF;
+  const walletVerified = hasEnv(env, ["CLEAR402_CAW_WALLET_UUID", "CLEAR402_CAW_WALLET_ADDRESS"]);
+  const pactVerified = hasEnv(env, ["CLEAR402_CAW_PACT_ID", "CLEAR402_CAW_CHAIN_ID", "CLEAR402_CAW_TOKEN_ID"]);
+  const paymentVerified = hasEnv(env, [
+    "CLEAR402_CAW_LAST_REQUEST_ID",
+    "CLEAR402_CAW_LAST_AUDIT_ID",
+    "CLEAR402_CAW_LAST_WALLET_ADDRESS"
+  ]) && hasAnyEnv(env, ["CLEAR402_CAW_LAST_TX_HASH", "CLEAR402_CAW_LAST_COBO_TRANSACTION_ID"]);
+  const denialVerified = hasEnv(env, ["CLEAR402_CAW_POLICY_DENIAL_EVIDENCE_REF"]);
+
+  return [
+    createCapabilityRecord({
+      capability: "caw_cli",
+      status: "verified",
+      evidenceMode: "live",
+      rawEvidenceRef: evidenceRef,
+      notes: "Official CAW command responded to --help in this environment."
+    }),
+    createCapabilityRecord({
+      capability: "wallet_identity",
+      status: walletVerified ? "verified" : "needs_manual_step",
+      evidenceMode: walletVerified ? "live" : "fallback",
+      rawEvidenceRef: walletVerified ? manualEvidenceRef ?? evidenceRef : evidenceRef,
+      notes: walletVerified
+        ? "Wallet identity is present in runtime environment; secret values are not recorded."
+        : "Run CAW onboarding and wallet pairing manually, then inject wallet UUID/address via runtime env."
+    }),
+    createCapabilityRecord({
+      capability: "policy_enforcement",
+      status: pactVerified ? "verified" : "needs_manual_step",
+      evidenceMode: pactVerified ? "live" : "fallback",
+      rawEvidenceRef: pactVerified ? manualEvidenceRef ?? evidenceRef : evidenceRef,
+      notes: pactVerified
+        ? "Runtime has a CAW pact scoped to the configured testnet chain and token."
+        : "Submit and approve a testnet pact with chain/token/amount/merchant allowlist before live use."
+    }),
+    createCapabilityRecord({
+      capability: "payment_execution",
+      status: paymentVerified ? "verified" : "fallback_required",
+      evidenceMode: paymentVerified ? "live" : "fallback",
+      rawEvidenceRef: paymentVerified ? manualEvidenceRef ?? evidenceRef : evidenceRef,
+      notes: paymentVerified
+        ? "A tiny testnet payment execution has recorded request, wallet, transaction, and audit evidence."
+        : "Execute one tiny testnet payment through CawAdapter before claiming live CAW payment execution."
+    }),
+    createCapabilityRecord({
+      capability: "audit_lookup",
+      status: paymentVerified ? "verified" : "needs_manual_step",
+      evidenceMode: paymentVerified ? "live" : "fallback",
+      rawEvidenceRef: paymentVerified ? manualEvidenceRef ?? evidenceRef : evidenceRef,
+      notes: paymentVerified
+        ? "Audit lookup evidence is recorded for the latest CAW testnet request."
+        : "Verify CAW audit lookup for the testnet request before liveReady can become true."
+    }),
+    createCapabilityRecord({
+      capability: "policy_denial_evidence",
+      status: denialVerified ? "verified" : "needs_manual_step",
+      evidenceMode: denialVerified ? "live" : "fallback",
+      rawEvidenceRef: denialVerified ? env.CLEAR402_CAW_POLICY_DENIAL_EVIDENCE_REF : evidenceRef,
+      notes: denialVerified
+        ? "Live CAW denial evidence is recorded without exposing secrets."
+        : "Trigger and record an audited policy denial, or leave this capability as needs_manual_step."
+    })
+  ];
 }
 
 export function createCawCapabilityReport(records, { createdAt = Date.now() } = {}) {
@@ -180,6 +205,14 @@ function createProbeEvidenceRef(evidence) {
 
 function escapeTableCell(value) {
   return String(value).replaceAll("|", "\\|").replaceAll("\n", " ");
+}
+
+function hasEnv(env, keys) {
+  return keys.every((key) => typeof env[key] === "string" && env[key].length > 0);
+}
+
+function hasAnyEnv(env, keys) {
+  return keys.some((key) => typeof env[key] === "string" && env[key].length > 0);
 }
 
 function runCommand(command, args, { timeoutMs } = {}) {

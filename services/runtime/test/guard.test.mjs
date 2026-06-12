@@ -292,7 +292,14 @@ describe("guard pipeline", () => {
   it("blocks metadata resource overrides before PaymentContext creation", async () => {
     const db = makeDb();
     const scenario = makePipelineScenario("mission-metadata-override", "100");
+    let cawCalls = 0;
     scenario.input.metadata.resourceUrl = "https://evil.example/paid/report";
+    scenario.input.cawAdapter = {
+      transferTokens: async () => {
+        cawCalls += 1;
+        throw new Error("CAW must not be called when P0 resource binding blocks");
+      }
+    };
 
     const result = await runGuardPipeline(db, scenario.input);
 
@@ -301,6 +308,7 @@ describe("guard pipeline", () => {
     assert.match(result.reason ?? "", /Metadata resource does not match bound request resource/);
     assert.equal(result.paymentContext, undefined);
     assert.equal(result.paymentContextHash, undefined);
+    assert.equal(cawCalls, 0);
   });
 
   it("blocks replay on the second identical guarded payment", async () => {
@@ -313,6 +321,57 @@ describe("guard pipeline", () => {
     assert.equal(first.decision, "allow");
     assert.equal(second.decision, "block");
     assert.match(second.reason ?? "", /already been reserved|duplicate/i);
+  });
+
+  it("does not allow pending CAW approval to reach receipt verification", async () => {
+    const db = makeDb();
+    const scenario = makePipelineScenario("mission-pending-approval", "100");
+    scenario.input.cawAdapter = {
+      transferTokens: async ({ requestId }) => ({
+        evidenceMode: "live",
+        requestId,
+        walletAddress: "0xCAW0000000000000000000000000000000000001",
+        auditLogId: "approval-1",
+        decision: "require_approval",
+        denial: {
+          code: "CAW_PENDING_APPROVAL",
+          reason: "owner approval required",
+          details: { approvalId: "approval-1" },
+          attemptedOperation: "transfer",
+          paymentContextHash: scenario.builtContext.paymentContextHash,
+          cawRequestId: requestId,
+          auditLogId: "approval-1",
+          evidenceMode: "live"
+        }
+      })
+    };
+
+    const result = await runGuardPipeline(db, scenario.input);
+
+    assert.equal(result.decision, "require_approval");
+    assert.equal(result.status, "prepared");
+    assert.equal(result.receipt, undefined);
+    assert.equal(result.cawEvidence?.denial?.code, "CAW_PENDING_APPROVAL");
+  });
+
+  it("blocks live CAW evidence missing raw transaction or audit anchors", async () => {
+    const db = makeDb();
+    const scenario = makePipelineScenario("mission-missing-caw-evidence", "100");
+    scenario.input.cawAdapter = {
+      transferTokens: async ({ requestId }) => ({
+        evidenceMode: "live",
+        requestId,
+        walletAddress: "0xCAW0000000000000000000000000000000000001",
+        decision: "allow"
+      })
+    };
+
+    const result = await runGuardPipeline(db, scenario.input);
+
+    assert.equal(result.decision, "block");
+    assert.equal(result.status, "disputed");
+    assert.match(result.reason ?? "", /CAW live evidence is missing/);
+    assert.equal(result.receipt, undefined);
   });
 
   it("blocks overspend before reservation", async () => {
@@ -401,7 +460,8 @@ describe("guard pipeline", () => {
           requestId,
           walletAddress: "0xCAW0000000000000000000000000000000000001",
           txHash: "0x" + "2".repeat(64),
-          auditLogId: `audit-${currentMissionId}`
+          auditLogId: `audit-${currentMissionId}`,
+          rawEvidenceRef: `caw-live:${currentMissionId}`
         })
       },
       now,
@@ -643,7 +703,8 @@ function makePipelineScenario(missionId, budgetLimitUsd) {
           requestId,
           walletAddress: "0xCAW0000000000000000000000000000000000001",
           txHash: "0x" + "1".repeat(64),
-          auditLogId: `audit-${currentMissionId}`
+          auditLogId: `audit-${currentMissionId}`,
+          rawEvidenceRef: `caw-live:${currentMissionId}`
         })
       },
       now,

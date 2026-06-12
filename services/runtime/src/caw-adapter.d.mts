@@ -21,17 +21,21 @@ export interface CawExecutionResult {
   cawRequestId: string;
   auditLogId?: string;
   txHash?: string;
+  coboTransactionId?: string;
+  walletAddress: string;
   rawEvidenceRef: string;
   evidenceMode: EvidenceMode;
 }
 
 export interface CawBlockedResult {
   ok: false;
-  decision: "block" | "fallback_required";
-  problem: unknown;
+  decision: "block" | "fallback_required" | "require_approval";
+  problem?: unknown;
   evidenceMode: EvidenceMode;
   paymentContextHash?: string;
   denial?: CawPolicyDenialEvidence;
+  rawEvidenceRef?: string;
+  walletAddress?: string;
 }
 
 export interface CawAdapterInstance {
@@ -45,9 +49,32 @@ export interface CawAdapterInstance {
       report?: CawCapabilityReport;
       clock?: () => number;
       requestIdFactory?: () => string;
+      requestId?: string;
       liveExecutor?: unknown;
     }
   ): Promise<CawExecutionResult | CawBlockedResult>;
+  transferTokens(input: {
+    requestId: string;
+    missionId: string;
+    providerId: string;
+    chainId: string;
+    tokenId: string;
+    dstAddr: string;
+    amount: string;
+    pactId: string;
+    paymentContextHash: string;
+    paymentContext: PaymentContext;
+  }): Promise<{
+    evidenceMode: EvidenceMode;
+    requestId: string;
+    txHash?: string;
+    coboTransactionId?: string;
+    walletAddress?: string;
+    auditLogId?: string;
+    rawEvidenceRef?: string;
+    decision?: "allow" | "block" | "require_approval" | "fallback_required";
+    denial?: CawPolicyDenialEvidence;
+  }>;
 }
 
 export declare function createCawAdapter(options?: {
@@ -64,6 +91,7 @@ export declare function executePaymentIntent(
     attemptedOperation?: "transfer" | "contract_call" | "message_sign";
     clock?: () => number;
     requestIdFactory?: () => string;
+    requestId?: string;
     liveExecutor?: unknown;
   }
 ): Promise<CawExecutionResult | CawBlockedResult>;

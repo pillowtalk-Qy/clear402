@@ -1,6 +1,6 @@
 # Clear402 Demo Operator Runbook
 
-This runbook is the operator path for the current integration branch. It is intentionally strict about live, fallback, and mock labels.
+This runbook is the operator path for the current `clear402/live-caw-testnet` branch. It is intentionally strict about live, fallback, and mock labels.
 
 ## 1. Truth Boundary
 
@@ -8,7 +8,9 @@ This runbook is the operator path for the current integration branch. It is inte
 |---|---|---|
 | Runtime/provider health | live | Local services are running and returning health payloads. |
 | Guard pipeline | live execution over local/demo inputs | Provider registry, metadata firewall, PaymentContext binding, quote/nonce/budget checks, clearsig, and receipt verifier execute in tests and attack lab. |
-| CAW execution | fallback | `caw` is not on `PATH`; `payment_execution` is `fallback_required`. |
+| CAW testnet smoke | live for one recorded Sepolia tiny transfer | Request ID, pact ID, tx hash, and pact completion are in `docs/live_caw_testnet_smoke_report.md`. |
+| CAW default demo execution | no live payment | Ordinary dashboard demos and attack lab runs must not trigger a real CAW payment. |
+| CAW policy denial evidence | fallback / needs manual step | `policy_denial_evidence` was not live-smoked and must not be claimed as verified. |
 | Attack lab | mock inputs, live guard execution | The 16 scenarios are fixtures run through the real guard pipeline. |
 | Provider/trust/capability seed data | mock | Demo records prove the pipeline shape, not external registry truth. |
 | Dashboard payment/export actions | fallback/demo state | The dashboard labels non-live state; it does not prove funds moved. |
@@ -100,7 +102,7 @@ Say: "16 out of 16 fixture attacks are blocked by the real guard pipeline."
 
 Also say: "The attack inputs are mock fixtures. The defense logic is the same guard pipeline code used by runtime tests."
 
-Do not say that these were external attacks, production traffic, or CAW-funded payments.
+Do not say that these were external attacks, production traffic, or CAW-funded payments. The attack lab does not trigger the recorded live CAW smoke.
 
 ## 6. P0 Fix Explanation
 
@@ -117,20 +119,21 @@ Short demo wording:
 
 "The P0 was a resource substitution risk. A malicious metadata field could try to steer the payment context toward another URL. Now the guard binds request, challenge, and metadata together. A mismatch is blocked before PaymentContext exists."
 
-## 7. CAW Fallback-Only Explanation
+## 7. CAW Testnet Smoke Explanation
 
 Current CAW fact:
 
-- `docs/caw_capability_report.md` says `Live ready: false`.
-- `caw_cli` is `unavailable`.
-- `payment_execution` is `fallback_required`.
-- The local CawAdapter boundary must deny or return fallback-required evidence when official CAW capabilities are not verified.
+- `docs/caw_capability_report.md` says `Live ready: true` only for the recorded Sepolia testnet pact and tiny-transfer smoke.
+- `docs/live_caw_testnet_smoke_report.md` records the request ID, pact ID, transaction hash, pact completion, and balance evidence.
+- The transfer was `0.0001` SETH on Ethereum Sepolia testnet.
+- This is not mainnet, not production-ready, and not unrestricted CAW execution.
+- `policy_denial_evidence` remains `needs_manual_step` / `fallback` / `not-run`; do not claim live policy-denial evidence.
 
 Short demo wording:
 
-"CAW is the spending authority, but this machine does not have the CAW CLI available. So Clear402 shows the CAW boundary and denial path, but it does not claim a real CAW-funded payment."
+"CAW is the spending authority. This branch records one tiny Sepolia testnet CAW transfer, with request ID, pact ID, tx hash, and pact completion in the live smoke report. The normal dashboard demo and attack lab do not move funds, and policy-denial evidence is still a manual-step fallback."
 
-If the dashboard shows sample hashes or a transaction reference, call them sample/fallback evidence, not settlement proof.
+If the dashboard shows sample hashes or a transaction reference, call them sample/fallback evidence unless they are explicitly the Sepolia tx hash from `docs/live_caw_testnet_smoke_report.md`.
 
 ## 8. Dashboard Walkthrough
 
@@ -141,7 +144,7 @@ Recommended order:
 3. Click `Create mission`.
 4. Click `Dry run 402` and describe the challenge/registry/fallback settlement labels.
 5. Click `Prepare guard` and describe PaymentContext, nonce, quote lock, clear-signing, and metadata redaction.
-6. Treat `Execute payment` as a fallback demo step only. Preface it before clicking.
+6. Treat `Execute payment` as a fallback demo step only. Preface it before clicking; the ordinary dashboard demo does not run the live CAW testnet smoke.
 7. Click `Verify receipt` as a receipt-verifier demo state, not proof of live delivery.
 8. Run selected attack cards in the dashboard for UI storytelling.
 9. Use the CLI attack lab for the authoritative 16/16 gate.
@@ -173,7 +176,7 @@ Current limitation: the dashboard export is an in-app JSON/Markdown bundle. It i
 | Dashboard shows runtime/provider `fallback` | Confirm runtime/provider terminals are running and health URLs are reachable. |
 | Port conflict | Set `RUNTIME_PORT`, `PROVIDER_X402_PORT`, or pass a different dashboard `--port`. |
 | Attack lab fails before results | Re-run `pnpm install`, then `pnpm test:e2e` to isolate the failing runtime test. |
-| CAW execution is requested | Stop and point to `docs/caw_capability_report.md`; this branch is fallback-only at the CAW boundary. |
+| CAW execution is requested | Do not run another live smoke during the demo. Point to `docs/live_caw_testnet_smoke_report.md` for the already-recorded Sepolia testnet evidence. |
 | Evidence labels look mixed | Use `docs/live_fallback_mock_policy.md` as the tie-breaker. |
 
 ## 11. Rehearsal Checklist
@@ -186,6 +189,6 @@ Current limitation: the dashboard export is an in-app JSON/Markdown bundle. It i
 - [ ] `pnpm run attack:all` passed with 16 blocked results.
 - [ ] Dashboard loads at `http://127.0.0.1:3000`.
 - [ ] Runtime and provider health badges are live.
-- [ ] CAW fallback-only wording is rehearsed.
+- [ ] CAW testnet-smoke-only wording is rehearsed.
 - [ ] P0 metadata override explanation is rehearsed.
 - [ ] Evidence export labels are checked before presentation.

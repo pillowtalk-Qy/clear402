@@ -46,12 +46,15 @@ export interface CawAdapterLike {
     amount: string;
     pactId: string;
     paymentContextHash: string;
+    paymentContext: PaymentContext;
   }): Promise<{
     evidenceMode: "live" | "fallback" | "mock";
     requestId: string;
     txHash?: string;
+    coboTransactionId?: string;
     walletAddress: string;
     auditLogId?: string;
+    rawEvidenceRef?: string;
     decision?: "allow" | "block" | "require_approval";
     denial?: CawPolicyDenialEvidence;
   }>;
@@ -65,12 +68,15 @@ export interface CawAdapterLike {
     amount: string;
     pactId: string;
     paymentContextHash: string;
+    paymentContext: PaymentContext;
   }): Promise<{
     evidenceMode: "live" | "fallback" | "mock";
     requestId: string;
     txHash?: string;
+    coboTransactionId?: string;
     walletAddress: string;
     auditLogId?: string;
+    rawEvidenceRef?: string;
     decision?: "allow" | "block" | "require_approval";
     denial?: CawPolicyDenialEvidence;
   }>;
@@ -147,8 +153,10 @@ export interface GuardPipelineResult {
     evidenceMode: "live" | "fallback" | "mock";
     requestId: string;
     txHash?: string;
+    coboTransactionId?: string;
     walletAddress: string;
     auditLogId?: string;
+    rawEvidenceRef?: string;
     denial?: CawPolicyDenialEvidence;
   };
   receipt?: ServiceReceipt;
@@ -328,6 +336,23 @@ function responseHeadersLookCacheSafe(
   }
 
   return { allowed: true, checks };
+}
+
+function hasCompleteLiveCawEvidence(cawEvidence: {
+  requestId?: string;
+  walletAddress?: string;
+  txHash?: string;
+  coboTransactionId?: string;
+  auditLogId?: string;
+  rawEvidenceRef?: string;
+}): boolean {
+  return Boolean(
+    cawEvidence.requestId &&
+      cawEvidence.walletAddress &&
+      (cawEvidence.txHash || cawEvidence.coboTransactionId) &&
+      cawEvidence.auditLogId &&
+      cawEvidence.rawEvidenceRef
+  );
 }
 
 export async function runGuardPipeline(
@@ -777,8 +802,52 @@ export async function runGuardPipeline(
     dstAddr: providerEntry.merchantAddress,
     amount: challenge.amount,
     pactId: input.cawPactId,
-    paymentContextHash: builtContext.paymentContextHash
+    paymentContextHash: builtContext.paymentContextHash,
+    paymentContext: builtContext.context
   });
+
+  if (cawEvidence.decision === "require_approval") {
+    const event = createFailure(database, {
+      missionId: input.missionId,
+      layer: "caw",
+      reason: cawEvidence.denial?.reason ?? "CAW requires owner approval",
+      decision: "require_approval",
+      evidence: {
+        challenge,
+        registryResult,
+        trustResult,
+        metadataFirewall,
+        paymentContext: builtContext.context,
+        clearSignResult,
+        cawEvidence
+      }
+    });
+    releaseReservationBudget(database, builtContext.paymentContextHash);
+
+    return {
+      decision: "require_approval",
+      status: "prepared",
+      ...(cawEvidence.denial?.reason !== undefined
+        ? { reason: cawEvidence.denial.reason }
+        : { reason: "CAW requires owner approval" }),
+      guardEventId: event.id,
+      providerRegistryResult: registryResult,
+      trustResult,
+      metadataFirewall,
+      paymentContext: builtContext.context,
+      paymentContextHash: builtContext.paymentContextHash,
+      cawRequestId: builtContext.cawRequestId,
+      reservation: {
+        quoteId: reservationResult.reservation.quoteId,
+        paymentContextHash: reservationResult.reservation.paymentContextHash,
+        nonce: reservationResult.reservation.nonce,
+        reservedBudget: reservationResult.reservation.reservedBudget
+      },
+      clearsig: clearSignResult,
+      cawEvidence,
+      evidenceBundle: evidenceBundleForMission(database, input.missionId)
+    };
+  }
 
   if (cawEvidence.decision === "block" || cawEvidence.denial !== undefined) {
     const event = createFailure(database, {
@@ -804,6 +873,47 @@ export async function runGuardPipeline(
       ...(cawEvidence.denial?.reason !== undefined
         ? { reason: cawEvidence.denial.reason }
         : { reason: "CAW denied payment" }),
+      guardEventId: event.id,
+      providerRegistryResult: registryResult,
+      trustResult,
+      metadataFirewall,
+      paymentContext: builtContext.context,
+      paymentContextHash: builtContext.paymentContextHash,
+      cawRequestId: builtContext.cawRequestId,
+      reservation: {
+        quoteId: reservationResult.reservation.quoteId,
+        paymentContextHash: reservationResult.reservation.paymentContextHash,
+        nonce: reservationResult.reservation.nonce,
+        reservedBudget: reservationResult.reservation.reservedBudget
+      },
+      clearsig: clearSignResult,
+      cawEvidence,
+      evidenceBundle: evidenceBundleForMission(database, input.missionId)
+    };
+  }
+
+  if (cawEvidence.evidenceMode === "live" && !hasCompleteLiveCawEvidence(cawEvidence)) {
+    const event = createFailure(database, {
+      missionId: input.missionId,
+      layer: "caw",
+      reason: "CAW live evidence is missing wallet, transaction, audit, or raw evidence",
+      decision: "fallback_required",
+      evidence: {
+        challenge,
+        registryResult,
+        trustResult,
+        metadataFirewall,
+        paymentContext: builtContext.context,
+        clearSignResult,
+        cawEvidence
+      }
+    });
+    markReservationDisputed(database, builtContext.paymentContextHash);
+
+    return {
+      decision: "block",
+      status: "disputed",
+      reason: "CAW live evidence is missing wallet, transaction, audit, or raw evidence",
       guardEventId: event.id,
       providerRegistryResult: registryResult,
       trustResult,

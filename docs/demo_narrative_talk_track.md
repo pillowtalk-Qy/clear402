@@ -1,6 +1,6 @@
 # Clear402 Demo Narrative / Talk Track
 
-This is the safe demo script for the current integration branch. It is written to avoid overstating CAW capability.
+This is the safe demo script for the current `clear402/live-caw-testnet` branch. It is written to avoid overstating CAW capability.
 
 ## 3-Minute Version
 
@@ -30,7 +30,7 @@ This is the safe demo script for the current integration branch. It is written t
 
 ### 2:45-3:00 - CAW Boundary
 
-"CAW execution is fallback-only here. The `caw` CLI is not available, the capability report says `Live ready: false`, and `payment_execution` is `fallback_required`. Clear402 shows the boundary and denial path, but does not claim that CAW moved funds."
+"This branch records one CAW Sepolia testnet tiny transfer. The request ID, pact ID, tx hash, and pact completion are in `docs/live_caw_testnet_smoke_report.md`. That is not mainnet, not production-ready, and not unrestricted CAW execution. Policy-denial evidence is still `needs_manual_step` / `fallback` / `not-run`."
 
 ## 8-Minute Version
 
@@ -46,7 +46,7 @@ This is the safe demo script for the current integration branch. It is written t
 
 "Live means the code path or service actually executed. Fallback means the intended live capability is unavailable and the substitute is visible. Mock means fixture or seed data."
 
-"In this branch, local runtime/provider health is live. Guard pipeline execution is live when the tests and attack lab run it. CAW-side payment execution is fallback because the `caw` CLI is missing. Attack inputs and provider/trust seed records are mock."
+"In this branch, local runtime/provider health is live. Guard pipeline execution is live when the tests and attack lab run it. CAW payment execution is live only for the one recorded Sepolia testnet smoke. Ordinary dashboard demos and attack lab runs do not trigger real CAW payments. Attack inputs and provider/trust seed records are mock."
 
 ### 2:00-3:10 - Dashboard Walkthrough
 
@@ -72,7 +72,7 @@ This is the safe demo script for the current integration branch. It is written t
 
 ### 5:30-6:30 - Evidence Export
 
-"The dashboard can render a JSON and Markdown evidence bundle for the current state. The CLI attack lab can also be captured as a log artifact. Before using any evidence, we check the labels: runtime/provider are live, CAW execution is fallback, attack inputs and seed data are mock."
+"The dashboard can render a JSON and Markdown evidence bundle for the current state. The CLI attack lab can also be captured as a log artifact. Before using any evidence, we check the labels: runtime/provider are live, the recorded CAW smoke is Sepolia-testnet-only, policy-denial evidence is fallback/not-run, and attack inputs plus seed data are mock."
 
 "That prevents the evidence story from outrunning the implementation."
 
@@ -80,23 +80,26 @@ This is the safe demo script for the current integration branch. It is written t
 
 "CAW is deliberately outside Clear402's policy logic. Clear402 prepares and checks the payment context, then the CawAdapter is the only boundary to CAW."
 
-"Right now, the capability report says the CAW CLI is unavailable. That means wallet identity, policy enforcement, payment execution, audit lookup, and policy denial evidence are all fallback-required. The correct behavior is to stop or return fallback-required evidence."
+"The capability report now records one live CAW Sepolia testnet tiny transfer. The smoke report includes the CAW request ID, pact ID, transaction hash, and pact completion. It does not prove mainnet readiness, production readiness, unrestricted execution, or live policy-denial evidence."
 
 ### 7:30-8:00 - Close
 
-"So the demo claim is narrow and strong: live local services, real guard pipeline execution, 16/16 fixture attacks blocked, P0 resource override closed, and explicit CAW fallback at the spending boundary."
+"So the demo claim is narrow and strong: live local services, real guard pipeline execution, 16/16 fixture attacks blocked, P0 resource override closed, and one recorded CAW Sepolia testnet tiny transfer. The ordinary demo path still avoids real CAW payment execution."
 
-"The next rehearsal should focus on timing, evidence labels, and making sure nobody describes fallback or mock state as funds movement."
+"The next rehearsal should focus on timing, evidence labels, and making sure nobody generalizes the Sepolia smoke into mainnet, production, unrestricted CAW execution, or live policy-denial coverage."
 
 ## Risk Statement
 
 Use this wording when asked about production readiness:
 
-"This branch is demo-gate ready for the guard pipeline and evidence story. It is not claiming real CAW-funded settlement. CAW capability is fallback-only until the CLI or SDK is installed, verified, and wired through CawAdapter with raw evidence. Attack lab inputs are fixtures, and provider/trust records are demo seed data."
+"This branch is demo-gate ready for the guard pipeline and evidence story, and it records one tiny CAW Sepolia testnet transfer. That smoke is not mainnet, not production-ready, and not unrestricted CAW execution. Policy-denial evidence remains `needs_manual_step` / `fallback` / `not-run`. Attack lab inputs are fixtures, provider/trust records are demo seed data, and the ordinary demo does not trigger a real CAW payment."
 
 ## Things Not To Say
 
-- "CAW moved funds in this demo."
+- "The ordinary dashboard demo moved CAW funds."
+- "The Sepolia smoke proves mainnet readiness."
+- "CAW execution is unrestricted now."
+- "Live policy-denial evidence is verified."
 - "The sample transaction hash proves settlement."
 - "The attack lab used external attackers or production traffic."
 - "The ERC-8004 trust data is live network data."
@@ -109,12 +112,13 @@ Use this wording when asked about production readiness:
 
 | Instead of | Say |
 |---|---|
-| "We paid with CAW." | "The CAW boundary is present, but execution is fallback-required in this environment." |
+| "We paid with CAW." | "We recorded one tiny CAW Sepolia testnet transfer; the ordinary demo does not move funds." |
 | "These are real attacks." | "These are fixture attacks executed through the real guard pipeline." |
-| "This tx hash is proof." | "This is sample/fallback evidence unless a verified CAW receipt exists." |
+| "This tx hash is proof." | "Only the Sepolia tx hash in the live smoke report is live CAW testnet evidence." |
 | "ERC-8004 verified the provider." | "The ERC-8004-style adapter executed over demo trust records." |
 | "The dashboard exported runtime evidence." | "The dashboard rendered an in-app evidence bundle with mode labels." |
+| "Policy denial is live-verified." | "Policy-denial evidence is still a manual-step fallback and was not run." |
 
 ## Final Demo Claim
 
-"Clear402 can truthfully demonstrate the x402 guard and evidence pipeline today: runtime/provider health is live, the guard pipeline really executes, the 16-scenario attack lab is blocked end to end, the P0 metadata override is closed, and CAW payment execution remains visibly fallback-required until official CAW capabilities are verified."
+"Clear402 can truthfully demonstrate the x402 guard and evidence pipeline today: runtime/provider health is live, the guard pipeline really executes, the 16-scenario attack lab is blocked end to end, the P0 metadata override is closed, and one CAW Sepolia testnet tiny transfer is recorded with request ID, pact ID, tx hash, and pact completion. That does not claim mainnet readiness, production readiness, unrestricted CAW execution, or live policy-denial evidence."

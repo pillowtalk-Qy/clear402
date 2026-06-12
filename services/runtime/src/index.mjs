@@ -13,6 +13,12 @@ export {
   validatePaymentContext
 } from "./caw-adapter.mjs";
 
+export {
+  createCawLiveExecutor,
+  getCawLivePrerequisites,
+  toCawDecimalAmount
+} from "./caw-live-executor.mjs";
+
 export { clearSign } from "./clearsig/adapter.ts";
 export {
   ATTACK_NAMES,

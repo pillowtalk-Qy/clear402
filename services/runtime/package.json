@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@cobo/agentic-wallet": "^0.1.7",
     "@clear402/shared": "workspace:*"
   },
   "scripts": {

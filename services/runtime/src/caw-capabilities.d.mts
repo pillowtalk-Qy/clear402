@@ -30,6 +30,12 @@ export declare function probeCawCapabilities(options?: {
     errorCode?: string;
   };
   clock?: () => number;
+  env?: Record<string, string | undefined>;
+}): CawCapabilityRecord[];
+
+export declare function createManualCapabilityRecords(input: {
+  env?: Record<string, string | undefined>;
+  evidenceRef: string;
 }): CawCapabilityRecord[];
 
 export declare function createCawCapabilityReport(

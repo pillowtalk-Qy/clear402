@@ -2,7 +2,7 @@
 
 Clear402 is a hardened x402 runtime and evidence dashboard with a strict CAW boundary.
 
-The current integration branch can demonstrate the guard pipeline and attack lab truthfully, but CAW-side payment execution is fallback-only because the `caw` CLI is not available on `PATH`. Do not describe this branch as moving real funds through CAW.
+The current `clear402/live-caw-testnet` branch can demonstrate the guard pipeline and attack lab truthfully, and it records one successful CAW Sepolia testnet tiny transfer. That live CAW claim is limited to the recorded smoke in `docs/live_caw_testnet_smoke_report.md`; it is not mainnet, not production-ready, and not unrestricted CAW execution.
 
 ## Current Branch State
 
@@ -11,13 +11,16 @@ The current integration branch can demonstrate the guard pipeline and attack lab
 - `services/provider-x402`: local x402 provider health service plus deterministic challenge, payment proof, receipt, and attack-fixture helpers.
 - `packages/shared`: shared Zod contracts and domain types.
 - `scripts/run_attack_lab.ts`: runs 16 attack fixtures through the real guard pipeline and requires every scenario to return `blocked` with a `guardEventId`.
-- `docs/caw_capability_report.md`: records CAW `Live ready: false` and `payment_execution: fallback_required`.
+- `docs/caw_capability_report.md`: records CAW `Live ready: true` only for the recorded Sepolia testnet pact and tiny-transfer smoke; `policy_denial_evidence` remains `needs_manual_step` / `fallback` / `not-run`.
+- `docs/live_caw_testnet_smoke_report.md`: records the request ID, pact ID, transaction hash, pact completion, and testnet balance evidence for the one live CAW smoke.
 - SQLite schema initialization for the runtime service.
 
 ## Current Limits
 
-- CAW payment execution against official CAW/funds is not available in this environment.
-- CAW audit lookup and policy denial evidence are fallback-required until the CAW capability report is verified.
+- Default demo and attack lab flows do not trigger real CAW payments; they remain local/demo guard-pipeline exercises.
+- Only the explicit live CAW Sepolia testnet smoke moved testnet SETH, and the completed pact should not be reused for another smoke.
+- The recorded smoke is not mainnet execution, not production readiness, and not unrestricted wallet access.
+- CAW policy-denial evidence was not live-smoked; it remains `needs_manual_step` / `fallback` / `not-run`.
 - Runtime/provider health are long-lived service endpoints; attack lab HTTP routes are exercised by the attack runner's local runtime handler.
 - Dashboard mission, payment, receipt, and evidence export actions are demo/fallback state unless backed by a runtime API response.
 - Attack inputs are mock fixtures, not external exploit traffic.
@@ -55,6 +58,7 @@ Default endpoints:
 - [Demo Narrative / Talk Track](./docs/demo_narrative_talk_track.md)
 - [Live / Fallback / Mock Policy](./docs/live_fallback_mock_policy.md)
 - [CAW Capability Report](./docs/caw_capability_report.md)
+- [Live CAW Testnet Smoke Report](./docs/live_caw_testnet_smoke_report.md)
 
 ## Evidence Dashboard
 
@@ -76,11 +80,11 @@ It shows:
 
 ## live / fallback / mock
 
-- `live`: runtime/provider health endpoints; guard pipeline code execution in tests and attack lab; provider registry, metadata firewall, PaymentContext resource binding, quote/nonce/budget checks, clearsig, and receipt verifier logic when those modules execute.
-- `fallback`: CAW execution boundary while `caw` is unavailable; dashboard mission/payment/receipt/export actions that represent demo state; capability records marked `fallback_required`.
+- `live`: runtime/provider health endpoints; guard pipeline code execution in tests and attack lab; provider registry, metadata firewall, PaymentContext resource binding, quote/nonce/budget checks, clearsig, and receipt verifier logic when those modules execute; the single recorded Sepolia testnet CAW tiny transfer documented in `docs/live_caw_testnet_smoke_report.md`.
+- `fallback`: CAW policy-denial evidence because it was not live-smoked; dashboard mission/payment/receipt/export actions that represent demo state; capability records marked `fallback_required` or `needs_manual_step`.
 - `mock`: attack fixtures, demo provider/trust/capability seed records, dashboard sample IDs and hashes.
 
-Nothing in the dashboard or docs should present fallback/mock state as proof that CAW moved funds.
+Nothing in the dashboard or docs should present fallback/mock state as proof that CAW moved funds. The only current CAW funds-movement claim is the recorded Sepolia testnet smoke.
 
 ## P0 Security Fix To Call Out
 

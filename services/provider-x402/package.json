@@ -1,15 +1,13 @@
 {
-  "name": "provider-x402",
+  "name": "@clear402/provider-x402",
   "private": true,
   "type": "module",
-  "exports": {
-    ".": "./src/index.mjs"
+  "dependencies": {
+    "@clear402/shared": "workspace:*"
   },
   "scripts": {
-    "dev": "node src/server.mjs",
-    "start": "node dist/server.mjs",
-    "lint": "node scripts/lint.mjs",
-    "test": "node --test test/*.test.mjs",
-    "build": "node scripts/build.mjs"
+    "dev": "tsx watch src/server.ts",
+    "build": "tsup src/server.ts --format esm --platform node --target node25 --outDir dist --clean --sourcemap",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }

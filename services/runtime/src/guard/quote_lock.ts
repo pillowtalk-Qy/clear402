@@ -170,8 +170,8 @@ export function getLedgerExposureUsd(database: DatabaseSync, missionId: string):
     .all(missionId) as Array<{ amountUsd: string }>;
 
   return rows.reduce((sum, row) => {
-    const [sumWhole, sumFraction = ""] = sum.split(".");
-    const [rowWhole, rowFraction = ""] = row.amountUsd.split(".");
+    const [sumWhole = "0", sumFraction = ""] = sum.split(".");
+    const [rowWhole = "0", rowFraction = ""] = row.amountUsd.split(".");
     const decimals = Math.max(sumFraction.length, rowFraction.length, 18);
     const scale = 10n ** BigInt(decimals);
     const sumMinor =
@@ -368,8 +368,8 @@ function addForLedger(left: string, right: string): string {
     18
   );
   const scale = 10n ** BigInt(decimals);
-  const [leftWhole, leftFraction = ""] = left.split(".");
-  const [rightWhole, rightFraction = ""] = right.split(".");
+  const [leftWhole = "0", leftFraction = ""] = left.split(".");
+  const [rightWhole = "0", rightFraction = ""] = right.split(".");
   const total =
     BigInt(leftWhole) * scale +
     BigInt(leftFraction.padEnd(decimals, "0") || "0") +

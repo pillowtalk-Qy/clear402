@@ -139,7 +139,7 @@ export function buildPaymentContext(input: BuildPaymentContextInput): BuiltPayme
     // The resource binding must come from the verified x402 challenge. Metadata is evidence,
     // and may be redacted or blocked, but it cannot choose the paid resource.
     url: input.challenge.resource,
-    body: input.body
+    ...(input.body !== undefined ? { body: input.body } : {})
   });
   const issuedAt = input.issuedAt ?? Date.now();
   const facilitatorUrlHash =

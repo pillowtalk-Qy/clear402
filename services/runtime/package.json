@@ -2,12 +2,14 @@
   "name": "@clear402/runtime",
   "private": true,
   "type": "module",
-  "exports": {
-    ".": "./src/index.mjs"
+  "dependencies": {
+    "@clear402/shared": "workspace:*"
   },
   "scripts": {
-    "lint": "node scripts/lint.mjs",
+    "dev": "tsx watch src/server.ts",
+    "build": "tsup src/server.ts --format esm --platform node --target node25 --outDir dist --clean --sourcemap",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "node scripts/test.mjs",
-    "build": "node scripts/build.mjs"
+    "db:init": "tsx src/db/init-cli.ts"
   }
 }

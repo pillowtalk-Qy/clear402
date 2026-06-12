@@ -1,10 +1,11 @@
 import { DatabaseSync } from "node:sqlite";
 
+import type { ProviderRegistryEntry } from "../../../../packages/shared/src/index.mjs";
 import type {
   ERC8004TrustRecord,
-  ProviderRegistryEntry
 } from "../x402/erc8004_trust_adapter.ts";
 import { createCawAdapter } from "../caw-adapter.mjs";
+import { scanMetadata } from "../guard/metadata_firewall.ts";
 import { buildPaymentContext } from "../guard/payment_context.ts";
 
 export interface AttackLabRequestInput {
@@ -225,9 +226,13 @@ export function createRawChallenge(input: {
         amount: input.amount,
         payTo: input.payTo ?? input.provider.merchantAddress,
         resource: input.resourceUrl,
-        facilitatorUrl: input.facilitatorUrl ?? input.provider.facilitatorUrl,
         description: input.description ?? "Clear402 paid report",
-        expiresAt
+        expiresAt,
+        ...(input.facilitatorUrl ?? input.provider.facilitatorUrl
+          ? {
+              facilitatorUrl: input.facilitatorUrl ?? input.provider.facilitatorUrl
+            }
+          : {})
       }
     ]
   };
@@ -244,10 +249,10 @@ export function createAttackRequest(input: AttackLabRequestInput): {
   return {
     method: input.method ?? "GET",
     url: input.url,
-    body: input.body,
-    headers: input.headers,
-    boundHeaders: input.boundHeaders,
-    rawHeaders: input.rawHeaders
+    ...(input.body !== undefined ? { body: input.body } : {}),
+    ...(input.headers !== undefined ? { headers: input.headers } : {}),
+    ...(input.boundHeaders !== undefined ? { boundHeaders: input.boundHeaders } : {}),
+    ...(input.rawHeaders !== undefined ? { rawHeaders: input.rawHeaders } : {})
   };
 }
 
@@ -259,20 +264,22 @@ export function buildAttackPaymentContext(input: AttackLabContextInput) {
     amount: input.challenge.amount,
     payTo: input.challenge.payTo,
     resource: input.challenge.resource,
-    facilitatorUrl: input.challenge.facilitatorUrl,
     expiresAt: input.challenge.expiresAt,
     providerId: input.providerId,
     rawChallengeHash: input.challenge.rawChallengeHash ?? `0x${"0".repeat(64)}`,
-    evidenceMode: input.challenge.evidenceMode ?? "mock"
+    evidenceMode: input.challenge.evidenceMode ?? "mock",
+    ...(input.challenge.facilitatorUrl !== undefined
+      ? { facilitatorUrl: input.challenge.facilitatorUrl }
+      : {})
   };
 
-  return buildPaymentContext({
+  const paymentContextInput: Parameters<typeof buildPaymentContext>[0] = {
     missionId: input.missionId,
     providerId: input.providerId,
     quoteId: input.quoteId,
     method: input.method,
     challenge,
-    metadata: input.metadata,
+    metadata: scanMetadata(input.metadata),
     merchantAddress: input.merchantAddress,
     chainId: input.chainId,
     tokenId: input.tokenId,
@@ -281,9 +288,14 @@ export function buildAttackPaymentContext(input: AttackLabContextInput) {
     issuedAt: input.issuedAt,
     cawPactId: input.cawPactId,
     serviceMode: input.serviceMode,
-    clearSignDigest: input.clearSignDigest,
-    body: input.body
-  });
+    ...(input.body !== undefined ? { body: input.body } : {})
+  };
+
+  if (input.clearSignDigest !== undefined) {
+    paymentContextInput.clearSignDigest = input.clearSignDigest;
+  }
+
+  return buildPaymentContext(paymentContextInput);
 }
 
 export function encodeTransferCalldata(recipient: string, amount: string): string {

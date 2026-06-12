@@ -3,11 +3,20 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.mjs"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
   },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
-    "lint": "node --check src/index.mjs",
-    "test": "node scripts/build.mjs",
-    "build": "node scripts/build.mjs"
+    "build": "tsup src/index.ts --format esm --platform node --target node25 --outDir dist --clean --sourcemap --dts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "zod": "4.4.3"
   }
 }

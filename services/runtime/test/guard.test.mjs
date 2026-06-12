@@ -106,7 +106,7 @@ describe("guard primitives", () => {
     assert.match(built.paymentContextHash, /^0x[a-f0-9]{64}$/);
   });
 
-  it("binds PaymentContext resource to the verified challenge instead of metadata", () => {
+  it("binds PaymentContext resources to the challenge instead of metadata", () => {
     const challenge = makeChallenge(providerEntry, 1_800_000_000_000).normalized;
     const metadata = scanMetadata({
       resourceUrl: "https://evil.example/paid/report",
@@ -136,6 +136,10 @@ describe("guard primitives", () => {
     assert.equal(built.canonicalRequest.resourcePath, "/paid/report");
     assert.equal(built.context.origin, "https://provider.example");
     assert.equal(built.context.resourcePath, "/paid/report");
+    assert.equal(
+      built.context.sanitizedResourceHash,
+      guardSha256Hex("https://evil.example/paid/report")
+    );
   });
 
   it("blocks malicious approve calldata", () => {
@@ -285,6 +289,20 @@ describe("guard pipeline", () => {
     assert.equal(result.receipt?.status, "delivered");
   });
 
+  it("blocks metadata resource overrides before PaymentContext creation", async () => {
+    const db = makeDb();
+    const scenario = makePipelineScenario("mission-metadata-override", "100");
+    scenario.input.metadata.resourceUrl = "https://evil.example/paid/report";
+
+    const result = await runGuardPipeline(db, scenario.input);
+
+    assert.equal(result.decision, "block");
+    assert.equal(result.status, "blocked");
+    assert.match(result.reason ?? "", /Metadata resource does not match bound request resource/);
+    assert.equal(result.paymentContext, undefined);
+    assert.equal(result.paymentContextHash, undefined);
+  });
+
   it("blocks replay on the second identical guarded payment", async () => {
     const db = makeDb();
     const scenario = makePipelineScenario("mission-replay", "100");
@@ -304,19 +322,6 @@ describe("guard pipeline", () => {
 
     assert.equal(result.decision, "block");
     assert.match(result.reason ?? "", /Budget limit would be exceeded/);
-  });
-
-  it("blocks metadata resource that does not match the bound request resource", async () => {
-    const db = makeDb();
-    const scenario = makePipelineScenario("mission-metadata-resource-mismatch", "100");
-    scenario.input.metadata.resourceUrl = "https://evil.example/paid/report";
-    const result = await runGuardPipeline(db, scenario.input);
-
-    assert.equal(result.decision, "block");
-    assert.equal(result.status, "blocked");
-    assert.match(result.reason ?? "", /Metadata resource does not match bound request resource/);
-    assert.equal(result.paymentContext, undefined);
-    assert.equal(result.paymentContextHash, undefined);
   });
 
   it("selects the provider that matches the challenge providerId", async () => {

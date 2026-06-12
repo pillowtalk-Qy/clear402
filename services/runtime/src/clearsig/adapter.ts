@@ -127,10 +127,19 @@ function decodeKnownCalldata(calldata: string): {
     };
   }
 
-  return {
-    functionSignature,
+  const result: {
+    functionSignature?: string;
+    decodedParams?: Record<string, unknown>;
+    intent: string;
+  } = {
     intent: functionSignature === undefined ? "Unknown calldata selector" : functionSignature
   };
+
+  if (functionSignature !== undefined) {
+    result.functionSignature = functionSignature;
+  }
+
+  return result;
 }
 
 function findNestedSelectors(calldata: string): string[] {
@@ -225,8 +234,13 @@ export function clearSign(input: ClearSignInput): ClearSignResult {
   const selector = selectorOf(calldata);
   const decoded = decodeKnownCalldata(calldata);
   result.selector = selector;
-  result.functionSignature = decoded.functionSignature;
-  result.decodedParams = decoded.decodedParams;
+  if (decoded.functionSignature !== undefined) {
+    result.functionSignature = decoded.functionSignature;
+  }
+
+  if (decoded.decodedParams !== undefined) {
+    result.decodedParams = decoded.decodedParams;
+  }
   result.intent = decoded.intent;
   result.calldataDigest = sha256Hex(calldata);
 

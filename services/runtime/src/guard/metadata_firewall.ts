@@ -184,7 +184,10 @@ export function scanMetadata(input: MetadataTriple): MetadataFirewallResult {
   }
 
   if (input.reason !== undefined) {
-    sanitized.reason = reasonIsCode ? input.reason : reasonFindings?.sanitized;
+    const sanitizedReason = reasonIsCode ? input.reason : reasonFindings?.sanitized;
+    if (sanitizedReason !== undefined) {
+      sanitized.reason = sanitizedReason;
+    }
   }
 
   if (input.reason !== undefined && !reasonIsCode && allFindings.length === 0) {

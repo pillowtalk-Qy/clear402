@@ -243,6 +243,8 @@ export interface AttackScenario {
 export interface EvidenceExportState {
   generatedAt: number;
   evidenceMode: EvidenceMode;
+  source: "server_side" | "frontend_fallback";
+  runtimeSource?: string;
   json: string;
   markdown: string;
   stale: boolean;
@@ -274,6 +276,18 @@ export interface DashboardRuntimeSnapshot {
 
 export interface DashboardInitOptions extends DashboardRuntimeSnapshot {
   preset: DashboardPreset;
+}
+
+export interface PreferredEvidenceExportResult {
+  evidence: EvidenceExportState;
+  usedRuntime: boolean;
+  fallbackReason?: string;
+}
+
+export interface PreferredEvidenceExportOptions {
+  fetcher?: typeof fetch;
+  basePath?: string;
+  now?: number;
 }
 
 const sampleProviderId = "provider-markets-01";
@@ -396,6 +410,56 @@ function modeFromHealth(snapshot: HealthSnapshot): EvidenceMode {
 
 function stableJson(value: unknown) {
   return JSON.stringify(value, null, 2);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function coerceEvidenceMode(value: unknown): EvidenceMode {
+  if (value === "live" || value === "fallback" || value === "mock") {
+    return value;
+  }
+
+  return "fallback";
+}
+
+function isSecretLikeKey(key: string) {
+  return /(?:api[_-]?key|secret|password|authorization|bearer|private[_-]?key|session|cookie|providerSignature)$/i.test(
+    key
+  );
+}
+
+export function redactSecretLikeText(value: string) {
+  return value
+    .replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi, "[redacted-email]")
+    .replace(/\bCUST-\d+\b/g, "[redacted-customer-id]")
+    .replace(/\bCLEAR402_CAW_[A-Z0-9_]*=[^\s"',)]+/g, "[redacted-secret]")
+    .replace(/\bsk-(?:live|test)-[A-Za-z0-9_-]+/g, "[redacted-secret]")
+    .replace(/\b(Bearer\s+)[A-Za-z0-9._-]+/gi, "$1[redacted-secret]")
+    .replace(/\b(API\s+token\s+)[^\s.]+/gi, "$1[redacted-secret]")
+    .replace(/\b(x-api-key\s*[:=]\s*)[^\s"',)]+/gi, "$1[redacted-secret]");
+}
+
+export function sanitizeEvidenceForDisplay(value: unknown): unknown {
+  if (typeof value === "string") {
+    return redactSecretLikeText(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((entry) => sanitizeEvidenceForDisplay(entry));
+  }
+
+  if (isRecord(value)) {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [
+        key,
+        isSecretLikeKey(key) ? "[redacted-secret]" : sanitizeEvidenceForDisplay(entry)
+      ])
+    );
+  }
+
+  return value;
 }
 
 function buildTimelineItem(
@@ -971,21 +1035,78 @@ export function applyDashboardAction(
   }
 
   if (action.type === "export-evidence") {
-    next.evidence = buildEvidenceExport(next, now);
-    next.timeline.unshift(
-      buildTimelineItem(
-        "timeline-export",
-        "Evidence exported",
-        "A markdown and JSON bundle captures the current live / fallback / mock split.",
-        "success",
-        "fallback",
-        now
-      )
-    );
-    return next;
+    return recordEvidenceExport(next, buildEvidenceExport(next, now), now);
   }
 
   return next;
+}
+
+export function resolveEvidenceMissionId(workspace: DashboardWorkspace) {
+  return workspace.mission.id ?? workspace.paymentContext.missionId;
+}
+
+export function recordEvidenceExport(
+  workspace: DashboardWorkspace,
+  evidence: EvidenceExportState,
+  now = Date.now(),
+  detail?: string
+): DashboardWorkspace {
+  const next = structuredClone(workspace) as DashboardWorkspace;
+  next.evidence = evidence;
+  next.timeline.unshift(
+    buildTimelineItem(
+      `timeline-export-${now}`,
+      "Evidence exported",
+      detail ??
+        (evidence.source === "server_side"
+          ? `Server-side evidence export (${evidence.runtimeSource ?? "runtime"}) captured the current live / fallback / mock split.`
+          : "Frontend fallback export captured the current live / fallback / mock split."),
+      "success",
+      evidence.evidenceMode,
+      now
+    )
+  );
+
+  return next;
+}
+
+export async function loadPreferredEvidenceExport(
+  workspace: DashboardWorkspace,
+  options: PreferredEvidenceExportOptions = {}
+): Promise<PreferredEvidenceExportResult> {
+  const fetcher = options.fetcher ?? fetch;
+  const now = options.now ?? Date.now();
+  const basePath = options.basePath ?? "";
+  const missionId = encodeURIComponent(resolveEvidenceMissionId(workspace));
+  const exportBasePath = `${basePath}/api/evidence/${missionId}`;
+
+  try {
+    const [jsonResponse, markdownResponse] = await Promise.all([
+      fetcher(`${exportBasePath}/export.json`, { cache: "no-store" }),
+      fetcher(`${exportBasePath}/export.md`, { cache: "no-store" })
+    ]);
+
+    if (!jsonResponse.ok || !markdownResponse.ok) {
+      const status = !jsonResponse.ok ? jsonResponse.status : markdownResponse.status;
+      throw new Error(`Runtime evidence export unavailable: HTTP ${status}`);
+    }
+
+    const [json, markdown] = await Promise.all([
+      jsonResponse.text(),
+      markdownResponse.text()
+    ]);
+
+    return {
+      evidence: buildServerSideEvidenceExport({ json, markdown, now }),
+      usedRuntime: true
+    };
+  } catch (error) {
+    return {
+      evidence: buildEvidenceExport(workspace, now),
+      usedRuntime: false,
+      fallbackReason: error instanceof Error ? error.message : "Runtime evidence export unavailable"
+    };
+  }
 }
 
 export function buildEvidenceExport(workspace: DashboardWorkspace, now = Date.now()): EvidenceExportState {
@@ -1048,10 +1169,11 @@ export function buildEvidenceExport(workspace: DashboardWorkspace, now = Date.no
     ]
   };
 
-  const json = stableJson({
+  const sanitizedBundle = sanitizeEvidenceForDisplay({
     ...bundle,
     generatedAt: now
   });
+  const json = stableJson(sanitizedBundle);
 
   const markdown = [
     "# Clear402 Evidence Pack",
@@ -1095,8 +1217,49 @@ export function buildEvidenceExport(workspace: DashboardWorkspace, now = Date.no
   return {
     generatedAt: now,
     evidenceMode: "fallback",
+    source: "frontend_fallback",
     json,
-    markdown,
+    markdown: redactSecretLikeText(markdown),
+    stale: false
+  };
+}
+
+export function buildServerSideEvidenceExport({
+  json,
+  markdown,
+  now = Date.now()
+}: {
+  json: string;
+  markdown: string;
+  now?: number;
+}): EvidenceExportState {
+  const sanitizedJsonText = redactSecretLikeText(json);
+  let payload: unknown;
+
+  try {
+    payload = JSON.parse(sanitizedJsonText);
+  } catch {
+    payload = null;
+  }
+
+  const payloadRecord = isRecord(payload) ? payload : {};
+  const generatedAt =
+    typeof payloadRecord.generatedAt === "number" ? payloadRecord.generatedAt : now;
+  const evidenceMode = coerceEvidenceMode(payloadRecord.evidenceMode);
+  const source =
+    typeof payloadRecord.source === "string" && payloadRecord.source.length > 0
+      ? payloadRecord.source
+      : "runtime";
+  const sanitizedPayload = sanitizeEvidenceForDisplay(payload);
+  const renderedJson = payload ? stableJson(sanitizedPayload) : sanitizedJsonText;
+
+  return {
+    generatedAt,
+    evidenceMode,
+    source: "server_side",
+    runtimeSource: source,
+    json: renderedJson,
+    markdown: redactSecretLikeText(markdown),
     stale: false
   };
 }

@@ -1,6 +1,6 @@
 # Clear402 Demo Operator Runbook
 
-This runbook is the operator path for the current `clear402/live-caw-testnet` branch. It is intentionally strict about live, fallback, and mock labels.
+This runbook is the operator path for the current Clear402 demo branch. It is intentionally strict about live, fallback, and mock labels.
 
 ## 1. Truth Boundary
 
@@ -10,7 +10,7 @@ This runbook is the operator path for the current `clear402/live-caw-testnet` br
 | Guard pipeline | live execution over local/demo inputs | Provider registry, metadata firewall, PaymentContext binding, quote/nonce/budget checks, clearsig, and receipt verifier execute in tests and attack lab. |
 | CAW testnet smoke | live for one recorded Sepolia tiny transfer | Request ID, pact ID, tx hash, and pact completion are in `docs/live_caw_testnet_smoke_report.md`. |
 | CAW default demo execution | no live payment | Ordinary dashboard demos and attack lab runs must not trigger a real CAW payment. |
-| CAW policy denial evidence | fallback / needs manual step | `policy_denial_evidence` was not live-smoked and must not be claimed as verified. |
+| CAW policy denial evidence | live for one recorded Sepolia destination-allowlist denial | Request ID, pact ID, rejected transaction record, denial reason, and no-success evidence are in `docs/live_caw_policy_denial_report.md`. |
 | Attack lab | mock inputs, live guard execution | The 16 scenarios are fixtures run through the real guard pipeline. |
 | Provider/trust/capability seed data | mock | Demo records prove the pipeline shape, not external registry truth. |
 | Dashboard payment/export actions | fallback/demo state | The dashboard labels non-live state; it does not prove funds moved. |
@@ -123,15 +123,16 @@ Short demo wording:
 
 Current CAW fact:
 
-- `docs/caw_capability_report.md` says `Live ready: true` only for the recorded Sepolia testnet pact and tiny-transfer smoke.
+- `docs/caw_capability_report.md` says `Live ready: true` only for the recorded Sepolia testnet allow-path tiny transfer and the recorded Sepolia testnet destination-allowlist denial.
 - `docs/live_caw_testnet_smoke_report.md` records the request ID, pact ID, transaction hash, pact completion, and balance evidence.
+- `docs/live_caw_policy_denial_report.md` records the request ID, pact ID, rejected transaction record, denial reason, and no-success evidence.
 - The transfer was `0.0001` SETH on Ethereum Sepolia testnet.
 - This is not mainnet, not production-ready, and not unrestricted CAW execution.
-- `policy_denial_evidence` remains `needs_manual_step` / `fallback` / `not-run`; do not claim live policy-denial evidence.
+- The recorded policy-denial evidence covers one destination allowlist rejection only; do not claim every CAW policy-denial type is covered.
 
 Short demo wording:
 
-"CAW is the spending authority. This branch records one tiny Sepolia testnet CAW transfer, with request ID, pact ID, tx hash, and pact completion in the live smoke report. The normal dashboard demo and attack lab do not move funds, and policy-denial evidence is still a manual-step fallback."
+"CAW is the spending authority. This branch records one tiny Sepolia testnet CAW transfer, with request ID, pact ID, tx hash, and pact completion in the live smoke report. It also records one Sepolia testnet CAW policy denial where a non-allowlisted destination was rejected without a transaction hash. The normal dashboard demo and attack lab do not move funds."
 
 If the dashboard shows sample hashes or a transaction reference, call them sample/fallback evidence unless they are explicitly the Sepolia tx hash from `docs/live_caw_testnet_smoke_report.md`.
 
@@ -176,7 +177,7 @@ Current limitation: the dashboard export is an in-app JSON/Markdown bundle. It i
 | Dashboard shows runtime/provider `fallback` | Confirm runtime/provider terminals are running and health URLs are reachable. |
 | Port conflict | Set `RUNTIME_PORT`, `PROVIDER_X402_PORT`, or pass a different dashboard `--port`. |
 | Attack lab fails before results | Re-run `pnpm install`, then `pnpm test:e2e` to isolate the failing runtime test. |
-| CAW execution is requested | Do not run another live smoke during the demo. Point to `docs/live_caw_testnet_smoke_report.md` for the already-recorded Sepolia testnet evidence. |
+| CAW execution is requested | Do not run another live smoke during the demo. Point to `docs/live_caw_testnet_smoke_report.md` and `docs/live_caw_policy_denial_report.md` for the already-recorded Sepolia testnet evidence. |
 | Evidence labels look mixed | Use `docs/live_fallback_mock_policy.md` as the tie-breaker. |
 
 ## 11. Rehearsal Checklist

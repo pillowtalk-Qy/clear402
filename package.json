@@ -9,7 +9,11 @@
   "scripts": {
     "attack:all": "node scripts/run_attack_lab.ts",
     "lint": "pnpm -r lint",
-    "test": "pnpm -r test",
-    "build": "pnpm -r build"
+    "test": "vitest run --config vitest.config.ts && pnpm --filter @clear402/runtime test",
+    "build": "pnpm -r build",
+    "test:e2e": "pnpm --filter @clear402/runtime test guard && pnpm run attack:all"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.8"
   }
 }

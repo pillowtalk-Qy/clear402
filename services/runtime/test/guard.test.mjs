@@ -106,6 +106,38 @@ describe("guard primitives", () => {
     assert.match(built.paymentContextHash, /^0x[a-f0-9]{64}$/);
   });
 
+  it("binds PaymentContext resource to the verified challenge instead of metadata", () => {
+    const challenge = makeChallenge(providerEntry, 1_800_000_000_000).normalized;
+    const metadata = scanMetadata({
+      resourceUrl: "https://evil.example/paid/report",
+      description: "ok",
+      reason: "MARKET_DATA_REQUEST"
+    });
+
+    const built = buildPaymentContext({
+      missionId: "mission-1",
+      providerId: providerEntry.providerId,
+      quoteId: "quote-1",
+      method: "GET",
+      challenge,
+      metadata,
+      merchantAddress: providerEntry.merchantAddress,
+      chainId: providerEntry.chainId,
+      tokenId: providerEntry.tokenId,
+      amountDecimals: 6,
+      nonce: "nonce-1",
+      issuedAt: 1_800_000_000_000,
+      cawPactId: "pact-1",
+      serviceMode: "caw-fetch"
+    });
+
+    assert.equal(built.canonicalRequest.canonicalUrl, "https://provider.example/paid/report");
+    assert.equal(built.canonicalRequest.origin, "https://provider.example");
+    assert.equal(built.canonicalRequest.resourcePath, "/paid/report");
+    assert.equal(built.context.origin, "https://provider.example");
+    assert.equal(built.context.resourcePath, "/paid/report");
+  });
+
   it("blocks malicious approve calldata", () => {
     const challenge = makeChallenge(providerEntry, 1_800_000_000_000).normalized;
     const metadata = scanMetadata({
@@ -272,6 +304,19 @@ describe("guard pipeline", () => {
 
     assert.equal(result.decision, "block");
     assert.match(result.reason ?? "", /Budget limit would be exceeded/);
+  });
+
+  it("blocks metadata resource that does not match the bound request resource", async () => {
+    const db = makeDb();
+    const scenario = makePipelineScenario("mission-metadata-resource-mismatch", "100");
+    scenario.input.metadata.resourceUrl = "https://evil.example/paid/report";
+    const result = await runGuardPipeline(db, scenario.input);
+
+    assert.equal(result.decision, "block");
+    assert.equal(result.status, "blocked");
+    assert.match(result.reason ?? "", /Metadata resource does not match bound request resource/);
+    assert.equal(result.paymentContext, undefined);
+    assert.equal(result.paymentContextHash, undefined);
   });
 
   it("selects the provider that matches the challenge providerId", async () => {

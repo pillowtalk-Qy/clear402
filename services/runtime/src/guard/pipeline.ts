@@ -514,6 +514,69 @@ export async function runGuardPipeline(
     };
   }
 
+  let metadataResourceUrl: ReturnType<typeof canonicalizeUrl>;
+  try {
+    metadataResourceUrl = canonicalizeUrl(input.metadata.resourceUrl);
+  } catch (error) {
+    const reason =
+      error instanceof Error ? error.message : "Metadata resource URL is invalid";
+    const event = createFailure(database, {
+      missionId: input.missionId,
+      layer: "resource_binding",
+      reason,
+      decision: "block",
+      evidence: {
+        challenge,
+        request: input.request,
+        registryResult,
+        trustResult,
+        metadataFirewall,
+        metadata: input.metadata
+      }
+    });
+
+    return {
+      decision: "block",
+      status: "blocked",
+      reason,
+      guardEventId: event.id,
+      providerRegistryResult: registryResult,
+      trustResult,
+      metadataFirewall,
+      evidenceBundle: evidenceBundleForMission(database, input.missionId)
+    };
+  }
+
+  if (metadataResourceUrl.canonicalUrl !== requestUrl.canonicalUrl) {
+    const event = createFailure(database, {
+      missionId: input.missionId,
+      layer: "resource_binding",
+      reason: "Metadata resource does not match bound request resource",
+      decision: "block",
+      evidence: {
+        boundResource: requestUrl.canonicalUrl,
+        challengeResource: challengeUrl.canonicalUrl,
+        metadataResource: metadataResourceUrl.canonicalUrl,
+        challenge,
+        request: input.request,
+        registryResult,
+        trustResult,
+        metadataFirewall
+      }
+    });
+
+    return {
+      decision: "block",
+      status: "blocked",
+      reason: "Metadata resource does not match bound request resource",
+      guardEventId: event.id,
+      providerRegistryResult: registryResult,
+      trustResult,
+      metadataFirewall,
+      evidenceBundle: evidenceBundleForMission(database, input.missionId)
+    };
+  }
+
   const builtContext = buildPaymentContext({
     missionId: input.missionId,
     providerId: providerEntry.providerId,

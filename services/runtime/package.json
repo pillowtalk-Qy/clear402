@@ -1,5 +1,5 @@
 {
-  "name": "runtime",
+  "name": "@clear402/runtime",
   "private": true,
   "type": "module",
   "exports": {

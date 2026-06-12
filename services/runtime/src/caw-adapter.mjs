@@ -10,13 +10,7 @@ import {
   probeCawCapabilities
 } from "./caw-capabilities.mjs";
 
-const REQUIRED_LIVE_CAPABILITIES = Object.freeze([
-  "caw_cli",
-  "wallet_identity",
-  "policy_enforcement",
-  "payment_execution",
-  "audit_lookup"
-]);
+const REQUIRED_LIVE_CAPABILITIES = CAW_CAPABILITIES;
 
 export function createCawAdapter({
   capabilities = probeCawCapabilities(),
@@ -44,6 +38,61 @@ export function createCawAdapter({
         liveExecutor,
         ...options
       });
+    },
+    async transferTokens(input, options = {}) {
+      if (!input?.paymentContext) {
+        const requestId = input?.requestId ?? requestIdFactory();
+        return {
+          evidenceMode: "fallback",
+          requestId,
+          decision: "fallback_required",
+          denial: createCawPolicyDenialEvidence({
+            code: "PAYMENT_CONTEXT_REQUIRED",
+            reason: "CawAdapter.transferTokens requires the guarded PaymentContext.",
+            details: {
+              required: "paymentContext"
+            },
+            attemptedOperation: "transfer",
+            cawRequestId: requestId,
+            evidenceMode: "fallback"
+          })
+        };
+      }
+
+      const result = await executePaymentIntent(
+        input.paymentContext,
+        {
+          report,
+          clock,
+          requestIdFactory: () => input.requestId,
+          liveExecutor,
+          attemptedOperation: "transfer",
+          ...options
+        }
+      );
+
+      if (result.ok) {
+        return {
+          evidenceMode: result.evidenceMode,
+          requestId: result.cawRequestId,
+          walletAddress: result.walletAddress,
+          txHash: result.txHash,
+          coboTransactionId: result.coboTransactionId,
+          auditLogId: result.auditLogId,
+          rawEvidenceRef: result.rawEvidenceRef,
+          decision: "allow"
+        };
+      }
+
+      return {
+        evidenceMode: result.evidenceMode,
+        requestId: result.denial?.cawRequestId ?? input.requestId,
+        walletAddress: result.walletAddress,
+        auditLogId: result.denial?.auditLogId,
+        rawEvidenceRef: result.rawEvidenceRef,
+        decision: result.decision,
+        denial: result.denial
+      };
     }
   };
 }
@@ -55,6 +104,7 @@ export async function executePaymentIntent(
     attemptedOperation = "transfer",
     clock = () => Date.now(),
     requestIdFactory = () => `caw_${randomUUID()}`,
+    requestId,
     liveExecutor
   } = {}
 ) {
@@ -72,6 +122,7 @@ export async function executePaymentIntent(
 
   const paymentContextHash = hashObject(paymentContext);
   const now = clock();
+  const cawRequestId = requestId ?? requestIdFactory();
 
   if (paymentContext.expiresAt <= now) {
     return createBlockedCawResult({
@@ -83,7 +134,7 @@ export async function executePaymentIntent(
       paymentContextHash,
       report,
       now,
-      requestId: requestIdFactory(),
+      requestId: cawRequestId,
       evidenceMode: "fallback"
     });
   }
@@ -98,7 +149,7 @@ export async function executePaymentIntent(
       paymentContextHash,
       report,
       now,
-      requestId: requestIdFactory(),
+      requestId: cawRequestId,
       evidenceMode: "fallback"
     });
   }
@@ -113,7 +164,7 @@ export async function executePaymentIntent(
       paymentContextHash,
       report,
       now,
-      requestId: requestIdFactory(),
+      requestId: cawRequestId,
       evidenceMode: "fallback"
     });
   }
@@ -122,20 +173,31 @@ export async function executePaymentIntent(
     paymentContext,
     paymentContextHash,
     attemptedOperation,
-    requestId: requestIdFactory()
+    requestId: cawRequestId
   });
 
-  if (!execution?.rawEvidenceRef) {
+  if (execution?.ok === false || execution?.denial || execution?.decision === "block" || execution?.decision === "require_approval") {
+    return createExecutorBlockedCawResult({
+      execution,
+      paymentContext,
+      paymentContextHash,
+      attemptedOperation,
+      now,
+      requestId: cawRequestId
+    });
+  }
+
+  if (!hasRequiredLiveEvidence(execution)) {
     return createBlockedCawResult({
       code: "CAW_LIVE_EVIDENCE_MISSING",
-      reason: "CAW execution returned without raw evidence reference.",
-      suggestion: "Preserve CAW stdout, request id, audit id, or receipt evidence before calling this live.",
+      reason: "CAW execution returned without wallet, transaction, audit, and raw evidence references.",
+      suggestion: "Preserve CAW request id, wallet address, tx hash or Cobo transaction id, audit id, and raw evidence before calling this live.",
       attemptedOperation,
       paymentContext,
       paymentContextHash,
       report,
       now,
-      requestId: requestIdFactory(),
+      requestId: cawRequestId,
       evidenceMode: "fallback"
     });
   }
@@ -144,9 +206,11 @@ export async function executePaymentIntent(
     ok: true,
     decision: "allow",
     paymentContextHash,
-    cawRequestId: execution.cawRequestId,
+    cawRequestId: execution.cawRequestId ?? execution.requestId ?? cawRequestId,
     auditLogId: execution.auditLogId,
     txHash: execution.txHash,
+    coboTransactionId: execution.coboTransactionId ?? execution.cobo_transaction_id,
+    walletAddress: execution.walletAddress,
     rawEvidenceRef: execution.rawEvidenceRef,
     evidenceMode: "live"
   };
@@ -242,6 +306,64 @@ export function validatePaymentContext(paymentContext) {
     ok: failures.length === 0,
     failures
   };
+}
+
+function createExecutorBlockedCawResult({
+  execution,
+  paymentContext,
+  paymentContextHash,
+  attemptedOperation,
+  now,
+  requestId
+}) {
+  const denial =
+    execution.denial ??
+    createCawPolicyDenialEvidence({
+      code: execution.decision === "require_approval" ? "CAW_PENDING_APPROVAL" : "CAW_POLICY_DENIED",
+      reason:
+        execution.decision === "require_approval"
+          ? "CAW operation requires owner approval."
+          : "CAW denied payment execution.",
+      details: {
+        cawPactId: paymentContext.cawPactId,
+        serviceMode: paymentContext.serviceMode
+      },
+      attemptedOperation,
+      paymentContextHash,
+      cawRequestId: execution.cawRequestId ?? execution.requestId ?? requestId,
+      auditLogId: execution.auditLogId,
+      evidenceMode: execution.evidenceMode ?? "live"
+    });
+
+  return {
+    ok: false,
+    decision: execution.decision === "require_approval" ? "require_approval" : "block",
+    paymentContextHash,
+    denial,
+    guardEvent: {
+      id: `guard_${hashObject({ code: denial.code, paymentContextHash, now }).slice(0, 16)}`,
+      missionId: paymentContext.missionId,
+      layer: "caw-adapter",
+      decision: execution.decision === "require_approval" ? "require_approval" : "block",
+      reason: denial.reason,
+      evidenceJson: denial,
+      createdAt: now
+    },
+    rawEvidenceRef: execution.rawEvidenceRef,
+    walletAddress: execution.walletAddress,
+    evidenceMode: execution.evidenceMode ?? denial.evidenceMode
+  };
+}
+
+function hasRequiredLiveEvidence(execution) {
+  return Boolean(
+    execution?.evidenceMode === "live" &&
+      execution?.rawEvidenceRef &&
+      (execution?.cawRequestId || execution?.requestId) &&
+      execution?.walletAddress &&
+      (execution?.txHash || execution?.coboTransactionId || execution?.cobo_transaction_id) &&
+      execution?.auditLogId
+  );
 }
 
 function createBlockedCawResult({

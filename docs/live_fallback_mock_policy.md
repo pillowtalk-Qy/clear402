@@ -13,6 +13,7 @@ Examples:
 - a local runtime/provider health response,
 - a real guard pipeline decision,
 - a real CAW-approved transaction,
+- the recorded CAW Sepolia testnet tiny transfer in `docs/live_caw_testnet_smoke_report.md`,
 - a real provider 402 challenge,
 - a real audit lookup,
 - or a real receipt verification.
@@ -50,6 +51,7 @@ Mock may help development, but it must never impersonate a live wallet, live den
 - `live` only after capability verification and raw evidence.
 - `fallback` when the official path is unavailable but a documented local substitute exists.
 - `mock` only for isolated fixtures or UI labs.
+- The current live CAW claim is limited to the recorded Sepolia testnet tiny transfer. It is not mainnet, production readiness, unrestricted CAW execution, or live policy-denial evidence.
 
 ### 2.2 Provider
 
@@ -115,7 +117,7 @@ If a capability is not verified, it must be labeled `fallback_required` or `need
 
 ## 8. Current Demo Gate Classification
 
-This section records the current integration branch status for demo operators.
+This section records the current `clear402/live-caw-testnet` branch status for demo operators.
 
 ### Live In The Current Demo
 
@@ -123,14 +125,15 @@ This section records the current integration branch status for demo operators.
 - Guard pipeline execution in tests and in `pnpm run attack:all`.
 - Provider registry validation, metadata firewall, PaymentContext resource binding, quote/nonce/budget checks, clearsig, and service receipt verification when run by the guard pipeline.
 - The P0 `metadata.resourceUrl` override defense: mismatched metadata is blocked before PaymentContext creation.
+- One CAW Sepolia testnet tiny transfer recorded in `docs/live_caw_testnet_smoke_report.md`, including request ID, pact ID, tx hash, pact completion, and balance evidence.
 
 These live claims describe code paths that actually execute. Some of those paths run over demo seed records; the seed data itself is not live external data.
 
 ### Fallback In The Current Demo
 
-- CAW-side payment execution. The `caw` CLI is not on `PATH`, `docs/caw_capability_report.md` says `Live ready: false`, and `payment_execution` is `fallback_required`.
 - Dashboard mission, payment, receipt, and export actions unless they are explicitly backed by a runtime response.
-- CAW audit lookup and CAW policy denial evidence until the capability report is verified.
+- Ordinary demo and attack lab flows do not trigger real CAW payments.
+- CAW policy-denial evidence remains `needs_manual_step` / `fallback` / `not-run`; a live audited policy-denial smoke was not run.
 
 ### Mock In The Current Demo
 
@@ -140,7 +143,9 @@ These live claims describe code paths that actually execute. Some of those paths
 
 ### Demo Rule
 
-Say "16/16 attacks blocked" only as: 16 mock attack fixtures were executed through the real guard pipeline, and each returned a blocked decision with evidence. Do not say or imply that CAW moved funds, that external attackers were tested, or that demo seed data is live registry data.
+Say "16/16 attacks blocked" only as: 16 mock attack fixtures were executed through the real guard pipeline, and each returned a blocked decision with evidence. Do not say or imply that the attack lab moved CAW funds, that external attackers were tested, or that demo seed data is live registry data.
+
+Say "live CAW execution" only as: one Sepolia testnet tiny transfer was recorded in `docs/live_caw_testnet_smoke_report.md`. Do not generalize it to mainnet, production readiness, unrestricted CAW execution, or live policy-denial evidence.
 
 ## 9. Safety Summary
 

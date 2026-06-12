@@ -68,7 +68,7 @@ Terminal 3:
 
 ```bash
 cd /Users/qy/Documents/clear402
-pnpm --filter dashboard dev -- --hostname 127.0.0.1 --port 3000
+pnpm --filter dashboard dev --hostname 127.0.0.1 --port 3000
 ```
 
 Open:

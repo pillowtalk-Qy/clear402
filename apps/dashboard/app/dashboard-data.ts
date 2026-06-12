@@ -1042,9 +1042,9 @@ export function buildEvidenceExport(workspace: DashboardWorkspace, now = Date.no
       attackLab: "mock" as EvidenceMode
     },
     limitations: [
-      "The dashboard uses fallback/mock evidence for mission, guard, and attack surfaces because runtime APIs are not implemented in this branch.",
-      "Only runtime and provider health are live today.",
-      "No live CAW execution or real provider trust adapter is wired yet."
+      "This branch records one live CAW Sepolia testnet tiny transfer in docs/live_caw_testnet_smoke_report.md.",
+      "Default dashboard demos and attack lab runs use fallback/mock evidence and do not trigger real CAW payments.",
+      "Do not claim mainnet, production-ready, or unrestricted CAW execution; policy_denial_evidence remains needs_manual_step / fallback / not-run until dedicated live denial evidence is recorded."
     ]
   };
 

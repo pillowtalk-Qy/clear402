@@ -1,13 +1,19 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import type { DatabaseSync } from "node:sqlite";
 import { pathToFileURL } from "node:url";
 
 import {
   healthResponseSchema,
   problemJsonSchema,
-  type HealthResponse,
-  type ProblemJSON
+  type HealthResponse
 } from "../../../packages/shared/src/index.js";
 import { initializeRuntimeDatabase } from "./db/init.js";
+import {
+  buildEvidenceExport,
+  parseEvidenceExportPath,
+  renderEvidenceExportMarkdown,
+  serializeEvidenceExportJson
+} from "./evidence_export.js";
 
 const runtimeVersion = "0.1.0";
 const runtimeServiceName = "runtime";
@@ -18,11 +24,23 @@ const runtimeDatabasePath = process.env.CLEAR402_RUNTIME_DATABASE_PATH;
 function jsonResponse(
   response: ServerResponse,
   statusCode: number,
-  payload: HealthResponse | ProblemJSON
+  payload: unknown
 ) {
   const body = JSON.stringify(payload);
   response.statusCode = statusCode;
   response.setHeader("content-type", "application/json; charset=utf-8");
+  response.setHeader("cache-control", "no-store");
+  response.end(body);
+}
+
+function textResponse(
+  response: ServerResponse,
+  statusCode: number,
+  body: string,
+  contentType: string
+) {
+  response.statusCode = statusCode;
+  response.setHeader("content-type", contentType);
   response.setHeader("cache-control", "no-store");
   response.end(body);
 }
@@ -52,12 +70,57 @@ function buildProblem(code: string, message: string, details?: Record<string, un
 function handleRequest(
   request: IncomingMessage,
   response: ServerResponse,
-  databasePath: string
+  databasePath: string,
+  database: DatabaseSync
 ) {
   const url = new URL(request.url ?? "/", `http://${request.headers.host ?? "localhost"}`);
 
   if (request.method === "GET" && url.pathname === "/health") {
     jsonResponse(response, 200, buildRuntimeHealth(databasePath));
+    return;
+  }
+
+  const evidenceExportPath = parseEvidenceExportPath(url.pathname);
+  if (evidenceExportPath !== null) {
+    if (request.method !== "GET") {
+      jsonResponse(
+        response,
+        405,
+        buildProblem("METHOD_NOT_ALLOWED", "Only GET is supported for evidence export.", {
+          path: url.pathname
+        })
+      );
+      return;
+    }
+
+    const result = buildEvidenceExport(database, evidenceExportPath.missionId);
+    if (!result.found || !result.export) {
+      jsonResponse(
+        response,
+        404,
+        buildProblem("EVIDENCE_NOT_FOUND", "Evidence export not found for mission.", {
+          missionId: evidenceExportPath.missionId
+        })
+      );
+      return;
+    }
+
+    if (evidenceExportPath.format === "json") {
+      textResponse(
+        response,
+        200,
+        serializeEvidenceExportJson(result.export),
+        "application/json; charset=utf-8"
+      );
+      return;
+    }
+
+    textResponse(
+      response,
+      200,
+      renderEvidenceExportMarkdown(result.export),
+      "text/markdown; charset=utf-8"
+    );
     return;
   }
 
@@ -85,7 +148,7 @@ export function startRuntimeServer(options: {
   const { database, databasePath } = initializeRuntimeDatabase(databaseOptions);
 
   const server = createServer((request, response) => {
-    handleRequest(request, response, databasePath);
+    handleRequest(request, response, databasePath, database);
   });
 
   return new Promise<{

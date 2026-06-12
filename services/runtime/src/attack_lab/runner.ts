@@ -1,6 +1,12 @@
 import { createServer } from "node:http";
 
 import { createProblem, hashObject } from "../../../../packages/shared/src/index.mjs";
+import {
+  buildEvidenceExport,
+  parseEvidenceExportPath,
+  renderEvidenceExportMarkdown,
+  serializeEvidenceExportJson
+} from "../evidence_export.ts";
 import { probeCawCapabilities } from "../caw-capabilities.mjs";
 import { ATTACK_NAMES, runAllScenarios, runScenarioByName } from "./scenarios.ts";
 
@@ -128,6 +134,43 @@ export function createRuntimeHttpHandler(options: {
       });
     }
 
+    const evidenceExportPath = parseEvidenceExportPath(url.pathname);
+    if (evidenceExportPath !== null) {
+      if (request.method !== "GET") {
+        return jsonResponse(
+          405,
+          createProblem("METHOD_NOT_ALLOWED", "Only GET is supported for evidence export.")
+        );
+      }
+
+      const result = buildEvidenceExport(undefined, evidenceExportPath.missionId, {
+        capabilityReport: options.capabilityReport,
+        ...(options.now !== undefined ? { now: options.now } : {})
+      });
+      if (!result.found || !result.export) {
+        return jsonResponse(
+          404,
+          createProblem("EVIDENCE_NOT_FOUND", "Evidence export not found for mission.", {
+            missionId: evidenceExportPath.missionId
+          })
+        );
+      }
+
+      if (evidenceExportPath.format === "json") {
+        return textResponse(
+          200,
+          serializeEvidenceExportJson(result.export),
+          "application/json; charset=utf-8"
+        );
+      }
+
+      return textResponse(
+        200,
+        renderEvidenceExportMarkdown(result.export),
+        "text/markdown; charset=utf-8"
+      );
+    }
+
     if (url.pathname.startsWith("/api/attacks/")) {
       return attackHandler(request);
     }
@@ -221,6 +264,16 @@ function jsonResponse(status: number, body: unknown) {
     headers: {
       "content-type": "application/json; charset=utf-8",
       "content-length": String(Buffer.byteLength(payload))
+    }
+  });
+}
+
+function textResponse(status: number, body: string, contentType: string) {
+  return new Response(body, {
+    status,
+    headers: {
+      "content-type": contentType,
+      "content-length": String(Buffer.byteLength(body))
     }
   });
 }

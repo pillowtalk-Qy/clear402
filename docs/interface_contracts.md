@@ -62,7 +62,16 @@ The attack lab runner starts a local runtime handler that exposes:
 
 This route is used by `scripts/run_attack_lab.ts` and runtime tests. It is an operator/test surface for the attack lab, not evidence of a production payment API.
 
-### 3.3 Response Rules
+### 3.3 Evidence Export
+
+The runtime exposes server-side evidence export endpoints:
+
+- `GET /api/evidence/:missionId/export.json`
+- `GET /api/evidence/:missionId/export.md`
+
+Both endpoints are read-only. JSON is built from one structured evidence bundle; Markdown is rendered from the same bundle. Exports must label `live`, `fallback`, and `mock` evidence explicitly and must not include API keys, wallet secrets, pairing tokens, local environment values, or raw secret-bearing CAW evidence.
+
+### 3.4 Response Rules
 
 - Health payloads must validate against `HealthResponse`.
 - Failure responses must use `ProblemJSON`.
@@ -92,7 +101,6 @@ The following are reserved for later phases and are not implemented here:
 - CAW denial coverage beyond the recorded destination-allowlist rejection
 - live ERC-8004 network data
 - long-lived runtime mission/payment endpoints beyond health
-- server-side evidence export endpoint
 
 ## 6. Stability Note
 

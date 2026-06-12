@@ -33,6 +33,12 @@ export {
   runAllAttackLabScenarios,
   runAttackLabScenario
 } from "./attack_lab/runner.ts";
+export {
+  buildEvidenceExport,
+  parseEvidenceExportPath,
+  renderEvidenceExportMarkdown,
+  serializeEvidenceExportJson
+} from "./evidence_export.ts";
 export { buildPaymentContext } from "./guard/payment_context.ts";
 export { runGuardPipeline } from "./guard/pipeline.ts";
 export { scanMetadata } from "./guard/metadata_firewall.ts";

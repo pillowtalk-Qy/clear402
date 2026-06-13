@@ -15,6 +15,8 @@ The current branch can demonstrate the guard pipeline and attack lab truthfully,
 - `docs/caw_capability_report.md`: records CAW `Live ready: true` only for the recorded Sepolia testnet allow-path tiny transfer and destination-allowlist policy denial.
 - `docs/live_caw_testnet_smoke_report.md`: records the request ID, pact ID, transaction hash, pact completion, and testnet balance evidence for the one live CAW smoke.
 - `docs/live_caw_policy_denial_report.md`: records the request ID, pact ID, rejected transaction record, denial reason, and no-success evidence for the one live CAW policy-denial check.
+- `docs/demo_script.md`, `docs/paper_mapping.md`, `docs/limitations.md`, and `docs/security_boundaries.md`: Phase 21 final demo packaging docs.
+- `evidence/sample_evidence_pack.json` and `evidence/sample_evidence_pack.md`: sample/fallback/mock evidence pack artifacts; they are not live CAW audit artifacts and do not add a live tx hash to the ordinary dashboard flow.
 - SQLite schema initialization for the runtime service.
 
 ## Current Limits
@@ -65,11 +67,22 @@ Default endpoints:
 ## Demo Docs
 
 - [Demo Operator Runbook](./docs/demo_operator_runbook.md)
+- [Five-Minute Demo Script](./docs/demo_script.md)
 - [Demo Narrative / Talk Track](./docs/demo_narrative_talk_track.md)
 - [Live / Fallback / Mock Policy](./docs/live_fallback_mock_policy.md)
+- [Paper Mapping](./docs/paper_mapping.md)
+- [Limitations](./docs/limitations.md)
+- [Security Boundaries](./docs/security_boundaries.md)
 - [CAW Capability Report](./docs/caw_capability_report.md)
 - [Live CAW Testnet Smoke Report](./docs/live_caw_testnet_smoke_report.md)
 - [Live CAW Policy Denial Report](./docs/live_caw_policy_denial_report.md)
+
+## Evidence Samples
+
+- [Sample Evidence Pack JSON](./evidence/sample_evidence_pack.json)
+- [Sample Evidence Pack Markdown](./evidence/sample_evidence_pack.md)
+
+The sample evidence pack is for demo packaging and review. It is explicitly sample/fallback/mock, does not execute CAW, and must not be used as proof of a live CAW payment.
 
 ## Evidence Dashboard
 

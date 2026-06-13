@@ -1,0 +1,202 @@
+{
+  "version": "clear402.sample-evidence-pack.v1",
+  "sample": true,
+  "sampleNotice": "Sample/fallback/mock artifact for documentation and demo packaging. This is not a live CAW audit artifact and does not prove a live payment.",
+  "source": "phase21_packaging_sample",
+  "evidenceMode": "fallback",
+  "generatedAtIso": "2026-06-13T00:00:00.000Z",
+  "missionId": "sample-mission-demo-402",
+  "liveCawScopeReferences": {
+    "evidenceMode": "fallback",
+    "note": "This sample only links to recorded live-scope reports. It does not embed or create live CAW transaction evidence.",
+    "allowPathTransferReport": "docs/live_caw_testnet_smoke_report.md",
+    "policyDenialReport": "docs/live_caw_policy_denial_report.md",
+    "allowPathScope": "one recorded Sepolia tiny transfer only",
+    "policyDenialScope": "one recorded Sepolia destination-allowlist denial only"
+  },
+  "evidenceModeSummary": {
+    "overall": "fallback",
+    "counts": {
+      "live": 0,
+      "fallback": 6,
+      "mock": 4
+    },
+    "components": [
+      {
+        "component": "mission",
+        "evidenceMode": "fallback",
+        "note": "Sample mission row modeled after the dashboard/runtime demo flow."
+      },
+      {
+        "component": "providerChallenge",
+        "evidenceMode": "fallback",
+        "note": "Deterministic local/demo challenge shape."
+      },
+      {
+        "component": "providerTrust",
+        "evidenceMode": "mock",
+        "note": "Demo provider registry and ERC-8004-style trust seed data."
+      },
+      {
+        "component": "paymentContext",
+        "evidenceMode": "fallback",
+        "note": "Sample PaymentContext facts; no live CAW payment was attempted."
+      },
+      {
+        "component": "guard",
+        "evidenceMode": "fallback",
+        "note": "Fallback/demo guard decision at the CAW boundary."
+      },
+      {
+        "component": "ordinaryDashboardPayment",
+        "evidenceMode": "fallback",
+        "note": "Ordinary dashboard payment is fallback/demo and has no live transaction hash."
+      },
+      {
+        "component": "attackLab",
+        "evidenceMode": "mock",
+        "note": "Attack inputs are mock fixtures; guard execution is real when reproduced with pnpm run attack:all."
+      },
+      {
+        "component": "redaction",
+        "evidenceMode": "fallback",
+        "note": "Secrets and raw CAW evidence refs are omitted."
+      }
+    ]
+  },
+  "mission": {
+    "id": "sample-mission-demo-402",
+    "status": "blocked",
+    "budgetUsd": "0.10",
+    "resourceUrl": "https://127.0.0.1:4010/paid/report?topic=market-intel",
+    "userPromptSummary": "Request protected market data for the research desk.",
+    "evidenceMode": "fallback"
+  },
+  "providerChallenge": {
+    "evidenceMode": "fallback",
+    "provider": {
+      "providerId": "provider-runtime-demo",
+      "origin": "https://127.0.0.1:4010",
+      "merchantAddress": "0xA882b939c4Ca15c904760b8c240124Cb68cc2A88",
+      "chainId": "84532",
+      "tokenId": "USDC",
+      "cawAllowlistStatus": "allowed",
+      "seedDataNotice": "Demo provider seed data, not live registry truth.",
+      "evidenceMode": "mock"
+    },
+    "challenge": {
+      "scheme": "exact",
+      "network": "base-sepolia",
+      "amount": "0.10",
+      "asset": "USDC",
+      "resourceUrl": "https://127.0.0.1:4010/paid/report?topic=market-intel",
+      "quoteId": "sample-quote-demo-402",
+      "rawChallengeHash": "0xsample_raw_challenge_hash",
+      "evidenceMode": "fallback"
+    }
+  },
+  "providerTrust": {
+    "evidenceMode": "mock",
+    "agentId": "erc8004:agent:runtime-demo",
+    "agentUri": "https://127.0.0.1:4010/paid/report",
+    "reputationScore": 84,
+    "deliverySuccessRate": 0.97,
+    "notice": "Local demo trust record only; not live ERC-8004 network data."
+  },
+  "paymentContext": {
+    "version": "clear402.payment.v1",
+    "evidenceMode": "fallback",
+    "paymentContextHash": "0xsample_payment_context_hash",
+    "providerId": "provider-runtime-demo",
+    "quoteId": "sample-quote-demo-402",
+    "method": "POST",
+    "origin": "https://127.0.0.1:4010",
+    "resourcePath": "/paid/report?topic=market-intel",
+    "amount": "0.10",
+    "amountDecimals": 6,
+    "chainId": "84532",
+    "tokenId": "USDC",
+    "serviceMode": "caw-fetch",
+    "cawPactId": "runtime-demo-pact",
+    "piiPolicyHash": "0xsample_pii_policy_hash",
+    "quoteTermsHash": "0xsample_quote_terms_hash"
+  },
+  "guard": {
+    "evidenceMode": "fallback",
+    "decision": "fallback_required",
+    "status": "blocked",
+    "guardEventId": "sample-guard-event-caw-fallback",
+    "layer": "caw",
+    "reason": "Mission Flow Runtime API is in fallback/demo mode and does not execute real CAW payments."
+  },
+  "ordinaryDashboardPayment": {
+    "evidenceMode": "fallback",
+    "status": "not_live_payment",
+    "txHash": null,
+    "liveTxHashPresent": false,
+    "paymentAttemptedWithCaw": false,
+    "note": "The ordinary dashboard payment is fallback/demo and must not be described as the recorded live Sepolia transfer."
+  },
+  "serviceReceipt": {
+    "evidenceMode": "fallback",
+    "receiptId": "sample-receipt-demo-402",
+    "receiptStatus": "failed",
+    "paymentContextHash": "0xsample_payment_context_hash",
+    "cawRequestId": "clear402:sample-request",
+    "txHash": null,
+    "providerResponseHash": "0xsample_provider_response_hash",
+    "providerSignaturePresent": true,
+    "redactionSummaryHash": "0xsample_redaction_summary_hash"
+  },
+  "attackLab": {
+    "inputMode": "mock",
+    "guardExecutionModeWhenRun": "live",
+    "evidenceMode": "mock",
+    "source": "attack_lab_fixture_summary",
+    "claimAllowed": "16 mock attack fixtures can be executed through the real guard pipeline with pnpm run attack:all.",
+    "claimForbidden": "Do not claim these are external attacks, production traffic, or live CAW-funded exploit attempts.",
+    "sampleScenarios": [
+      {
+        "attack": "replay_same_proof",
+        "paper": "Five Attacks on x402 Agentic Payment Protocol",
+        "blockedBy": "Quote Reservation / Nonce Lock",
+        "expectedDecision": "blocked"
+      },
+      {
+        "attack": "pii_leakage",
+        "paper": "Hardening x402: PII-Safe Agentic Payments",
+        "blockedBy": "Metadata Firewall",
+        "expectedDecision": "blocked"
+      },
+      {
+        "attack": "paid_but_denied",
+        "paper": "A402: Binding Cryptocurrency Payments to Service Execution",
+        "blockedBy": "ServiceReceipt verifier",
+        "expectedDecision": "blocked"
+      }
+    ]
+  },
+  "redaction": {
+    "evidenceMode": "fallback",
+    "rawCawEvidenceRefsOmitted": true,
+    "secretsOmitted": [
+      "CLEAR402_CAW_API_KEY",
+      "pairing tokens",
+      "wallet secrets",
+      "local .env.caw.local values"
+    ]
+  },
+  "claimsAllowed": [
+    "This sample demonstrates the final evidence pack shape and labels.",
+    "The ordinary dashboard payment in this sample is fallback/demo with no live tx hash.",
+    "The attack lab entries are mock fixture summaries; real guard execution happens only when the runner is executed."
+  ],
+  "claimsForbidden": [
+    "Do not use this sample as proof of live CAW payment.",
+    "Do not claim mainnet execution.",
+    "Do not claim production readiness.",
+    "Do not claim unrestricted CAW execution.",
+    "Do not claim provider/trust seed data is live registry truth."
+  ]
+}
+

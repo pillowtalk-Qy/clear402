@@ -1,5 +1,5 @@
 import type { ServiceReceipt } from "../../../../packages/shared/src/index.mjs";
-import { hmacSha256Hex, sha256Hex, timingSafeStringEqual } from "../guard/hash.ts";
+import { canonicalJson, hmacSha256Hex, sha256Hex, timingSafeStringEqual } from "../guard/hash.ts";
 
 export interface VerifyServiceReceiptInput {
   receipt: ServiceReceipt;
@@ -8,6 +8,8 @@ export interface VerifyServiceReceiptInput {
   expectedPaymentContextHash: string;
   expectedPactId: string;
   expectedProviderAddress: string;
+  expectedResource?: string;
+  expectedAsset?: string;
   expectedAmount: string;
   expectedChainId: string;
   expectedTokenId: string;
@@ -25,6 +27,11 @@ export interface ServiceReceiptVerificationResult {
 export interface DemoReceiptSignatureInput {
   paymentContextHash: string;
   providerResponseHash: string;
+  resource?: string;
+  asset?: string;
+  cawEvidenceRef?: string;
+  fallbackEvidenceRef?: string;
+  serviceResultHash?: string;
   responseSchemaHash?: string;
   deliveryTimestamp: number;
   status: ServiceReceipt["status"];
@@ -80,20 +87,33 @@ function responseBodyExplicitlyDeniesDelivery(responseBody: unknown): boolean {
   return false;
 }
 
+export function buildServiceResultHash(input: {
+  receiptId: string;
+  providerResponseHash: string;
+  responseSchemaHash?: string;
+  resource?: string;
+  asset?: string;
+  deliveryTimestamp: number;
+  status: ServiceReceipt["status"];
+}): string {
+  return sha256Hex(
+    canonicalJson({
+      receiptId: input.receiptId,
+      providerResponseHash: input.providerResponseHash,
+      responseSchemaHash: input.responseSchemaHash,
+      resource: input.resource,
+      asset: input.asset,
+      deliveryTimestamp: input.deliveryTimestamp,
+      status: input.status
+    })
+  );
+}
+
 export function signReceiptForDemo(
   providerPublicKey: string,
   receipt: DemoReceiptSignatureInput
 ): string {
-  return hmacSha256Hex(
-    providerPublicKey,
-    JSON.stringify({
-      paymentContextHash: receipt.paymentContextHash,
-      providerResponseHash: receipt.providerResponseHash,
-      responseSchemaHash: receipt.responseSchemaHash,
-      deliveryTimestamp: receipt.deliveryTimestamp,
-      status: receipt.status
-    })
-  );
+  return hmacSha256Hex(providerPublicKey, canonicalJson(receipt));
 }
 
 export function verifyServiceReceipt(
@@ -102,6 +122,15 @@ export function verifyServiceReceipt(
   const signatureInput: DemoReceiptSignatureInput = {
     paymentContextHash: input.receipt.paymentContextHash,
     providerResponseHash: input.receipt.providerResponseHash,
+    ...(input.receipt.resource !== undefined ? { resource: input.receipt.resource } : {}),
+    ...(input.receipt.asset !== undefined ? { asset: input.receipt.asset } : {}),
+    ...(input.receipt.cawEvidenceRef !== undefined ? { cawEvidenceRef: input.receipt.cawEvidenceRef } : {}),
+    ...(input.receipt.fallbackEvidenceRef !== undefined
+      ? { fallbackEvidenceRef: input.receipt.fallbackEvidenceRef }
+      : {}),
+    ...(input.receipt.serviceResultHash !== undefined
+      ? { serviceResultHash: input.receipt.serviceResultHash }
+      : {}),
     deliveryTimestamp: input.receipt.deliveryTimestamp,
     status: input.receipt.status,
     ...(input.receipt.responseSchemaHash !== undefined
@@ -118,6 +147,9 @@ export function verifyServiceReceipt(
     amount: input.receipt.amount === input.expectedAmount,
     chainId: input.receipt.chainId === input.expectedChainId,
     tokenId: input.receipt.tokenId === input.expectedTokenId,
+    resource:
+      input.expectedResource === undefined || input.receipt.resource === input.expectedResource,
+    asset: input.expectedAsset === undefined || input.receipt.asset === input.expectedAsset,
     responseHash: input.receipt.providerResponseHash === stableBodyHash(input.responseBody),
     providerSignature: timingSafeStringEqual(input.receipt.providerSignature, expectedSignature),
     responseSchema:
@@ -127,7 +159,20 @@ export function verifyServiceReceipt(
       input.responseSchemaHash === undefined || responseBodyHasExpectedShape(input.responseBody),
     deliveryNotDenied: !responseBodyExplicitlyDeniesDelivery(input.responseBody),
     cawCompleted: input.receipt.cawRequestId !== undefined || input.receipt.txHash !== undefined,
-    noRawPii: !receiptHasRawPii(input.receipt)
+    noRawPii: !receiptHasRawPii(input.receipt),
+    serviceResultHash:
+      input.receipt.serviceResultHash ===
+      buildServiceResultHash({
+        receiptId: input.receipt.receiptId,
+        providerResponseHash: input.receipt.providerResponseHash,
+        ...(input.receipt.responseSchemaHash !== undefined
+          ? { responseSchemaHash: input.receipt.responseSchemaHash }
+          : {}),
+        ...(input.receipt.resource !== undefined ? { resource: input.receipt.resource } : {}),
+        ...(input.receipt.asset !== undefined ? { asset: input.receipt.asset } : {}),
+        deliveryTimestamp: input.receipt.deliveryTimestamp,
+        status: input.receipt.status
+      })
   };
   const failed = Object.entries(checks).find(([, passed]) => !passed);
 

@@ -39,6 +39,10 @@ export {
   renderEvidenceExportMarkdown,
   serializeEvidenceExportJson
 } from "./evidence_export.ts";
+export {
+  buildMissionTimeline,
+  serializeMissionTimelineSse
+} from "./mission_timeline.ts";
 export { buildPaymentContext } from "./guard/payment_context.ts";
 export { runGuardPipeline } from "./guard/pipeline.ts";
 export { scanMetadata } from "./guard/metadata_firewall.ts";

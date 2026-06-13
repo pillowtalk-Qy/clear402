@@ -14,6 +14,7 @@ import {
   renderEvidenceExportMarkdown,
   serializeEvidenceExportJson
 } from "./evidence_export.js";
+import { buildMissionTimeline, serializeMissionTimelineSse } from "./mission_timeline.js";
 import {
   createMission,
   dryRunMission,
@@ -50,6 +51,14 @@ function textResponse(
   response.statusCode = statusCode;
   response.setHeader("content-type", contentType);
   response.setHeader("cache-control", "no-store");
+  response.end(body);
+}
+
+function sseResponse(response: ServerResponse, statusCode: number, body: string) {
+  response.statusCode = statusCode;
+  response.setHeader("content-type", "text/event-stream; charset=utf-8");
+  response.setHeader("cache-control", "no-store");
+  response.setHeader("connection", "keep-alive");
   response.end(body);
 }
 
@@ -99,6 +108,36 @@ async function handleRequest(
 
   if (request.method === "GET" && url.pathname === "/health") {
     jsonResponse(response, 200, buildRuntimeHealth(databasePath));
+    return;
+  }
+
+  const timelineRoute = url.pathname.match(/^\/api\/missions\/([^/]+)\/timeline\.sse$/);
+  if (timelineRoute) {
+    if (request.method !== "GET") {
+      jsonResponse(
+        response,
+        405,
+        buildProblem("METHOD_NOT_ALLOWED", "Only GET is supported for mission timeline SSE.", {
+          path: url.pathname
+        })
+      );
+      return;
+    }
+
+    const missionId = decodeURIComponent(timelineRoute[1] ?? "");
+    const timeline = buildMissionTimeline(database, missionId);
+    if (!timeline.found) {
+      jsonResponse(
+        response,
+        404,
+        buildProblem("MISSION_NOT_FOUND", "Mission not found for timeline stream.", {
+          missionId
+        })
+      );
+      return;
+    }
+
+    sseResponse(response, 200, serializeMissionTimelineSse(timeline.events));
     return;
   }
 

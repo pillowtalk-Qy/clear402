@@ -20,14 +20,14 @@ The OriginShift logo starts with water: water is one of the origins of life and 
 
 | Member | Avatar | Current submission role | Wallet address | Contact |
 |---|---|---|---|---|
-| Qy | <img src="./assets/team/qy.jpg" alt="Qy avatar" width="96"> | Project owner / submitter | TBD | TBD |
-| Damia | <img src="./assets/team/damia.png" alt="Damia avatar" width="96"> | Team member | TBD | TBD |
-| Max | <img src="./assets/team/max.png" alt="Max avatar" width="96"> | Team member | TBD | TBD |
-| Chris | <img src="./assets/team/chris.png" alt="Chris avatar" width="96"> | Team member | TBD | TBD |
+| Qy | <img src="./assets/team/qy.jpg" alt="Qy avatar" width="96"> | Project owner / submitter; Clear402 product, integration, and final packaging lead | To be provided in hackathon portal | To be provided in hackathon portal |
+| Damia | <img src="./assets/team/damia.png" alt="Damia avatar" width="96"> | Team member; demo narrative and review support | To be provided in hackathon portal | To be provided in hackathon portal |
+| Max | <img src="./assets/team/max.png" alt="Max avatar" width="96"> | Team member; technical review and presentation support | To be provided in hackathon portal | To be provided in hackathon portal |
+| Chris | <img src="./assets/team/chris.png" alt="Chris avatar" width="96"> | Team member; operations, testing, and submission support | To be provided in hackathon portal | To be provided in hackathon portal |
 
 ## Submission Notes
 
-- Fill public wallet addresses before final portal submission if the hackathon form requires them.
-- Fill contact details with information the team is comfortable submitting publicly or semi-publicly.
-- Do not include private keys, API keys, seed phrases, pairing tokens, wallet secrets, or private CAW environment values in this file.
+- Fill public wallet addresses in the hackathon portal if the form requires them.
+- Fill contact details in the hackathon portal with information the team is comfortable submitting publicly or semi-publicly.
+- Do not include private keys, API keys, seed phrases, pairing tokens, wallet secrets, private CAW environment values, or private personal contact details in this public repository.
 - If one person covers multiple roles, update the role column before the final submission.

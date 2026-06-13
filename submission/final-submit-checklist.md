@@ -12,7 +12,8 @@ Use this as the last checklist before pressing submit in the hackathon portal.
 - Sample evidence pack exists in `evidence/`.
 - Team page exists at `docs/team.md`.
 - Simulation/rehearsal presentation deck exists at `submission/ppt/clear402-hackathon-deck.pptx`; formal version is being urgently polished.
-- Simulation/rehearsal demo recording script exists at `submission/demo-video/recording-script.md`; formal video is being urgently polished.
+- Simulation/rehearsal demo MP4 exists at `submission/demo-video/clear402-demo-simulation-rehearsal.mp4`; formal video is being urgently polished.
+- Simulation/rehearsal demo recording script exists at `submission/demo-video/recording-script.md`.
 
 ## Must Fill Manually Before Portal Submit
 
@@ -32,6 +33,12 @@ pnpm build
 pnpm test:e2e
 pnpm run attack:all
 git status --short --branch
+```
+
+If Playwright cannot find Chrome/Chromium on a fresh machine, run:
+
+```bash
+pnpm exec playwright install chromium
 ```
 
 Expected claim if all pass:

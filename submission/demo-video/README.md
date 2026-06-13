@@ -2,7 +2,13 @@
 
 Use `recording-script.md` to rehearse and record the final 3-5 minute demo video.
 
-Status: simulation/rehearsal script ready; formal video version is being urgently polished.
+Status: simulation/rehearsal MP4 and script ready; formal video version is being urgently polished.
+
+Current simulation/rehearsal MP4:
+
+```text
+submission/demo-video/clear402-demo-simulation-rehearsal.mp4
+```
 
 Recommended formal output:
 

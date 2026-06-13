@@ -87,12 +87,19 @@ pnpm run attack:all
 
 `pnpm test:e2e` runs Playwright dashboard E2E, runtime guard tests, and the attack lab gate. Browser artifacts are written under `e2e-results/` and are intentionally gitignored.
 
+If the machine running E2E does not have Chrome/Chromium available, install the browser runtime first:
+
+```bash
+pnpm exec playwright install chromium
+```
+
 ## Demo Video Script Link
 
 - [Five-Minute Demo Script](./docs/demo_script.md)
 - [Demo Operator Runbook](./docs/demo_operator_runbook.md)
 - [Submission Package](./submission/README.md)
 - [Demo Video Recording Script](./submission/demo-video/recording-script.md)
+- [Demo Video - simulation/rehearsal MP4](./submission/demo-video/clear402-demo-simulation-rehearsal.mp4)
 - [Presentation Deck - simulation/rehearsal version](./submission/ppt/clear402-hackathon-deck.pptx)
 - [Final Submit Checklist](./submission/final-submit-checklist.md)
 
@@ -165,6 +172,7 @@ See [Security Boundaries](./docs/security_boundaries.md) and [Limitations](./doc
 ## Project Assets
 
 - [Clear402 Logo](./docs/assets/project/clear402-logo.png)
+- [Demo Video - simulation/rehearsal MP4](./submission/demo-video/clear402-demo-simulation-rehearsal.mp4)
 - [Presentation Deck - simulation/rehearsal version](./submission/ppt/clear402-hackathon-deck.pptx)
 - [Submission Package](./submission/README.md)
 

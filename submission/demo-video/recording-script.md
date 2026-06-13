@@ -103,7 +103,7 @@ Show `docs/final_gate_report.md` or the completion slide.
 Say:
 
 ```text
-The final gate passes lint, tests, build, Playwright browser E2E, runtime guard tests, and the attack lab. The remaining championship backlog is documented as future work: ServiceEscrow fund and refund, message signing, richer policy matching, SSE timeline, signed ProviderQuote, full dual receipt, and gateway mode.
+The final gate passes lint, tests, build, Playwright browser E2E, runtime guard tests, and the attack lab. The runtime now has a basic mission timeline SSE endpoint, while the remaining championship backlog is documented as future work: ServiceEscrow fund and refund, message signing, richer policy matching, signed ProviderQuote, full dual receipt, and gateway mode.
 ```
 
 ### 4:20-4:50 - Close

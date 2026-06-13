@@ -22,7 +22,7 @@ That live scope does not extend to ordinary dashboard payments, attack lab runs,
 | Ordinary dashboard/demo flow is fallback | The dashboard mission/payment/receipt/export path is fallback/demo unless explicitly backed by runtime evidence; ordinary payment has no live tx hash. |
 | Attack fixtures are mock inputs | The attack lab inputs are fixtures; the guard execution is real local code. |
 | Provider/trust/capability seed data is demo/mock | Demo provider registry, ERC-8004-style trust, capability records, wallet IDs, hashes, and sample references are not live registry truth. |
-| Browser E2E requires local Chrome/Chromium | `pnpm test:e2e` uses Playwright and needs a local Chromium-compatible browser installed and runnable in the operator environment. |
+| Browser E2E requires local Chrome/Chromium | `pnpm test:e2e` uses Playwright and needs a local Chromium-compatible browser installed and runnable in the operator environment; run `pnpm exec playwright install chromium` if needed. |
 
 ## Dashboard And Evidence Limits
 
@@ -50,7 +50,7 @@ Phase 21 packaging does not finish the full P1 championship list. Current status
 | ServiceEscrow fund/refund flow | Not complete. |
 | `message_sign` PaymentContext support | Not complete. |
 | `params_match` / `message_match` / `function_abis` support | Not complete. |
-| SSE timeline | Not complete. |
+| SSE timeline | Basic runtime SSE snapshot endpoint complete at `/api/missions/:missionId/timeline.sse`; not a full production push/subscribe system. |
 | 20-request race regression | Partially complete in the attack fixture `concurrent_free_riding_20_requests`; not a broader production load/race suite. |
 | Signed ProviderQuote | Not complete. |
 | Dual Receipt model | Partially represented by payment and delivery receipt fields; not a full production dual-receipt protocol. |
@@ -62,4 +62,3 @@ Phase 21 packaging does not finish the full P1 championship list. Current status
 ## Safe Closeout Claim
 
 "This branch is final-demo packaged for the current Clear402 guard and evidence story. It shows live local services, real local guard execution, fallback-labeled ordinary dashboard payment, 16/16 mock attack fixtures blocked, one recorded CAW Sepolia tiny transfer, and one recorded CAW Sepolia destination-allowlist denial. It does not claim mainnet, production readiness, unrestricted CAW execution, full CAW denial coverage, live provider registry truth, or external attack traffic."
-

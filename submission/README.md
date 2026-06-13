@@ -22,12 +22,18 @@ This folder collects the files and final links needed for the hackathon portal.
 | Proposal | `docs/proposal.md` | Ready |
 | Demo script | `docs/demo_script.md` and `submission/demo-video/recording-script.md` | Ready |
 | Presentation deck | `submission/ppt/clear402-hackathon-deck.pptx` | Simulation/rehearsal version; formal version in urgent polish |
-| Demo video | Add the final uploaded link below after recording | Simulation script ready; formal video in urgent polish |
+| Demo video | `submission/demo-video/clear402-demo-simulation-rehearsal.mp4` | Simulation/rehearsal MP4 ready; formal video in urgent polish |
 | Team info | `docs/team.md` | Needs wallet/contact fields if required by the portal |
 | Chain/testnet evidence | `docs/live_caw_testnet_smoke_report.md`, `docs/live_caw_policy_denial_report.md` | Ready |
 | Security boundary | `docs/security_boundaries.md` and `docs/limitations.md` | Ready |
 
 ## Demo Video Link
+
+Simulation/rehearsal demo video file:
+
+```text
+submission/demo-video/clear402-demo-simulation-rehearsal.mp4
+```
 
 Final uploaded demo video link:
 

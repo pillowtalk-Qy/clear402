@@ -35,9 +35,9 @@ All gate commands were run with `CLEAR402_CAW_*` and `CLEAR402_TEST_MERCHANT_ADD
 | Project logo | pass | `docs/assets/project/clear402-logo.png` is included and referenced from the README. |
 | Submission package index | pass | `submission/README.md` lists the portal-ready links, claims, and remaining manual fields. |
 | Presentation deck | simulation | `submission/ppt/clear402-hackathon-deck.pptx` is a 9-slide editable simulation/rehearsal deck; the formal PPT version is being urgently polished. |
-| Demo video script | simulation | `submission/demo-video/recording-script.md` gives a 3-5 minute rehearsal flow and claims-control checklist; the formal video is being urgently polished. |
+| Demo video script/video | simulation | `submission/demo-video/recording-script.md` gives a 3-5 minute rehearsal flow and `submission/demo-video/clear402-demo-simulation-rehearsal.mp4` is a short simulation/rehearsal MP4; the formal video is being urgently polished. |
 | Demo video file/link | manual | The final MP4 or hosted video link must still be recorded/uploaded by the team and pasted into the submission portal. |
-| Team wallet/contact fields | manual | `docs/team.md` intentionally leaves wallet addresses and contact details as TBD until the team chooses public submission values. |
+| Team wallet/contact fields | manual | `docs/team.md` keeps wallet addresses and contact details out of the public repo; fill them in the hackathon portal if required. |
 
 ## Final No-Go Checklist
 
@@ -53,6 +53,7 @@ All gate commands were run with `CLEAR402_CAW_*` and `CLEAR402_TEST_MERCHANT_ADD
 | Phase 16-21 acceptance is satisfied | pass | The repository passes the required gate commands and the review docs are present. |
 | Final No-Go Checklist has P0/P1 blockers | pass | No P0 blocker remains; P1 items are documented as limitations rather than hidden claims. |
 | P1/championship unfinished items are carried forward | pass | The remaining championship backlog is explicitly listed in `docs/limitations.md`. |
+| Runtime SSE timeline endpoint exists | pass | `/api/missions/:missionId/timeline.sse` streams a mission/guard/receipt snapshot as `text/event-stream`; this is not claimed as production realtime infrastructure. |
 
 ## Remaining Issues
 

@@ -142,6 +142,20 @@ describe("runtime", () => {
       const serializedEvidence = JSON.stringify(evidence);
       expect(serializedEvidence).not.toContain("CLEAR402_CAW_");
       expect(serializedEvidence).not.toContain("sk-");
+
+      const timelineResponse = await fetch(
+        `${baseUrl}/api/missions/mission-flow-api-1/timeline.sse`
+      );
+      expect(timelineResponse.status).toBe(200);
+      expect(timelineResponse.headers.get("content-type")).toContain("text/event-stream");
+      const timeline = await timelineResponse.text();
+      expect(timeline).toContain("event: ready");
+      expect(timeline).toContain("event: mission");
+      expect(timeline).toContain("event: guard");
+      expect(timeline).toContain("event: receipt");
+      expect(timeline).toContain("Receipt is recorded without claiming a live CAW transaction hash.");
+      expect(timeline).not.toContain("CLEAR402_CAW_");
+      expect(timeline).not.toContain("sk-");
     } finally {
       await server.close();
       for (const [key, value] of Object.entries(previousEnv)) {

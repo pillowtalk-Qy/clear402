@@ -3,6 +3,10 @@ import type { DatabaseSync } from "node:sqlite";
 
 import type { GuardDecision, GuardEvent } from "../../../../packages/shared/src/index.mjs";
 import { canonicalJson } from "./hash.ts";
+import {
+  buildMissionTimelineEventFromGuard,
+  recordMissionTimelineEvent
+} from "../mission_timeline.ts";
 
 export interface RecordGuardEventInput {
   id?: string;
@@ -52,6 +56,20 @@ export function recordGuardEvent(
       canonicalJson(event.evidenceJson),
       event.createdAt
     );
+
+  recordMissionTimelineEvent(database, {
+    id: event.id,
+    missionId: event.missionId,
+    type: "guard",
+    createdAt: event.createdAt,
+    payload: buildMissionTimelineEventFromGuard({
+      layer: event.layer,
+      decision: event.decision,
+      reason: event.reason ?? null,
+      evidenceJson: canonicalJson(event.evidenceJson),
+      createdAt: event.createdAt
+    })
+  });
 
   return event;
 }

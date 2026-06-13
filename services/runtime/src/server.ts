@@ -14,7 +14,7 @@ import {
   renderEvidenceExportMarkdown,
   serializeEvidenceExportJson
 } from "./evidence_export.js";
-import { buildMissionTimeline, serializeMissionTimelineSse } from "./mission_timeline.js";
+import { startMissionTimelineStream } from "./mission_timeline.js";
 import {
   createMission,
   dryRunMission,
@@ -51,14 +51,6 @@ function textResponse(
   response.statusCode = statusCode;
   response.setHeader("content-type", contentType);
   response.setHeader("cache-control", "no-store");
-  response.end(body);
-}
-
-function sseResponse(response: ServerResponse, statusCode: number, body: string) {
-  response.statusCode = statusCode;
-  response.setHeader("content-type", "text/event-stream; charset=utf-8");
-  response.setHeader("cache-control", "no-store");
-  response.setHeader("connection", "keep-alive");
   response.end(body);
 }
 
@@ -125,8 +117,13 @@ async function handleRequest(
     }
 
     const missionId = decodeURIComponent(timelineRoute[1] ?? "");
-    const timeline = buildMissionTimeline(database, missionId);
-    if (!timeline.found) {
+    const streamOptions: Parameters<typeof startMissionTimelineStream>[3] = {};
+    const lastEventId = request.headers["last-event-id"];
+    if (lastEventId !== undefined) {
+      streamOptions.lastEventId = String(lastEventId);
+    }
+    const found = startMissionTimelineStream(response, database, missionId, streamOptions);
+    if (!found) {
       jsonResponse(
         response,
         404,
@@ -137,7 +134,6 @@ async function handleRequest(
       return;
     }
 
-    sseResponse(response, 200, serializeMissionTimelineSse(timeline.events));
     return;
   }
 

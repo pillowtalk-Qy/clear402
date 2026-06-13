@@ -163,6 +163,14 @@ export function installAttackLabSchema(database: DatabaseSync): void {
       evidence_json text,
       created_at integer
     );
+    create table mission_timeline_events (
+      timeline_id integer primary key autoincrement,
+      event_id text not null unique,
+      mission_id text not null,
+      event_type text not null,
+      created_at integer not null,
+      payload_json text not null
+    );
   `);
 }
 

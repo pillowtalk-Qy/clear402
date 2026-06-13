@@ -7,6 +7,7 @@ import { hashObject, sha256Hex } from "../guard/hash.ts";
 import { buildPaymentContext } from "../guard/payment_context.ts";
 import { runGuardPipeline } from "../guard/pipeline.ts";
 import { scanMetadata } from "../guard/metadata_firewall.ts";
+import { recordMissionTimelineEvent } from "../mission_timeline.ts";
 import { normalizeX402Challenge } from "../x402/challenge_normalizer.ts";
 import { validateERC8004Trust } from "../x402/erc8004_trust_adapter.ts";
 import { signReceiptForDemo, type DemoReceiptSignatureInput } from "../receipt/receipt_verifier.ts";
@@ -375,8 +376,8 @@ async function executeAttackScenario(
     provider,
     now
   });
-  const runOnce = async () =>
-    runGuardPipeline(database, {
+  const runOnce = async () => {
+    const guardResult = await runGuardPipeline(database, {
       missionId,
       providerRegistryEntries,
       trustRecords,
@@ -401,6 +402,26 @@ async function executeAttackScenario(
       providerChallenge
     });
 
+    recordMissionTimelineEvent(database, {
+      missionId,
+      type: "attack",
+      createdAt: now,
+      payload: {
+        title: `${scenario.attack} attack`,
+        detail: `${scenario.blockedBy} handled ${scenario.attack.replace(/_/g, " ")}.`,
+        status: guardResult.decision === "allow" ? "success" : "blocked",
+        evidenceMode: cawBoundary.execution.evidenceMode ?? "mock",
+        attack: scenario.attack,
+        paper: scenario.paper,
+        blockedBy: scenario.blockedBy,
+        decision: toAttackDecision(guardResult.decision),
+        guardEventId: (guardResult as { guardEventId?: string }).guardEventId
+      }
+    });
+
+    return guardResult;
+  };
+
   const buildBaseResult = (guardResult: unknown, extra: Record<string, unknown> = {}) => ({
     attack: scenario.attack,
     paper: scenario.paper,
@@ -412,7 +433,7 @@ async function executeAttackScenario(
     },
     baselineRisk: scenario.baselineRisk,
     blockedBy: scenario.blockedBy,
-    decision: toAttackDecision((guardResult as { decision: "allow" | "block" | "require_approval" }).decision),
+    decision: toAttackDecision((guardResult as { decision: string }).decision),
     guardEventId: (guardResult as { guardEventId?: string }).guardEventId,
     evidenceMode: cawBoundary.execution.evidenceMode ?? "mock",
     fixtureMode: "mock",
@@ -544,7 +565,7 @@ function createScenarioCawAdapter(
   };
 }
 
-function toAttackDecision(decision: "allow" | "block" | "require_approval") {
+function toAttackDecision(decision: string) {
   if (decision === "block") {
     return "blocked";
   }

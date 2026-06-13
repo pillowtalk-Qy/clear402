@@ -25,7 +25,7 @@ All gate commands were run with `CLEAR402_CAW_*` and `CLEAR402_TEST_MERCHANT_ADD
 | Phase 17: Security audit | pass | `docs/security_audit.md` exists and the P0 audit result is none. |
 | Phase 18: Code review | pass | `docs/code_review.md` exists and the historical P1 evidence-bundle issue is carried into limitations, not left hidden. |
 | Phase 19: Design review | pass | `docs/design_review.md` confirms the dashboard still reads as an operator console, not a landing page. |
-| Phase 20: P1 championship features | pass with documented limitations | The current main branch closes the local ServiceEscrow, message_sign PaymentContext, clear-sign policy, signed ProviderQuote, local payment gateway, Dual Receipt, and SSE snapshot work; live counterparts remain explicitly out of scope. |
+| Phase 20: P1 championship features | pass with documented limitations | The current main branch closes the local ServiceEscrow, message_sign PaymentContext, clear-sign policy, signed ProviderQuote, local payment gateway, Dual Receipt, and append-only local SSE timeline work; live counterparts remain explicitly out of scope. |
 | Phase 21: final packaging | pass | README, runbook, demo script, limitations, sample evidence, and CAW boundary docs are aligned on live / fallback / mock boundaries, with the remaining live claims still open. |
 
 ## Latest Completed Scope
@@ -38,7 +38,7 @@ All gate commands were run with `CLEAR402_CAW_*` and `CLEAR402_TEST_MERCHANT_ADD
 | Signed ProviderQuote | pass | Signed quote creation and verification are wired locally. |
 | local payment gateway | pass | Gateway mode exists as a local provider route, not a production payment network gateway. |
 | Dual Receipt | pass | Dual-receipt protocol is implemented locally, not chain-native settlement truth. |
-| SSE snapshot | pass | Mission timeline SSE snapshot exists at `/api/missions/:missionId/timeline.sse`; this is not production realtime infra. |
+| Append-only local SSE timeline | pass | Mission timeline SSE streams local append-only mission/guard/receipt/attack events from `/api/missions/:missionId/timeline.sse`, supports heartbeat comments and `Last-Event-ID` replay, and is not production-scale realtime infra. |
 
 ## Hackathon Submission Package
 
@@ -65,7 +65,7 @@ All gate commands were run with `CLEAR402_CAW_*` and `CLEAR402_TEST_MERCHANT_ADD
 | Phase 16-21 acceptance is satisfied | pass | The repository passes the required gate commands and the review docs are present. |
 | Final No-Go Checklist has P0/P1 blockers | pass | No P0 blocker remains; P1 items are documented as limitations rather than hidden claims. |
 | P1/championship unfinished items are carried forward | pass | The remaining championship backlog is explicitly listed in `docs/limitations.md`. |
-| Runtime SSE timeline endpoint exists | pass | `/api/missions/:missionId/timeline.sse` streams a mission/guard/receipt snapshot as `text/event-stream`; this is not claimed as production realtime infrastructure. |
+| Runtime SSE timeline endpoint exists | pass | `/api/missions/:missionId/timeline.sse` streams an append-only local mission timeline as `text/event-stream`; this is not claimed as production-scale realtime infrastructure. |
 
 ## Remaining Issues
 
@@ -100,4 +100,4 @@ No active blocker. The historical audit/code-review P1 issue about evidence-bund
 
 Recommended: demo and submit.
 
-Clear402 is demo-ready for GitHub hackathon submission: the local guard, escrow, clear-sign, signed-quote, gateway, dual receipt, and SSE snapshot paths are in place, while live CAW dashboard, message signing, onchain escrow, live ERC-8004 truth, production gateway, and production dual receipt claims remain intentionally open.
+Clear402 is demo-ready for GitHub hackathon submission: the local guard, escrow, clear-sign, signed-quote, gateway, dual receipt, and append-only local SSE timeline paths are in place, while live CAW dashboard, message signing, onchain escrow, live ERC-8004 truth, production gateway, and production dual receipt claims remain intentionally open.

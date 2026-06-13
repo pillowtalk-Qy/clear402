@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   ArrowDownToLine,
   ArrowRightLeft,
@@ -34,13 +34,16 @@ import {
   formatJson,
   getAttackById,
   loadPreferredEvidenceExport,
+  mergeRuntimeTimelineItem,
   recordEvidenceExport,
+  runtimeTimelineEventToDashboardItem,
   runPreferredMissionFlowAction,
   type AttackScenario,
   type DashboardPreset,
   type DashboardRuntimeSnapshot,
   type DashboardWorkspace,
   type EvidenceMode,
+  type RuntimeTimelineSsePayload,
   type TimelineEvent,
   toCompactModeLabel
 } from "./dashboard-data";
@@ -80,6 +83,13 @@ const badgeStyles: Record<BadgeTone, string> = {
 };
 
 const defaultJsonPreview = "{\n  \"status\": \"empty\"\n}";
+
+function timelineSseUrl(runtimeEndpoint: string, missionId: string) {
+  const url = new URL(runtimeEndpoint);
+  url.pathname = `/api/missions/${encodeURIComponent(missionId)}/timeline.sse`;
+  url.search = "";
+  return url.toString();
+}
 
 function Badge({ state, tone }: { state: string; tone?: BadgeTone | undefined }) {
   const resolvedTone = tone ?? (state === "live" ? "live" : state === "fallback" ? "fallback" : state === "mock" ? "mock" : "neutral");
@@ -396,6 +406,35 @@ export function DashboardShell({ initialWorkspace, runtime, provider }: Dashboar
   const selectedAttackCard = selectedAttack ?? workspace.attacks[0];
   const isExportVisible = isExportOpen || Boolean(workspace.evidence);
   const modePreview = mapCountsLabel(modes);
+  const runtimeTimelineMissionId = workspace.mission.id;
+
+  useEffect(() => {
+    if (!runtimeTimelineMissionId || typeof EventSource === "undefined") {
+      return;
+    }
+
+    const source = new EventSource(timelineSseUrl(runtime.endpoint, runtimeTimelineMissionId));
+    const handleRuntimeTimelineEvent = (event: MessageEvent<string>) => {
+      try {
+        const item = runtimeTimelineEventToDashboardItem(
+          JSON.parse(event.data) as RuntimeTimelineSsePayload
+        );
+        if (item) {
+          setWorkspace((current) => mergeRuntimeTimelineItem(current, item));
+        }
+      } catch {
+        // Keep the dashboard on its local timeline if the runtime stream is unavailable or malformed.
+      }
+    };
+
+    for (const eventName of ["mission", "guard", "receipt", "attack"]) {
+      source.addEventListener(eventName, handleRuntimeTimelineEvent);
+    }
+
+    return () => {
+      source.close();
+    };
+  }, [runtime.endpoint, runtimeTimelineMissionId]);
 
   const run = (action: Parameters<typeof applyDashboardAction>[1]) => {
     setWorkspace((current) => applyDashboardAction(current, action));

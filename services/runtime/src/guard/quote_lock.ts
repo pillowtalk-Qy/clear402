@@ -3,6 +3,7 @@ import type { DatabaseSync } from "node:sqlite";
 import type { PaymentContext, QuoteReservation } from "../../../../packages/shared/src/index.mjs";
 import { compareDecimalStrings } from "./amount.ts";
 import { canonicalJson } from "./hash.ts";
+import { recordMissionTimelineEvent } from "../mission_timeline.ts";
 
 export interface EnsureMissionInput {
   missionId: string;
@@ -72,6 +73,10 @@ function toSqlJson(value: unknown): string {
 
 export function ensureMission(database: DatabaseSync, input: EnsureMissionInput) {
   const now = input.createdAt ?? Date.now();
+  const existingMission = database
+    .prepare(`select id from missions where id = ?`)
+    .get(input.missionId) as { id: string } | undefined;
+
   database
     .prepare(
       `insert into missions (
@@ -101,6 +106,27 @@ export function ensureMission(database: DatabaseSync, input: EnsureMissionInput)
       now,
       now
     );
+
+  if (!existingMission) {
+    recordMissionTimelineEvent(database, {
+      id: `mission_${input.missionId}`,
+      missionId: input.missionId,
+      type: "mission",
+      createdAt: now,
+      payload: {
+        title: "Mission created",
+        detail: "Runtime mission record is available for timeline streaming.",
+        status: "active",
+        evidenceMode: "fallback",
+        userPrompt: input.userPrompt ?? "Clear402 guarded payment",
+        budgetUsd: input.budgetUsd,
+        cawWalletAddress: input.cawWalletAddress ?? null,
+        pactId: input.pactId ?? null,
+        createdAt: now,
+        updatedAt: now
+      }
+    });
+  }
 }
 
 export function ensureProvider(database: DatabaseSync, input: EnsureProviderInput) {

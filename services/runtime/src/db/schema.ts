@@ -141,7 +141,17 @@ CREATE TABLE IF NOT EXISTS guard_events (
   created_at INTEGER NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS mission_timeline_events (
+  timeline_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  event_id TEXT NOT NULL UNIQUE,
+  mission_id TEXT NOT NULL REFERENCES missions(id) ON DELETE CASCADE,
+  event_type TEXT NOT NULL CHECK (event_type IN ('mission', 'guard', 'receipt', 'attack')),
+  created_at INTEGER NOT NULL,
+  payload_json TEXT NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_missions_status ON missions(status);
 CREATE INDEX IF NOT EXISTS idx_guard_events_mission_id ON guard_events(mission_id);
 CREATE INDEX IF NOT EXISTS idx_receipts_mission_id ON receipts(mission_id);
+CREATE INDEX IF NOT EXISTS idx_mission_timeline_events_mission_id ON mission_timeline_events(mission_id, timeline_id);
 `;

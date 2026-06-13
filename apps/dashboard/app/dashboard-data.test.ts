@@ -7,6 +7,8 @@ import {
   createInitialWorkspace,
   formatRequestId,
   loadPreferredEvidenceExport,
+  mergeRuntimeTimelineItem,
+  runtimeTimelineEventToDashboardItem,
   runPreferredMissionFlowAction
 } from "./dashboard-data";
 
@@ -72,6 +74,34 @@ describe("dashboard data", () => {
 
   test("formats request ids with clear402 prefix", () => {
     expect(formatRequestId("0x1234567890abcdef")).toBe("clear402:1234567890abcdef");
+  });
+
+  test("maps runtime SSE timeline payloads into the dashboard timeline", () => {
+    const workspace = createInitialWorkspace({
+      runtime,
+      provider,
+      preset: "demo"
+    });
+    const item = runtimeTimelineEventToDashboardItem({
+      eventId: "guard-runtime-sse-1",
+      eventType: "guard",
+      createdAt: 1_800_000_000_000,
+      missionId: "mission-runtime-sse",
+      payload: {
+        title: "Guard fallback",
+        detail: "Runtime guard stopped at the CAW fallback boundary.",
+        status: "fallback",
+        evidenceMode: "fallback",
+        guardEventId: "guard-runtime-sse-1"
+      }
+    });
+
+    expect(item).toBeDefined();
+    const next = mergeRuntimeTimelineItem(workspace, item!);
+    expect(next.timeline[0]?.id).toBe("guard-runtime-sse-1");
+    expect(next.timeline[0]?.source).toBe("runtime_sse");
+    expect(next.timeline[0]?.auditLogId).toBe("guard-runtime-sse-1");
+    expect(next.timeline[0]?.detail).toContain("fallback boundary");
   });
 
   test("prefers server-side evidence export when runtime export succeeds", async () => {

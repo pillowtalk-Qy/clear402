@@ -7,6 +7,11 @@ import { afterAll, describe, expect, test } from "vitest";
 import { healthResponseSchema } from "../../../packages/shared/src/index.js";
 import { initializeRuntimeDatabase } from "./db/init.js";
 import { canonicalJson, hashObject } from "./guard/hash.js";
+import {
+  readMissionTimelineEvents,
+  recordMissionTimelineEvent,
+  serializeMissionTimelineHeartbeat
+} from "./mission_timeline.js";
 import { startRuntimeServer } from "./server.js";
 
 describe("runtime", () => {
@@ -148,8 +153,7 @@ describe("runtime", () => {
       );
       expect(timelineResponse.status).toBe(200);
       expect(timelineResponse.headers.get("content-type")).toContain("text/event-stream");
-      const timeline = await timelineResponse.text();
-      expect(timeline).toContain("event: ready");
+      const timeline = await readSseUntil(timelineResponse, "event: receipt");
       expect(timeline).toContain("event: mission");
       expect(timeline).toContain("event: guard");
       expect(timeline).toContain("event: receipt");
@@ -277,7 +281,239 @@ describe("runtime", () => {
       await server.close();
     }
   });
+
+  test("mission timeline replays existing events on first SSE connection", async () => {
+    const databasePath = join(databaseDir, "timeline-first-connect.sqlite");
+    const handle = initializeRuntimeDatabase({ databasePath });
+    seedTimelineMission(handle.database, "mission-timeline-first", 1_800_000_000_000);
+    const first = recordMissionTimelineEvent(handle.database, {
+      id: "timeline-first-1",
+      missionId: "mission-timeline-first",
+      type: "mission",
+      createdAt: 1_800_000_000_001,
+      payload: {
+        title: "Mission created",
+        detail: "seeded event",
+        status: "success",
+        evidenceMode: "fallback"
+      }
+    });
+    const second = recordMissionTimelineEvent(handle.database, {
+      id: "timeline-first-2",
+      missionId: "mission-timeline-first",
+      type: "guard",
+      createdAt: 1_800_000_000_002,
+      payload: {
+        title: "Guard fallback",
+        detail: "guard event",
+        status: "fallback",
+        evidenceMode: "fallback"
+      }
+    });
+    handle.database.close();
+
+    const server = await startRuntimeServer({
+      host: "127.0.0.1",
+      port: 0,
+      databasePath
+    });
+
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:${server.port}/api/missions/mission-timeline-first/timeline.sse`
+      );
+      const text = await readSseUntil(response, "id: timeline-first-2");
+      expect(text).toContain(`id: ${first.id}`);
+      expect(text).toContain(`event: ${first.type}`);
+      expect(text).toContain(`id: ${second.id}`);
+      expect(text).toContain(`event: ${second.type}`);
+    } finally {
+      await server.close();
+    }
+  });
+
+  test("Last-Event-ID only replays subsequent mission timeline events", async () => {
+    const databasePath = join(databaseDir, "timeline-last-event-id.sqlite");
+    const handle = initializeRuntimeDatabase({ databasePath });
+    seedTimelineMission(handle.database, "mission-timeline-replay", 1_800_000_000_000);
+    recordMissionTimelineEvent(handle.database, {
+      id: "timeline-replay-1",
+      missionId: "mission-timeline-replay",
+      type: "mission",
+      createdAt: 1_800_000_000_001,
+      payload: {
+        title: "Mission created",
+        detail: "seeded event",
+        status: "success",
+        evidenceMode: "fallback"
+      }
+    });
+    recordMissionTimelineEvent(handle.database, {
+      id: "timeline-replay-2",
+      missionId: "mission-timeline-replay",
+      type: "guard",
+      createdAt: 1_800_000_000_002,
+      payload: {
+        title: "Guard blocked",
+        detail: "second event",
+        status: "blocked",
+        evidenceMode: "fallback"
+      }
+    });
+    recordMissionTimelineEvent(handle.database, {
+      id: "timeline-replay-3",
+      missionId: "mission-timeline-replay",
+      type: "receipt",
+      createdAt: 1_800_000_000_003,
+      payload: {
+        title: "Receipt recorded",
+        detail: "third event",
+        status: "fallback",
+        evidenceMode: "fallback"
+      }
+    });
+    handle.database.close();
+
+    const server = await startRuntimeServer({
+      host: "127.0.0.1",
+      port: 0,
+      databasePath
+    });
+
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:${server.port}/api/missions/mission-timeline-replay/timeline.sse`,
+        { headers: { "Last-Event-ID": "timeline-replay-1" } }
+      );
+      const text = await readSseUntil(response, "id: timeline-replay-3");
+      expect(text).not.toContain("id: timeline-replay-1");
+      expect(text).toContain("id: timeline-replay-2");
+      expect(text).toContain("id: timeline-replay-3");
+    } finally {
+      await server.close();
+    }
+  });
+
+  test("heartbeat comments do not pollute mission timeline event history", () => {
+    const handle = initializeRuntimeDatabase({
+      databasePath: join(databaseDir, "timeline-heartbeat.sqlite")
+    });
+    seedTimelineMission(handle.database, "mission-timeline-heartbeat", 1_800_000_000_000);
+    recordMissionTimelineEvent(handle.database, {
+      id: "timeline-heartbeat-1",
+      missionId: "mission-timeline-heartbeat",
+      type: "mission",
+      createdAt: 1_800_000_000_001,
+      payload: {
+        title: "Mission created",
+        detail: "seeded event",
+        status: "success",
+        evidenceMode: "fallback"
+      }
+    });
+
+    const heartbeat = serializeMissionTimelineHeartbeat(1_800_000_000_010);
+    expect(heartbeat).toContain(": heartbeat");
+    expect(readMissionTimelineEvents(handle.database, "mission-timeline-heartbeat")).toHaveLength(1);
+    handle.database.close();
+  });
+
+  test("mission timeline history is isolated by missionId", () => {
+    const handle = initializeRuntimeDatabase({
+      databasePath: join(databaseDir, "timeline-isolation.sqlite")
+    });
+    seedTimelineMission(handle.database, "mission-timeline-a", 1_800_000_000_000);
+    seedTimelineMission(handle.database, "mission-timeline-b", 1_800_000_000_000);
+    recordMissionTimelineEvent(handle.database, {
+      id: "timeline-isolated-a",
+      missionId: "mission-timeline-a",
+      type: "guard",
+      createdAt: 1_800_000_000_001,
+      payload: {
+        title: "Guard A",
+        detail: "mission A",
+        status: "blocked",
+        evidenceMode: "fallback"
+      }
+    });
+    recordMissionTimelineEvent(handle.database, {
+      id: "timeline-isolated-b",
+      missionId: "mission-timeline-b",
+      type: "receipt",
+      createdAt: 1_800_000_000_002,
+      payload: {
+        title: "Receipt B",
+        detail: "mission B",
+        status: "fallback",
+        evidenceMode: "fallback"
+      }
+    });
+
+    const missionA = readMissionTimelineEvents(handle.database, "mission-timeline-a");
+    const missionB = readMissionTimelineEvents(handle.database, "mission-timeline-b");
+    expect(missionA.map((event) => event.id)).toEqual(["timeline-isolated-a"]);
+    expect(missionB.map((event) => event.id)).toEqual(["timeline-isolated-b"]);
+    handle.database.close();
+  });
 });
+
+async function readSseUntil(response: Response, marker: string) {
+  expect(response.status).toBe(200);
+  const reader = response.body?.getReader();
+  expect(reader).toBeDefined();
+  const decoder = new TextDecoder();
+  let text = "";
+  const deadline = Date.now() + 2_000;
+
+  try {
+    while (Date.now() < deadline) {
+      const { value, done } = await reader!.read();
+      if (done) {
+        break;
+      }
+
+      text += decoder.decode(value, { stream: true });
+      if (text.includes(marker)) {
+        return text;
+      }
+    }
+  } finally {
+    await reader?.cancel();
+  }
+
+  throw new Error(`SSE marker not found: ${marker}\n${text}`);
+}
+
+function seedTimelineMission(
+  database: ReturnType<typeof initializeRuntimeDatabase>["database"],
+  missionId: string,
+  now: number
+) {
+  database
+    .prepare(
+      `insert into missions (
+        id,
+        user_prompt,
+        budget_usd,
+        status,
+        caw_wallet_uuid,
+        caw_wallet_address,
+        pact_id,
+        created_at,
+        updated_at
+      ) values (?, ?, ?, 'active', ?, ?, ?, ?, ?)`
+    )
+    .run(
+      missionId,
+      "Timeline test mission",
+      "1",
+      "wallet-timeline",
+      "0xCAW0000000000000000000000000000000000001",
+      "pact-timeline",
+      now,
+      now
+    );
+}
 
 function seedEvidenceMission(database: ReturnType<typeof initializeRuntimeDatabase>["database"], missionId: string) {
   const now = 1_800_000_000_000;

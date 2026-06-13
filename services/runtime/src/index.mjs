@@ -47,7 +47,11 @@ export {
 } from "./evidence_export.ts";
 export {
   buildMissionTimeline,
-  serializeMissionTimelineSse
+  readMissionTimelineEvents,
+  recordMissionTimelineEvent,
+  serializeMissionTimelineEvent,
+  serializeMissionTimelineHeartbeat,
+  startMissionTimelineStream
 } from "./mission_timeline.ts";
 export { buildPaymentContext } from "./guard/payment_context.ts";
 export { runGuardPipeline } from "./guard/pipeline.ts";

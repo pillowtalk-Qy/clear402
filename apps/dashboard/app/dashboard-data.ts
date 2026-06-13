@@ -196,6 +196,15 @@ export interface TimelineEvent {
   status: "allow" | "blocked" | "pending_approval" | "success" | "fallback" | "mock" | "live";
   timestamp: number;
   auditLogId?: string;
+  source?: "runtime_sse" | "dashboard";
+}
+
+export interface RuntimeTimelineSsePayload {
+  eventId?: string;
+  eventType?: "mission" | "guard" | "receipt" | "attack";
+  createdAt?: number;
+  missionId?: string;
+  payload?: Record<string, unknown>;
 }
 
 export interface ReceiptState {
@@ -446,6 +455,49 @@ function coerceEvidenceMode(value: unknown): EvidenceMode {
   return "fallback";
 }
 
+function coerceTimelineStatus(
+  value: unknown,
+  eventType: RuntimeTimelineSsePayload["eventType"]
+): TimelineEvent["status"] {
+  if (
+    value === "allow" ||
+    value === "blocked" ||
+    value === "pending_approval" ||
+    value === "success" ||
+    value === "fallback" ||
+    value === "mock" ||
+    value === "live"
+  ) {
+    return value;
+  }
+
+  if (eventType === "receipt") {
+    return "fallback";
+  }
+
+  if (eventType === "attack") {
+    return "blocked";
+  }
+
+  return "success";
+}
+
+function runtimeTimelineDefaultTitle(eventType: RuntimeTimelineSsePayload["eventType"]) {
+  if (eventType === "guard") {
+    return "Guard event";
+  }
+
+  if (eventType === "receipt") {
+    return "Receipt recorded";
+  }
+
+  if (eventType === "attack") {
+    return "Attack event";
+  }
+
+  return "Mission event";
+}
+
 function isSecretLikeKey(key: string) {
   return /(?:api[_-]?key|secret|password|authorization|bearer|private[_-]?key|session|cookie|providerSignature)$/i.test(
     key
@@ -515,6 +567,52 @@ export function formatCompactHash(value: string) {
 
 export function formatRequestId(paymentContextHash: string) {
   return `clear402:${paymentContextHash.replace(/^0x/, "").slice(0, 16)}`;
+}
+
+export function runtimeTimelineEventToDashboardItem(
+  event: RuntimeTimelineSsePayload
+): TimelineEvent | undefined {
+  if (!event.eventId || !event.missionId || !event.eventType || !isRecord(event.payload)) {
+    return undefined;
+  }
+
+  const payload = sanitizeEvidenceForDisplay(event.payload) as Record<string, unknown>;
+  const status = coerceTimelineStatus(payload.status, event.eventType);
+  const item: TimelineEvent = {
+    id: event.eventId,
+    title: typeof payload.title === "string" ? payload.title : runtimeTimelineDefaultTitle(event.eventType),
+    detail:
+      typeof payload.detail === "string"
+        ? payload.detail
+        : `${runtimeTimelineDefaultTitle(event.eventType)} recorded by runtime timeline.`,
+    status,
+    evidenceMode: coerceEvidenceMode(payload.evidenceMode),
+    timestamp: typeof event.createdAt === "number" ? event.createdAt : Date.now(),
+    source: "runtime_sse"
+  };
+
+  const auditLogId = payload.auditLogId ?? payload.guardEventId;
+  if (typeof auditLogId === "string") {
+    item.auditLogId = auditLogId;
+  }
+
+  return item;
+}
+
+export function mergeRuntimeTimelineItem(
+  workspace: DashboardWorkspace,
+  item: TimelineEvent
+): DashboardWorkspace {
+  const next = structuredClone(workspace) as DashboardWorkspace;
+  const existingIndex = next.timeline.findIndex((candidate) => candidate.id === item.id);
+  if (existingIndex >= 0) {
+    next.timeline[existingIndex] = item;
+  } else {
+    next.timeline.unshift(item);
+  }
+
+  next.timeline.sort((left, right) => right.timestamp - left.timestamp || right.id.localeCompare(left.id));
+  return next;
 }
 
 export function createInitialWorkspace(options: DashboardInitOptions): DashboardWorkspace {

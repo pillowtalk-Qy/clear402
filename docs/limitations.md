@@ -50,7 +50,7 @@ Phase 21 packaging does not finish the full P1 championship list. Current status
 | ServiceEscrow fund/refund flow | Complete as a local protocol/state-machine layer; not an onchain escrow contract. |
 | `message_sign` PaymentContext support | Complete for local/runtime evidence and guard enforcement; not a live CAW message-sign API claim. |
 | `params_match` / `message_match` / `function_abis` support | Complete for local clear-sign policy enforcement. |
-| SSE timeline | Basic runtime SSE snapshot endpoint complete at `/api/missions/:missionId/timeline.sse`; not a full production push/subscribe system. |
+| SSE timeline | Append-only local mission timeline complete at `/api/missions/:missionId/timeline.sse`, including event ids, event types, timestamps, mission ids, payloads, heartbeat comments, and `Last-Event-ID` replay; not production-scale realtime infrastructure. |
 | 20-request race regression | Partially complete in the attack fixture `concurrent_free_riding_20_requests`; not a broader production load/race suite. |
 | Signed ProviderQuote | Complete as a local signed quote protocol and verification layer; not a live provider attestation network. |
 | Dual Receipt model | Complete as a local payment/delivery dual-receipt protocol; not a chain-native or network-native settlement standard. |

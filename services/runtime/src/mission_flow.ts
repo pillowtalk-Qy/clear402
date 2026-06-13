@@ -19,6 +19,10 @@ import { ensureMission, ensureProvider } from "./guard/quote_lock.ts";
 import { listGuardEvents, recordGuardEvent } from "./guard/events.ts";
 import { runGuardPipeline, type GuardPipelineResult } from "./guard/pipeline.ts";
 import { canonicalJson, hashObject, sha256Hex } from "./guard/hash.ts";
+import {
+  buildMissionTimelineEventFromReceipt,
+  recordMissionTimelineEvent
+} from "./mission_timeline.ts";
 
 export type MissionFlowSource = "runtime_api";
 
@@ -793,7 +797,22 @@ function insertFallbackReceipt(
       input.now
     );
 
-  return receiptSummaryFromRow(requireLatestReceipt(database, input.missionId));
+  const receipt = requireLatestReceipt(database, input.missionId);
+  recordMissionTimelineEvent(database, {
+    missionId: input.missionId,
+    type: "receipt",
+    createdAt: input.now,
+    payload: buildMissionTimelineEventFromReceipt({
+      receiptId: receipt.receiptId,
+      paymentContextHash: receipt.paymentContextHash,
+      cawRequestId: receipt.cawRequestId,
+      txHash: receipt.txHash,
+      status: receipt.status,
+      evidenceMode: receipt.evidenceMode
+    })
+  });
+
+  return receiptSummaryFromRow(receipt);
 }
 
 function receiptSummaryFromRow(row: ReceiptRow): MissionFlowReceiptSummary {

@@ -146,17 +146,35 @@ function KV({
 function JsonBlock({
   value,
   label,
-  compact = false
+  compact = false,
+  defaultExpanded = false
 }: {
   value: unknown;
   label?: string;
   compact?: boolean;
+  defaultExpanded?: boolean;
 }) {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const summaryLabel = label ?? "Raw evidence";
+
   return (
-    <div className={`json-block${compact ? " json-block-compact" : ""}`}>
-      {label ? <div className="json-label">{label}</div> : null}
+    <details
+      className={`json-block${compact ? " json-block-compact" : ""}`}
+      open={isExpanded}
+      onToggle={(event) => setIsExpanded(event.currentTarget.open)}
+    >
+      <summary className="json-summary">
+        <span className="json-summary-copy">
+          <span className="json-label">{summaryLabel}</span>
+          <strong>Raw evidence</strong>
+        </span>
+        <span className="json-summary-state">
+          {isExpanded ? "shown" : "folded"}
+          {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        </span>
+      </summary>
       <pre>{value ? formatJson(value) : defaultJsonPreview}</pre>
-    </div>
+    </details>
   );
 }
 
@@ -190,15 +208,17 @@ function ActionButton({
   icon,
   onClick,
   tone = "neutral",
-  disabled
+  disabled,
+  testId
 }: {
   label: string;
   icon: ReactNode;
   onClick: () => void;
   tone?: BadgeTone;
   disabled?: boolean;
+  testId?: string;
 }) {
-  const testId = `action-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
+  const resolvedTestId = testId ?? `action-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
 
   return (
     <button
@@ -206,7 +226,7 @@ function ActionButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      data-testid={testId}
+      data-testid={resolvedTestId}
     >
       {icon}
       <span>{label}</span>
@@ -523,7 +543,7 @@ export function DashboardShell({ initialWorkspace, runtime, provider }: Dashboar
             <ActionButton label="Create mission" icon={<ClipboardList size={16} />} onClick={() => runMissionFlow("create-mission")} tone="success" />
             <ActionButton label="Dry run 402" icon={<FileSearch size={16} />} onClick={() => runMissionFlow("dry-run")} />
             <ActionButton label="Prepare guard" icon={<ShieldPlus size={16} />} onClick={() => runMissionFlow("prepare-guard")} tone="warning" />
-            <ActionButton label="Execute payment" icon={<ArrowRightLeft size={16} />} onClick={() => runMissionFlow("execute-payment")} tone="live" />
+            <ActionButton label="Execute demo payment" icon={<ArrowRightLeft size={16} />} onClick={() => runMissionFlow("execute-payment")} tone="warning" testId="action-execute-payment" />
             <ActionButton label="Verify receipt" icon={<ShieldCheck size={16} />} onClick={() => runMissionFlow("verify-receipt")} tone="success" />
             <ActionButton label={isExporting ? "Exporting evidence" : "Export evidence"} icon={<ArrowDownToLine size={16} />} onClick={() => void handleEvidenceExport()} tone="fallback" disabled={isExporting} />
           </section>
@@ -774,7 +794,7 @@ export function DashboardShell({ initialWorkspace, runtime, provider }: Dashboar
               </div>
               {isExportVisible ? (
                 <div className="export-body">
-                  <JsonBlock value={exportEvidence.json} label="JSON export" compact />
+                  <JsonBlock value={exportEvidence.json} label="JSON export" compact defaultExpanded />
                   <div className="markdown-block">
                     <div className="json-label">Markdown export</div>
                     <pre>{exportEvidence.markdown}</pre>

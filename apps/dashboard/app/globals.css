@@ -171,7 +171,7 @@ main {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 38px;
+  min-height: 44px;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.03);
   color: var(--text);
@@ -180,6 +180,14 @@ main {
     transform 120ms ease,
     border-color 120ms ease,
     background 120ms ease;
+}
+
+.preset-button,
+.tiny-toggle,
+.action-button,
+.attack-card,
+.json-summary {
+  touch-action: manipulation;
 }
 
 .preset-button:hover,
@@ -457,6 +465,16 @@ code {
   color: var(--text-soft);
 }
 
+code,
+pre,
+.metric-value,
+.metric-hint,
+.timeline-copy small,
+.log-row-id {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
 .json-block,
 .empty-state,
 .subpanel,
@@ -482,6 +500,53 @@ code {
   border-radius: var(--radius);
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.03);
+}
+
+.json-block[open] {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.json-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 44px;
+  min-width: 0;
+  cursor: pointer;
+  list-style: none;
+}
+
+.json-summary::-webkit-details-marker {
+  display: none;
+}
+
+.json-summary-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.json-summary-copy strong {
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.json-summary-state {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  flex: 0 0 auto;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-soft);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .json-block pre,
@@ -727,7 +792,6 @@ code {
 
 .tiny-toggle {
   font-size: 12px;
-  min-height: 30px;
   padding: 0 10px;
 }
 
@@ -805,7 +869,7 @@ code {
   .preset-button,
   .action-button,
   .tiny-toggle {
-    min-height: 40px;
+    min-height: 44px;
   }
 
   .panels-grid {
@@ -919,6 +983,15 @@ code {
   .badge {
     font-size: 10px;
     padding: 3px 7px;
+  }
+
+  .json-summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .json-summary-state {
+    min-height: 34px;
   }
 
   .sidebar-toggle {

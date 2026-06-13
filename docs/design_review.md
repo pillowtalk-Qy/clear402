@@ -6,10 +6,12 @@ Classifier: app UI, evidence/operator dashboard
 
 ## Summary
 
-Design score: B-
-AI slop score: B
+Design score: B
+AI slop score: B+
 
 The dashboard reads like an operator console, not a marketing page. The live/fallback/mock model is visible, the layout is dense but scannable, and the page avoids the common hero/card-grid trap. The main design risk is that a few visual choices still make fallback/demo actions feel more live than they are.
+
+Update, Phase 19 polish: P1-D1 is closed. The ordinary dashboard payment action now reads as a fallback/demo step, raw evidence is progressively disclosed, touch targets meet 44px, and desktop plus 390px mobile checks show no horizontal overflow.
 
 ## P0 Findings
 
@@ -17,34 +19,37 @@ None found.
 
 ## P1 Findings
 
-### P1-D1: The `Execute payment` action is visually styled as live even though the ordinary dashboard path is fallback/demo
+### P1-D1: Closed - payment action no longer presents the ordinary dashboard path as live
 
-Evidence:
+Original evidence:
 
 - `apps/dashboard/app/dashboard-shell.tsx:509` renders `Execute payment` with `tone="live"`.
 - The README and live/fallback/mock policy both state that ordinary dashboard demos do not trigger real CAW payments.
 
-Impact:
+Fix:
 
-This is a design trust issue. The page labels modes well overall, but the button color makes the riskiest action look like a live green path. In a demo, that can nudge an operator or viewer into thinking the dashboard action itself proves live CAW execution.
+- The action now displays `Execute demo payment`.
+- The stable E2E hook remains `data-testid="action-execute-payment"`.
+- The button tone is warning/fallback aligned, not live green.
+- The Service Receipt panel continues to show `Tx hash n/a` for the ordinary dashboard path.
 
-Recommendation:
+Residual risk:
 
-Use fallback/warning tone for `Execute payment` until the action is explicitly backed by live CAW execution. Consider button text such as `Execute demo payment` or a nearby `fallback` badge.
+The dashboard still has live runtime/provider health facts beside fallback/demo payment flow facts. This is acceptable for the operator console as long as the bottom-strip mode guard and fallback badges remain visible.
 
 ## Other Design Findings
 
-### D2: JSON blocks dominate the first scan
+### D2: Closed - raw JSON no longer dominates the first scan
 
-The dashboard is thorough, but large JSON panels appear early and compete with the top-level state narrative. The best path is progressive disclosure: keep hashes, decisions, and mode chips visible, then collapse raw JSON by default.
+Raw evidence blocks now use progressive disclosure. Registry entry, ERC-8004 trust result, PaymentContext JSON, and ClearSign input are folded by default, while operators can still open each raw evidence surface. Evidence export JSON stays expanded after export so the browser E2E can keep parsing the generated evidence bundle.
 
-### D3: Touch targets are just below the mobile target
+### D3: Closed - touch targets meet the mobile target
 
-Browser audit at 390x844 found no horizontal overflow, but interactive controls are mostly 40px high. The usual mobile target is 44px. This is polish rather than a blocker, but it is easy to improve.
+Visible buttons and raw-evidence summaries now measure at least 44px high in both desktop and 390x844 mobile checks.
 
-### D4: Typography is competent but generic
+### D4: Partially improved - numeric evidence is more deliberate
 
-The page uses `Inter, ui-sans-serif, system-ui...` as the primary stack. It looks professional, but it has little product-specific character. For an evidence/security console, a slightly more distinctive sans plus better numeric treatment would make hashes, amounts, and statuses feel more deliberate.
+The page still uses `Inter, ui-sans-serif, system-ui...` as the primary stack, but hashes, timestamps, amounts, metrics, and raw evidence now use tabular numerals. A more distinctive primary type choice remains optional polish, not a blocker.
 
 ## Positive Notes
 
@@ -53,16 +58,22 @@ The page uses `Inter, ui-sans-serif, system-ui...` as the primary stack. It look
 - The UI is appropriately dense for a security/operator dashboard.
 - Focus states exist.
 - Cards have restrained 8px radii and the layout does not rely on decorative feature grids.
+- The page still reads as an operator console, not a landing page or marketing hero.
 
 ## Commands And Checks
 
-- Started runtime, provider, and dashboard dev servers.
-- Used the Codex in-app Browser against `http://127.0.0.1:3000`.
-- Checked DOM structure, heading hierarchy, font/color extraction, touch target sizes, desktop overflow, and 390px mobile overflow.
+- Started runtime, provider, and dashboard dev servers against `http://127.0.0.1:3000`.
+- Used the Codex in-app Browser to inspect desktop and 390x844 mobile.
+- Desktop check: `scrollWidth` matched viewport width, no overflow offenders, minimum visible interactive height was 44px, raw evidence panels were folded, and receipt tx hash displayed `n/a`.
+- 390x844 mobile check: `scrollWidth` was 390, no overflow offenders, no small touch targets, and `Execute demo payment` remained visible without button squeeze.
+- Acceptance commands passed:
+  - `pnpm --filter dashboard test`
+  - `pnpm --filter dashboard build`
+  - `pnpm lint`
+  - `pnpm build`
+  - `pnpm test:e2e`
 
 ## Quick Wins
 
-- Change `Execute payment` to fallback/warning tone while it remains demo/fallback.
-- Collapse JSON blocks by default after the first two panels.
-- Increase mobile control min-height from 40px to 44px.
-- Add `font-variant-numeric: tabular-nums` for hashes, counters, timestamps, and amounts.
+- Keep the fallback/demo guard text visible if future dashboard actions add more payment controls.
+- Consider a later typography pass if the product needs more visual distinctiveness.

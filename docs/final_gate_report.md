@@ -1,8 +1,8 @@
 # W0 Final Gate Report
 
-Date: 2026-06-13 HKT
-Branch: `clear402/integration`
-Baseline checkpoint: `c2d2260 docs(demo): add final packaging artifacts`
+Date: 2026-06-14 HKT
+Branch: `main`
+Baseline checkpoint: `261ff27 feat(runtime): add local payment protocol extensions`
 
 All gate commands were run with `CLEAR402_CAW_*` and `CLEAR402_TEST_MERCHANT_ADDRESS` unset in the command environment. No `.env.caw.local` or `.env.caw.local.bak` file was read or printed.
 
@@ -10,7 +10,7 @@ All gate commands were run with `CLEAR402_CAW_*` and `CLEAR402_TEST_MERCHANT_ADD
 
 | Command | Result | Notes |
 |---|---|---|
-| `git status --short --branch` | pass | Branch was `clear402/integration` and the tree was clean before the final report/doc alignment edit. |
+| `git status --short --branch` | pass | Branch was `main` and the tree was clean before the final report/doc alignment edit. |
 | `pnpm lint` | pass | Workspace typecheck passed. |
 | `pnpm test` | pass | 37 tests passed, including runtime guard and CAW boundary coverage. |
 | `pnpm build` | pass | Dashboard, runtime, provider, and shared packages built successfully. |
@@ -25,8 +25,20 @@ All gate commands were run with `CLEAR402_CAW_*` and `CLEAR402_TEST_MERCHANT_ADD
 | Phase 17: Security audit | pass | `docs/security_audit.md` exists and the P0 audit result is none. |
 | Phase 18: Code review | pass | `docs/code_review.md` exists and the historical P1 evidence-bundle issue is carried into limitations, not left hidden. |
 | Phase 19: Design review | pass | `docs/design_review.md` confirms the dashboard still reads as an operator console, not a landing page. |
-| Phase 20: P1 championship features | pass with documented limitations | The remaining championship backlog is intentionally recorded in `docs/limitations.md`; no blocker remains for final packaging. |
-| Phase 21: final packaging | pass | README, runbook, demo script, limitations, sample evidence, and CAW boundary docs are aligned on live / fallback / mock boundaries. |
+| Phase 20: P1 championship features | pass with documented limitations | The current main branch closes the local ServiceEscrow, message_sign PaymentContext, clear-sign policy, signed ProviderQuote, local payment gateway, Dual Receipt, and SSE snapshot work; live counterparts remain explicitly out of scope. |
+| Phase 21: final packaging | pass | README, runbook, demo script, limitations, sample evidence, and CAW boundary docs are aligned on live / fallback / mock boundaries, with the remaining live claims still open. |
+
+## Latest Completed Scope
+
+| Item | Result | Notes |
+|---|---|---|
+| local ServiceEscrow | pass | Local protocol/state-machine layer only; not an onchain escrow contract. |
+| `message_sign` PaymentContext | pass | Local/runtime evidence and guard enforcement only; not a live CAW message-sign API claim. |
+| `params_match` / `message_match` / `function_abis` | pass | Clear-sign policy enforcement is present in the local guard path. |
+| Signed ProviderQuote | pass | Signed quote creation and verification are wired locally. |
+| local payment gateway | pass | Gateway mode exists as a local provider route, not a production payment network gateway. |
+| Dual Receipt | pass | Dual-receipt protocol is implemented locally, not chain-native settlement truth. |
+| SSE snapshot | pass | Mission timeline SSE snapshot exists at `/api/missions/:missionId/timeline.sse`; this is not production realtime infra. |
 
 ## Hackathon Submission Package
 
@@ -63,7 +75,14 @@ None.
 
 ### P1
 
-No active blocker. The historical audit/code-review P1 issue about evidence-bundle provenance is now reflected in the current baseline and in `docs/limitations.md`. The championship backlog remains intentionally incomplete.
+No active blocker. The historical audit/code-review P1 issue about evidence-bundle provenance is now reflected in the current baseline and in `docs/limitations.md`. The remaining live claims are intentionally incomplete:
+
+- CAW official x402 live dashboard flow
+- live CAW `message_sign`
+- onchain ServiceEscrow `contract_call`
+- live ERC-8004 network truth
+- production payment gateway
+- production dual receipt
 
 ### P2
 
@@ -73,13 +92,12 @@ No active blocker. The historical audit/code-review P1 issue about evidence-bund
 
 - P0 completion: 100%
 - Phase 16-21 completion: 100%
-- Hackathon code/docs/evidence materials in repo: 95%
+- GitHub hackathon submission readiness: 94%
+- Original championship/full live spec: 82%
 - Formal PPT/video completion: in urgent polish
-- P1/championship completion: 35%
-- Overall completion: 95%
 
 ## Recommendation
 
 Recommended: demo and submit.
 
-Clear402 is demo-ready for a CAW-backed x402 guard and evidence workflow, with live CAW evidence limited to the recorded Sepolia tiny transfer and recorded destination-allowlist denial.
+Clear402 is demo-ready for GitHub hackathon submission: the local guard, escrow, clear-sign, signed-quote, gateway, dual receipt, and SSE snapshot paths are in place, while live CAW dashboard, message signing, onchain escrow, live ERC-8004 truth, production gateway, and production dual receipt claims remain intentionally open.

@@ -1,58 +1,65 @@
 # Clear402
 
-Clear402 is a hardened x402 runtime and evidence dashboard with a strict CAW boundary.
+## One-Liner
 
-The current branch can demonstrate the guard pipeline and attack lab truthfully, and it records one successful CAW Sepolia testnet tiny transfer plus one CAW Sepolia testnet policy-denial result. Those live CAW claims are limited to the recorded reports in `docs/live_caw_testnet_smoke_report.md` and `docs/live_caw_policy_denial_report.md`; they are not mainnet, not production-ready, not unrestricted CAW execution, and not coverage for every CAW denial type.
+Clear402 is a CAW-backed x402 guard and evidence workflow for safer agent-native HTTP 402 payments.
 
-## Current Branch State
+## Project Background
 
-- `apps/dashboard`: Evidence Dashboard with mission, challenge, trust, firewall, receipt, attack, and export panels. It fetches live runtime/provider health and labels fallback/mock demo state.
-- `services/runtime`: Node runtime health service plus real guard pipeline modules for provider registry, ERC-8004 trust checks, metadata firewall, PaymentContext binding, quote/nonce/budget protection, clearsig, CAW adapter boundary, receipt verifier, and attack lab execution.
-- `services/provider-x402`: local x402 provider health service plus deterministic challenge, payment proof, receipt, and attack-fixture helpers.
-- `packages/shared`: shared Zod contracts and domain types.
-- `tests/e2e`: Playwright browser E2E for the dashboard mission flow, denied/fallback visibility, attack-state visibility, and evidence export artifacts.
-- `scripts/run_attack_lab.ts`: runs 16 attack fixtures through the real guard pipeline and requires every scenario to return `blocked` with a `guardEventId`.
-- `docs/caw_capability_report.md`: records CAW `Live ready: true` only for the recorded Sepolia testnet allow-path tiny transfer and destination-allowlist policy denial.
-- `docs/live_caw_testnet_smoke_report.md`: records the request ID, pact ID, transaction hash, pact completion, and testnet balance evidence for the one live CAW smoke.
-- `docs/live_caw_policy_denial_report.md`: records the request ID, pact ID, rejected transaction record, denial reason, and no-success evidence for the one live CAW policy-denial check.
-- `docs/demo_script.md`, `docs/paper_mapping.md`, `docs/limitations.md`, and `docs/security_boundaries.md`: Phase 21 final demo packaging docs.
-- `evidence/sample_evidence_pack.json` and `evidence/sample_evidence_pack.md`: sample/fallback/mock evidence pack artifacts; they are not live CAW audit artifacts and do not add a live tx hash to the ordinary dashboard flow.
-- SQLite schema initialization for the runtime service.
+Clear402 is a hackathon demo, not a mainnet production product. It demonstrates how an agent-native HTTP 402 payment flow can be wrapped with provider validation, resource binding, metadata redaction, clear signing, receipt verification, attack-lab checks, and evidence export. Live CAW evidence is limited to the recorded Sepolia tiny transfer and recorded destination-allowlist denial.
 
-## Current Limits
+## Why HTTP 402 / x402 Matters
 
-- Default demo and attack lab flows do not trigger real CAW payments; they remain local/demo guard-pipeline exercises.
-- Only the explicit live CAW Sepolia testnet smoke moved testnet SETH, and the completed pact should not be reused for another smoke.
-- The recorded CAW allow-path smoke and policy-denial evidence are not mainnet execution, not production readiness, and not unrestricted wallet access.
-- CAW policy-denial evidence covers one Sepolia testnet destination-allowlist rejection only; it does not cover every possible CAW denial type.
-- Runtime/provider health are long-lived service endpoints; attack lab HTTP routes are exercised by the attack runner's local runtime handler.
-- Dashboard mission, payment, receipt, and evidence export actions are demo/fallback state unless backed by a runtime API response.
-- Attack inputs are mock fixtures, not external exploit traffic.
-- Provider/trust/capability seed data is demo data, not live registry or ERC-8004 network data.
+HTTP 402 and x402 let services request payment inline, which is useful when autonomous agents buy data, model output, or services without a human checkout page. That flow also creates new risk: replayed proofs, cross-resource substitution, malicious provider discovery, hidden calldata, metadata leakage, and paid-but-denied delivery.
 
-## Gate Commands
+Clear402 treats an x402 payment as an evidence workflow. The payment header is only one input; the guard also binds the paid resource, provider identity, quote terms, wallet policy, signing intent, service receipt, and exported evidence.
+
+## What We Reuse From Cobo Agentic Wallet
+
+- Official CAW CLI / SDK boundary through `@cobo/agentic-wallet`.
+- CAW wallet identity and pact concepts for agent-controlled testnet payments.
+- Recorded Sepolia allow-path evidence for one tiny `0.0001` SETH transfer.
+- Recorded Sepolia destination-allowlist denial evidence for one rejected transfer.
+
+## What Clear402 Adds
+
+- x402 challenge normalization and PaymentContext binding.
+- Provider registry checks and ERC-8004-style trust validation over demo records.
+- Quote, nonce, budget, and replay locks.
+- Metadata firewall and redacted evidence export.
+- Clear-signing checks for malicious approval and hidden multicall behavior.
+- Service receipt verification for paid-but-denied and malformed delivery paths.
+- A 16-scenario attack lab that runs mock fixture inputs through the real guard pipeline.
+- An operator dashboard that labels live, fallback, and mock evidence boundaries.
+
+## Architecture
+
+| Area | Path | Purpose |
+|---|---|---|
+| Dashboard | `apps/dashboard` | Next.js operator console for missions, challenges, guard status, attack lab, and evidence export. |
+| Runtime | `services/runtime` | Guard pipeline, CAW adapter boundary, SQLite schema, evidence export, and attack-lab execution. |
+| Provider | `services/provider-x402` | Local deterministic x402 provider, challenge, payment proof, receipt, and fixture helpers. |
+| Shared contracts | `packages/shared` | Zod schemas and shared domain types. |
+| E2E tests | `tests/e2e` | Playwright desktop/mobile dashboard flow and evidence export checks. |
+| Evidence docs | `docs/live_caw_*.md` | Recorded Sepolia/testnet CAW evidence. |
+
+## Setup
+
+Requirements:
+
+- Node.js `>=22.5.0`
+- pnpm `>=10.33.2`
 
 ```bash
 pnpm install
-pnpm lint
-pnpm test
-pnpm build
-pnpm test:e2e
-pnpm run attack:all
+pnpm db:init
 ```
 
-`pnpm test:e2e` now runs the browser E2E first, then the runtime guard tests, then the authoritative 16/16 attack lab gate. The Playwright run starts or reuses:
+## Run Demo
 
-- runtime: `http://127.0.0.1:4000`
-- provider: `http://127.0.0.1:4010`
-- dashboard: `http://127.0.0.1:3000`
-
-Browser artifacts are written under `e2e-results/`, including desktop and mobile dashboard screenshots, Playwright traces/videos, and the dashboard evidence export JSON/Markdown. These artifacts are local run evidence and are intentionally gitignored.
-
-## Start Services
+Start the three local services:
 
 ```bash
-pnpm db:init
 pnpm --filter @clear402/runtime dev
 pnpm --filter @clear402/provider-x402 dev
 pnpm --filter dashboard dev
@@ -60,65 +67,102 @@ pnpm --filter dashboard dev
 
 Default endpoints:
 
-- runtime health: `http://127.0.0.1:4000/health`
-- provider health: `http://127.0.0.1:4010/health`
-- dashboard: `http://127.0.0.1:3000`
+- Dashboard: `http://127.0.0.1:3000`
+- Runtime health: `http://127.0.0.1:4000/health`
+- Provider health: `http://127.0.0.1:4010/health`
 
-## Demo Docs
+The ordinary dashboard payment path is fallback/demo state unless it is explicitly backed by recorded live CAW evidence. The attack lab uses mock fixture inputs and real guard execution.
 
-- [Demo Operator Runbook](./docs/demo_operator_runbook.md)
+## Run Tests
+
+```bash
+pnpm lint
+pnpm test
+pnpm build
+pnpm test:e2e
+pnpm run attack:all
+```
+
+`pnpm test:e2e` runs Playwright dashboard E2E, runtime guard tests, and the attack lab gate. Browser artifacts are written under `e2e-results/` and are intentionally gitignored.
+
+## Demo Video Script Link
+
 - [Five-Minute Demo Script](./docs/demo_script.md)
-- [Demo Narrative / Talk Track](./docs/demo_narrative_talk_track.md)
-- [Live / Fallback / Mock Policy](./docs/live_fallback_mock_policy.md)
-- [Paper Mapping](./docs/paper_mapping.md)
-- [Limitations](./docs/limitations.md)
-- [Security Boundaries](./docs/security_boundaries.md)
+- [Demo Operator Runbook](./docs/demo_operator_runbook.md)
+- [Demo video upload folder](./submission/demo-video)
+- [PPT upload folder](./submission/ppt)
+
+The final submitted video should be 3-5 minutes and show the dashboard flow, live/fallback/mock labels, evidence export, and 16/16 attack-lab result.
+
+## Proposal Link
+
+- [Hackathon Proposal](./docs/proposal.md)
+
+## Evidence Links
+
+All chain evidence below is Sepolia/testnet evidence.
+
+| Evidence | Value |
+|---|---|
+| Agent wallet / source address | `0xab42bb255c4660b0879f007ab3ed9ae049d85859` |
+| Allow-path CAW request ID | `clear402-live-caw-smoke-1781270885558` |
+| Allow-path pact ID | `71e60376-8959-4f25-ab7e-83fc3e8e196c` |
+| Allow-path tx hash | `0xf0f257dad181ec835c09e131177402c0d2073bf345ca13d394b6aaa170a69011` |
+| Allow-path explorer | `https://sepolia.etherscan.io/tx/0xf0f257dad181ec835c09e131177402c0d2073bf345ca13d394b6aaa170a69011` |
+| Policy-denial CAW request ID | `clear402-live-caw-denial-1781280971` |
+| Policy-denial pact ID | `c3f6217f-dc9a-4cdd-9332-8e1661e4ab8e` |
+| Policy-denial operation | Rejected Sepolia transfer to `0x000000000000000000000000000000000000dEaD` |
+| Policy-denial result | `ADDRESS_NOT_WHITELISTED` / `policy_denied`, no tx hash produced |
+
+Detailed reports:
+
 - [CAW Capability Report](./docs/caw_capability_report.md)
 - [Live CAW Testnet Smoke Report](./docs/live_caw_testnet_smoke_report.md)
 - [Live CAW Policy Denial Report](./docs/live_caw_policy_denial_report.md)
-
-## Evidence Samples
-
 - [Sample Evidence Pack JSON](./evidence/sample_evidence_pack.json)
 - [Sample Evidence Pack Markdown](./evidence/sample_evidence_pack.md)
 
-The sample evidence pack is for demo packaging and review. It is explicitly sample/fallback/mock, does not execute CAW, and must not be used as proof of a live CAW payment.
+The sample evidence pack is for demo packaging and review. It is sample/fallback/mock evidence and must not be used as proof of a live CAW payment.
 
-## Evidence Dashboard
+## Security Boundaries
 
-The dashboard is a control surface, not a landing page.
+- Hackathon demo only; not a mainnet production product.
+- Do not commit private keys, API keys, pairing tokens, seed phrases, wallet secrets, or `.env.caw.local` files.
+- Use Sepolia/testnet evidence only.
+- Ordinary dashboard payment is fallback/demo state.
+- Live CAW evidence is limited to the recorded Sepolia tiny transfer and recorded destination-allowlist denial.
+- Attack lab inputs are mock fixtures, not external exploit traffic, but they run through the real guard pipeline.
 
-It shows:
+See [Security Boundaries](./docs/security_boundaries.md) and [Limitations](./docs/limitations.md).
 
-- Mission Console
-- Official CAW Panel
-- x402 Challenge Inspector
-- Provider Registry + ERC-8004 Trust Panel
-- Metadata Firewall Diff
-- PaymentContext Panel
-- Clear Signing Panel
-- CAW Execution Timeline
-- Service Receipt Panel
-- Attack Lab Panel
-- Evidence Export Panel
+## Limitations
 
-## live / fallback / mock
+- The project does not claim mainnet readiness or unrestricted CAW execution.
+- The recorded CAW allow path covers one tiny Sepolia transfer only.
+- The recorded CAW denial covers one destination-allowlist rejection only.
+- Provider registry, ERC-8004-style trust, and capability seed data are demo records.
+- Browser/E2E artifacts are local run evidence and are not committed.
 
-- `live`: runtime/provider health endpoints; guard pipeline code execution in tests and attack lab; provider registry, metadata firewall, PaymentContext resource binding, quote/nonce/budget checks, clearsig, and receipt verifier logic when those modules execute; the single recorded Sepolia testnet CAW tiny transfer documented in `docs/live_caw_testnet_smoke_report.md`; the single recorded Sepolia testnet CAW destination-allowlist denial documented in `docs/live_caw_policy_denial_report.md`.
-- `fallback`: dashboard mission/payment/receipt/export actions that represent demo state; capability records marked `fallback_required` or `needs_manual_step`.
-- `mock`: attack fixtures, demo provider/trust/capability seed records, dashboard sample IDs and hashes.
+## Third-Party APIs / SDKs / AI Tools
 
-Nothing in the dashboard or docs should present fallback/mock state as proof that CAW moved funds. The only current CAW funds-movement claim is the recorded Sepolia testnet allow-path smoke; the recorded policy-denial evidence confirms no successful transfer.
+- Cobo Agentic Wallet SDK: `@cobo/agentic-wallet`
+- Cobo CAW CLI: used for recorded Sepolia/testnet evidence capture
+- x402-style local provider flow: implemented in `services/provider-x402`
+- Next.js, React, Framer Motion, and Lucide React for the dashboard
+- Zod for shared contracts
+- TypeScript, tsup, Vitest, and Playwright for build/test gates
+- SQLite-backed runtime schema
+- AI-assisted development/review tools were used during project packaging; no AI provider API key is committed.
 
-## P0 Security Fix To Call Out
+## Team Link
 
-The PaymentContext metadata override issue is closed. The guard pipeline now blocks when `metadata.resourceUrl` does not match the bound request/challenge resource before creating a PaymentContext.
+- [Team Template](./docs/team.md) - Fill before final submission.
 
-## Shared Contracts
+## Additional Docs
 
-Cross-module API shapes live in `packages/shared/src/contracts.ts`.
-Database layout lives in `services/runtime/src/db/schema.ts`.
-
-## Environment
-
-See [`.env.example`](./.env.example) for supported variables.
+- [Live / Fallback / Mock Policy](./docs/live_fallback_mock_policy.md)
+- [Paper Mapping](./docs/paper_mapping.md)
+- [Security Audit](./docs/security_audit.md)
+- [Code Review](./docs/code_review.md)
+- [Design Review](./docs/design_review.md)
+- [Final Gate Report](./docs/final_gate_report.md)

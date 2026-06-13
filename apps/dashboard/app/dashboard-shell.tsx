@@ -87,8 +87,15 @@ function Badge({ state, tone }: { state: string; tone?: BadgeTone | undefined })
 }
 
 function SectionCard({ title, subtitle, icon, state, tone, rightSlot, children, dense }: PanelCardProps) {
+  const testId = `panel-${title
+    .toLowerCase()
+    .replace(/\s*\+\s*/g, "-")
+    .replace(/\s*\/\s*/g, "-")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")}`;
+
   return (
-    <section className={`panel-card${dense ? " panel-card-dense" : ""}`}>
+    <section className={`panel-card${dense ? " panel-card-dense" : ""}`} data-testid={testId}>
       <div className="panel-card-head">
         <div className="panel-card-title-wrap">
           <div className="panel-card-icon">{icon}</div>
@@ -191,8 +198,16 @@ function ActionButton({
   tone?: BadgeTone;
   disabled?: boolean;
 }) {
+  const testId = `action-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
+
   return (
-    <button className={`action-button action-button-${tone}`} type="button" onClick={onClick} disabled={disabled}>
+    <button
+      className={`action-button action-button-${tone}`}
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      data-testid={testId}
+    >
       {icon}
       <span>{label}</span>
     </button>
@@ -245,9 +260,9 @@ function StateChip({ state }: { state: string }) {
 function Timeline({ items }: { items: TimelineEvent[] }) {
   return (
     <div className="timeline">
-      {items.map((item) => (
+      {items.map((item, index) => (
         <motion.div
-          key={item.id}
+          key={`${item.id}-${index}`}
           className={`timeline-item timeline-item-${item.status}`}
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
@@ -291,6 +306,7 @@ function AttackCards({
             type="button"
             className={`attack-card${active ? " attack-card-active" : ""}`}
             onClick={() => onSelect(attack.id)}
+            data-testid={`attack-card-${attack.id}`}
           >
             <div className="attack-card-top">
               <strong>{attack.title}</strong>
@@ -413,6 +429,7 @@ export function DashboardShell({ initialWorkspace, runtime, provider }: Dashboar
   const selectedAttackDescription = selectedAttackCard?.resultDetail ?? selectedAttackCard?.summary ?? "";
   const selectedAttackLayer = selectedAttackCard?.blockedLayer ?? "n/a";
   const selectedAttackEvidenceRef = selectedAttackCard?.evidenceRef ?? "n/a";
+  const selectedAttackGuardEventId = selectedAttackCard?.guardEventId ?? "n/a";
 
   return (
     <main className="dashboard-shell">
@@ -548,8 +565,8 @@ export function DashboardShell({ initialWorkspace, runtime, provider }: Dashboar
                   <StateChip state={workspace.caw.transactionStatus} />
                 </div>
                 <div className="log-list">
-                  {workspace.caw.auditLogs.map((entry) => (
-                    <div key={entry.id} className="log-row">
+                  {workspace.caw.auditLogs.map((entry, index) => (
+                    <div key={`${entry.id}-${index}`} className="log-row">
                       <span className="log-row-id">{entry.id}</span>
                       <span className="log-row-outcome">{entry.outcome}</span>
                       <Badge state={entry.evidenceMode} />
@@ -582,7 +599,7 @@ export function DashboardShell({ initialWorkspace, runtime, provider }: Dashboar
               {workspace.challenge.providerRegistryResult ? (
                 <JsonBlock value={workspace.challenge.providerRegistryResult} label="Provider registry result" />
               ) : null}
-              <KV label="Settlement path" value={<StateChip state={workspace.challenge.state} />} />
+              <KV label="Settlement path" value={<code>{workspace.challenge.settlementPath}</code>} />
             </SectionCard>
 
             <SectionCard
@@ -722,6 +739,7 @@ export function DashboardShell({ initialWorkspace, runtime, provider }: Dashboar
               </div>
               <KV label="Blocked layer" value={<code>{selectedAttackLayer}</code>} />
               <KV label="Evidence ref" value={<code>{selectedAttackEvidenceRef}</code>} />
+              <KV label="Guard event" value={<code>{selectedAttackGuardEventId}</code>} />
             </SectionCard>
 
             <SectionCard
@@ -787,7 +805,7 @@ export function DashboardShell({ initialWorkspace, runtime, provider }: Dashboar
         </div>
         <div className="strip-item">
           <strong>Mode guard</strong>
-          <p>Fallback and mock are intentionally visible. Nothing here pretends to be a live CAW denial.</p>
+          <p>Fallback and mock are intentionally visible. Ordinary dashboard payment is fallback/demo and never claims live CAW funds movement.</p>
         </div>
       </section>
     </main>

@@ -14,6 +14,7 @@ coverage/
 *.db
 data/
 **/data/
+e2e-results/
 .env
 .env.*
 !.env.example

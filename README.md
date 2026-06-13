@@ -10,6 +10,7 @@ The current branch can demonstrate the guard pipeline and attack lab truthfully,
 - `services/runtime`: Node runtime health service plus real guard pipeline modules for provider registry, ERC-8004 trust checks, metadata firewall, PaymentContext binding, quote/nonce/budget protection, clearsig, CAW adapter boundary, receipt verifier, and attack lab execution.
 - `services/provider-x402`: local x402 provider health service plus deterministic challenge, payment proof, receipt, and attack-fixture helpers.
 - `packages/shared`: shared Zod contracts and domain types.
+- `tests/e2e`: Playwright browser E2E for the dashboard mission flow, denied/fallback visibility, attack-state visibility, and evidence export artifacts.
 - `scripts/run_attack_lab.ts`: runs 16 attack fixtures through the real guard pipeline and requires every scenario to return `blocked` with a `guardEventId`.
 - `docs/caw_capability_report.md`: records CAW `Live ready: true` only for the recorded Sepolia testnet allow-path tiny transfer and destination-allowlist policy denial.
 - `docs/live_caw_testnet_smoke_report.md`: records the request ID, pact ID, transaction hash, pact completion, and testnet balance evidence for the one live CAW smoke.
@@ -37,6 +38,14 @@ pnpm build
 pnpm test:e2e
 pnpm run attack:all
 ```
+
+`pnpm test:e2e` now runs the browser E2E first, then the runtime guard tests, then the authoritative 16/16 attack lab gate. The Playwright run starts or reuses:
+
+- runtime: `http://127.0.0.1:4000`
+- provider: `http://127.0.0.1:4010`
+- dashboard: `http://127.0.0.1:3000`
+
+Browser artifacts are written under `e2e-results/`, including desktop and mobile dashboard screenshots, Playwright traces/videos, and the dashboard evidence export JSON/Markdown. These artifacts are local run evidence and are intentionally gitignored.
 
 ## Start Services
 

@@ -44,7 +44,7 @@ Expected result:
 - `pnpm lint` passes TypeScript checks across packages.
 - `pnpm test` passes unit and runtime tests.
 - `pnpm build` builds runtime, provider, shared package, and dashboard.
-- `pnpm test:e2e` includes guard pipeline tests and the attack lab.
+- `pnpm test:e2e` starts or reuses runtime `http://127.0.0.1:4000`, provider `http://127.0.0.1:4010`, and dashboard `http://127.0.0.1:3000`, runs Playwright browser E2E, then runs guard pipeline tests and the attack lab.
 - `pnpm run attack:all` prints all 16 attack names and ends with JSON results where every scenario has `decision: "blocked"` and a `guardEventId`.
 
 ## 4. Start Runtime, Provider, And Dashboard
@@ -152,6 +152,16 @@ Recommended order:
 10. Click `Export evidence` or `Open JSON` to show the dashboard's current evidence bundle.
 
 ## 9. Export Evidence
+
+Automated browser E2E artifacts are written to `e2e-results/`:
+
+- `desktop-chromium-dashboard.png`
+- `mobile-chromium-dashboard.png`
+- `dashboard-evidence-export.json`
+- `dashboard-evidence-export.md`
+- `playwright-output/` and `playwright-report/` for traces, videos, and the HTML report
+
+The browser E2E covers the operator path: create mission, dry run 402, prepare guard, execute fallback/demo payment, verify fallback receipt, run denied/attack dashboard states, and export evidence. It still treats the CLI attack lab as the authoritative 16/16 security gate.
 
 For gate evidence:
 

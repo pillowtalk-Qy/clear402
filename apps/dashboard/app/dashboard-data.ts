@@ -321,7 +321,6 @@ const samplePactId = "pact-demo-402";
 const sampleQuoteId = "quote-demo-402";
 const sampleRequestId = "clear402:7ad4e2d9c1bf6a01";
 const samplePaymentContextHash = "0x7ad4e2d9c1bf6a011d0b4a1c2fd31f92d4b73f9d8d1e8c8b3f0a1a2c3d4e5f60";
-const sampleTxHash = "0x9f2e3d4c5b6a79887766554433221100aa55cc33dd44ee66ff7788990011ab22";
 const sampleRawChallengeHash = "0x42a10f8a9d0c5f8f10c0f0a71e4c80b1f7b1e965d43de2b8e2a0a8c7d9e3f110";
 const sampleCanonicalUrlHash = "0x8f1298e3d7c2a0f1d3e9c5b7a4f0b1c28d97aa3d1f2c4e6f8b0a1c2d3e4f5678";
 const sampleBodyHash = "0x0d5c1a2b3e4f5061728394a5b6c7d8e9f102030405060708090a0b0c0d0e0f10";
@@ -750,7 +749,6 @@ export function createInitialWorkspace(options: DashboardInitOptions): Dashboard
       walletAddress: sampleWalletAddress,
       pactId: samplePactId,
       amount: "0.10",
-      txHash: sampleTxHash,
       evidenceMode: options.runtime.evidenceMode
     },
     deliveryReceipt: {
@@ -979,17 +977,17 @@ export function applyDashboardAction(
       paymentReceipt: {
         ...next.receipt.paymentReceipt,
         status: "paid",
-        txHash: sampleTxHash,
         evidenceMode: "fallback"
       },
       finalStatus: "paid",
       evidenceMode: "fallback"
     };
+    delete next.receipt.paymentReceipt.txHash;
     next.timeline.unshift(
       buildTimelineItem(
         "timeline-execute",
         "CAW execution step",
-        "The wallet submits the approved path and records a transaction reference for the receipt.",
+        "Fallback/demo execution records payment intent state without claiming live CAW funds movement.",
         "success",
         "fallback",
         now,
@@ -1079,6 +1077,18 @@ export async function runPreferredMissionFlowAction(
   const fetcher = options.fetcher ?? fetch;
   const now = options.now ?? Date.now();
   const basePath = options.basePath ?? "";
+
+  if (actionType === "execute-payment") {
+    return {
+      workspace: {
+        ...applyDashboardAction(workspace, { type: actionType }, now),
+        actionSource: "frontend_fallback"
+      },
+      usedRuntime: false,
+      source: "frontend_fallback",
+      fallbackReason: "Dashboard execute payment is a fallback/demo step; runtime CAW execution is disabled."
+    };
+  }
 
   try {
     const response =
@@ -1269,14 +1279,20 @@ function applyRuntimeMissionFlowPayload(
   }
 
   if (payload.receipt) {
+    const receiptPaymentPatch = payload.receipt.paymentReceipt ?? {};
+    const paymentReceipt = {
+      ...next.receipt.paymentReceipt,
+      ...receiptPaymentPatch,
+      evidenceMode: payloadMode
+    };
+    if (!("txHash" in receiptPaymentPatch)) {
+      delete paymentReceipt.txHash;
+    }
+
     next.receipt = {
       ...next.receipt,
       ...payload.receipt,
-      paymentReceipt: {
-        ...next.receipt.paymentReceipt,
-        ...(payload.receipt.paymentReceipt ?? {}),
-        evidenceMode: payloadMode
-      },
+      paymentReceipt,
       deliveryReceipt: {
         ...next.receipt.deliveryReceipt,
         ...(payload.receipt.deliveryReceipt ?? {}),

@@ -44,12 +44,13 @@ The dashboard is an operator console for reviewing live, fallback, and mock evid
 - Attack lab passes with 16/16 blocked scenarios.
 - Recorded live CAW evidence exists for one Sepolia tiny transfer and one Sepolia destination-allowlist denial.
 - Ordinary dashboard payment remains fallback/demo state.
-- Team details are intentionally left as a template in `docs/team.md` and must be filled before final submission.
+- Simulation/rehearsal presentation deck exists at `submission/ppt/clear402-hackathon-deck.pptx`; formal PPT/video versions are being urgently polished.
+- Team wallet/contact details are intentionally left as a template in `docs/team.md` and must be filled before final submission if required by the portal.
 
 ## Roadmap
 
-- Add a real uploaded 3-5 minute demo video to `submission/demo-video`.
-- Add final presentation slides to `submission/ppt`.
+- Add the formal uploaded 3-5 minute demo video link to `submission/README.md`.
+- Replace the simulation/rehearsal PPT with the final polished PPT if required by the submission portal.
 - Replace demo provider/trust seed data with live registry and attestation sources.
 - Expand CAW denial coverage beyond destination allowlist.
 - Add production deployment hardening, observability, and operator approval workflows.

@@ -1,5 +1,7 @@
 # Clear402
 
+<img src="./docs/assets/project/clear402-logo.png" alt="Clear402 logo" width="560">
+
 ## One-Liner
 
 Clear402 is a CAW-backed x402 guard and evidence workflow for safer agent-native HTTP 402 payments.
@@ -89,10 +91,12 @@ pnpm run attack:all
 
 - [Five-Minute Demo Script](./docs/demo_script.md)
 - [Demo Operator Runbook](./docs/demo_operator_runbook.md)
-- [Demo video upload folder](./submission/demo-video)
-- [PPT upload folder](./submission/ppt)
+- [Submission Package](./submission/README.md)
+- [Demo Video Recording Script](./submission/demo-video/recording-script.md)
+- [Presentation Deck - simulation/rehearsal version](./submission/ppt/clear402-hackathon-deck.pptx)
+- [Final Submit Checklist](./submission/final-submit-checklist.md)
 
-The final submitted video should be 3-5 minutes and show the dashboard flow, live/fallback/mock labels, evidence export, and 16/16 attack-lab result.
+The current PPT and video materials are simulation/rehearsal materials. The formal PPT/video versions are being urgently polished. The final submitted video should be 3-5 minutes and show the dashboard flow, live/fallback/mock labels, evidence export, and 16/16 attack-lab result.
 
 ## Proposal Link
 
@@ -157,6 +161,12 @@ See [Security Boundaries](./docs/security_boundaries.md) and [Limitations](./doc
 ## Team Link
 
 - [OriginShift Team](./docs/team.md) - fill wallet addresses and contact details before final portal submission if required.
+
+## Project Assets
+
+- [Clear402 Logo](./docs/assets/project/clear402-logo.png)
+- [Presentation Deck - simulation/rehearsal version](./submission/ppt/clear402-hackathon-deck.pptx)
+- [Submission Package](./submission/README.md)
 
 ## Additional Docs
 

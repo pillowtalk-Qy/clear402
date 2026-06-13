@@ -1,0 +1,11 @@
+{
+  "name": "pact_list_after_faucet",
+  "cmd": "caw pact list",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T21:39:40.151Z",
+  "ended_at": "2026-06-13T21:39:42.742Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "timed_out": false
+}

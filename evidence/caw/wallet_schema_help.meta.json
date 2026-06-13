@@ -1,0 +1,11 @@
+{
+  "name": "wallet_schema_help",
+  "cmd": "caw schema wallet 2>/dev/null || caw schema --help",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T21:40:05.233Z",
+  "ended_at": "2026-06-13T21:40:07.059Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "timed_out": false
+}

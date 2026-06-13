@@ -1,0 +1,10 @@
+{
+  "command": "caw fetch --help",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "probe_fetch_--help.stdout.txt",
+  "stderr": "probe_fetch_--help.stderr.txt",
+  "stdoutSha256": "9ac9058a91ab31ec93964fb4e3f18971ffedb178faa1459979440b8cc186284b",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "collectedAt": "2026-06-13T20:57:14.719Z"
+}

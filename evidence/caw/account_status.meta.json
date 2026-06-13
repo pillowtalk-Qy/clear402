@@ -1,0 +1,8 @@
+{
+  "command": "caw status",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "account_status.stdout.txt",
+  "stderr": "account_status.stderr.txt",
+  "collectedAt": "2026-06-13T21:11:54.885Z"
+}

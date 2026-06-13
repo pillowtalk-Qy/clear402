@@ -1,0 +1,58 @@
+{
+  "command": "caw",
+  "description": "caw is the command-line interface for Cobo Agentic Wallet. Use it to manage wallets, addresses, transactions, approvals, payments, and more through the Cobo Go SDK.",
+  "usage": "caw [flags]",
+  "flags": [
+    {
+      "name": "api-key",
+      "type": "string",
+      "description": "API key for authentication"
+    },
+    {
+      "name": "api-url",
+      "type": "string",
+      "description": "API base URL to target a specific environment (env: AGENT_WALLET_API_URL)"
+    },
+    {
+      "name": "timeout",
+      "type": "float64",
+      "default": "30",
+      "description": "HTTP timeout in seconds"
+    },
+    {
+      "name": "verbose",
+      "type": "bool",
+      "default": "false",
+      "description": "Enable debug logging"
+    }
+  ],
+  "subcommands": [
+    "address",
+    "completion",
+    "faucet",
+    "fetch",
+    "help",
+    "meta",
+    "onboard",
+    "pact",
+    "payment",
+    "pending",
+    "recipe",
+    "schema",
+    "status",
+    "track",
+    "tx",
+    "update",
+    "util",
+    "version",
+    "wallet"
+  ],
+  "exit_codes": {
+    "0": "success",
+    "1": "generic error",
+    "4": "authentication or permission failure",
+    "5": "policy denied",
+    "6": "insufficient balance",
+    "7": "network error (retryable)"
+  }
+}

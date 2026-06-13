@@ -37,7 +37,10 @@ export function createCawLiveExecutor({
     paymentContext,
     paymentContextHash,
     attemptedOperation = "transfer",
-    requestId
+    requestId,
+    contractAddress,
+    calldata,
+    amount
   }) {
     const envCheck = validatePaymentContextAgainstEnv(paymentContext, env);
     if (envCheck.length > 0) {
@@ -61,13 +64,13 @@ export function createCawLiveExecutor({
       return cache.get(requestId);
     }
 
-    if (attemptedOperation !== "transfer") {
+    if (!["transfer", "contract_call"].includes(attemptedOperation)) {
       const unsupported = createBlockedExecution({
         code: "CAW_UNSUPPORTED_OPERATION",
-        reason: `The configured CAW live executor only supports transfer; ${attemptedOperation} requires a dedicated live CAW API path.`,
+        reason: `The configured CAW live executor only supports transfer and contract_call; ${attemptedOperation} requires a dedicated live CAW API path.`,
         details: {
           attemptedOperation,
-          supportedOperations: ["transfer"]
+          supportedOperations: ["transfer", "contract_call"]
         },
         suggestion: "Wire and verify the official CAW API for this operation before claiming live evidence.",
         attemptedOperation,
@@ -91,24 +94,25 @@ export function createCawLiveExecutor({
 
     let submitResult;
     try {
-      const transferBody = {
-        pact_id: paymentContext.cawPactId,
-        chain_id: paymentContext.chainId,
-        token_id: paymentContext.tokenId,
-        dst_addr: paymentContext.merchantAddress,
-        amount: toCawDecimalAmount(paymentContext.amount, paymentContext.amountDecimals),
-        request_id: requestId,
-        description: `clear402:${paymentContextHash}`
-      };
-      if (typeof env.CLEAR402_CAW_WALLET_ADDRESS === "string" && env.CLEAR402_CAW_WALLET_ADDRESS.length > 0) {
-        transferBody.src_addr = env.CLEAR402_CAW_WALLET_ADDRESS;
-      }
-
-      const response = await transactionsApi.transferTokens(
-        env.CLEAR402_CAW_WALLET_UUID,
-        transferBody,
-        env.CLEAR402_CAW_API_KEY
-      );
+      const response =
+        attemptedOperation === "contract_call"
+          ? await submitContractCall({
+              transactionsApi,
+              env,
+              paymentContext,
+              paymentContextHash,
+              requestId,
+              contractAddress,
+              calldata,
+              amount
+            })
+          : await submitTransfer({
+              transactionsApi,
+              env,
+              paymentContext,
+              paymentContextHash,
+              requestId
+            });
       submitResult = response.data?.result;
     } catch (error) {
       const blocked = createDeniedExecution({
@@ -153,7 +157,7 @@ export function createCawLiveExecutor({
       pollMs: evidenceSettlePollMs
     });
 
-    const normalized = normalizeSuccessfulTransfer({
+    const normalized = normalizeSuccessfulTransaction({
       submitResult,
       record,
       auditLog,
@@ -165,6 +169,95 @@ export function createCawLiveExecutor({
     cache.set(requestId, normalized);
     return normalized;
   };
+}
+
+async function submitTransfer({
+  transactionsApi,
+  env,
+  paymentContext,
+  paymentContextHash,
+  requestId
+}) {
+  const transferBody = {
+    pact_id: paymentContext.cawPactId,
+    chain_id: paymentContext.chainId,
+    token_id: paymentContext.tokenId,
+    dst_addr: paymentContext.merchantAddress,
+    amount: toCawDecimalAmount(paymentContext.amount, paymentContext.amountDecimals),
+    request_id: requestId,
+    description: `clear402:${paymentContextHash}`
+  };
+  if (typeof env.CLEAR402_CAW_WALLET_ADDRESS === "string" && env.CLEAR402_CAW_WALLET_ADDRESS.length > 0) {
+    transferBody.src_addr = env.CLEAR402_CAW_WALLET_ADDRESS;
+  }
+
+  return transactionsApi.transferTokens(
+    env.CLEAR402_CAW_WALLET_UUID,
+    transferBody,
+    env.CLEAR402_CAW_API_KEY
+  );
+}
+
+async function submitContractCall({
+  transactionsApi,
+  env,
+  paymentContext,
+  paymentContextHash,
+  requestId,
+  contractAddress,
+  calldata,
+  amount
+}) {
+  if (!/^0x[0-9a-fA-F]{40}$/.test(String(contractAddress ?? ""))) {
+    return createLocalRejectedResponse({
+      status: 400,
+      code: "CONTRACT_ADDRESS_REQUIRED",
+      reason: "CAW contract_call requires a 0x-prefixed contract address.",
+      requestId
+    });
+  }
+  if (!/^0x[0-9a-fA-F]+$/.test(String(calldata ?? ""))) {
+    return createLocalRejectedResponse({
+      status: 400,
+      code: "CONTRACT_CALLDATA_REQUIRED",
+      reason: "CAW contract_call requires ABI-encoded calldata.",
+      requestId
+    });
+  }
+
+  const body = {
+    pact_id: paymentContext.cawPactId,
+    chain_id: paymentContext.chainId,
+    contract_addr: contractAddress,
+    value: toCawDecimalAmount(amount ?? "0", paymentContext.amountDecimals),
+    calldata,
+    request_id: requestId,
+    description: `clear402:${paymentContextHash}`
+  };
+  if (typeof env.CLEAR402_CAW_WALLET_ADDRESS === "string" && env.CLEAR402_CAW_WALLET_ADDRESS.length > 0) {
+    body.src_addr = env.CLEAR402_CAW_WALLET_ADDRESS;
+  }
+
+  return transactionsApi.contractCall(
+    env.CLEAR402_CAW_WALLET_UUID,
+    body,
+    env.CLEAR402_CAW_API_KEY
+  );
+}
+
+function createLocalRejectedResponse({ status, code, reason, requestId }) {
+  const error = new Error(reason);
+  error.response = {
+    status,
+    data: {
+      error: {
+        code,
+        reason,
+        details: { request_id: requestId }
+      }
+    }
+  };
+  throw error;
 }
 
 export function toCawDecimalAmount(amount, decimals) {
@@ -333,7 +426,7 @@ function auditLogContainsRequestId(item, requestId) {
   }).includes(requestId);
 }
 
-function normalizeSuccessfulTransfer({
+function normalizeSuccessfulTransaction({
   submitResult,
   record,
   auditLog,
@@ -345,7 +438,7 @@ function normalizeSuccessfulTransfer({
   const status = Number(record?.status ?? submitResult?.status);
   if (FAILED_STATUSES.has(status)) {
     return createBlockedExecution({
-      code: "CAW_TRANSFER_FAILED",
+      code: attemptedOperation === "contract_call" ? "CAW_CONTRACT_CALL_FAILED" : "CAW_TRANSFER_FAILED",
       reason: "CAW transaction reached a failed, rejected, or cancelled status.",
       details: {
         status,
@@ -367,8 +460,11 @@ function normalizeSuccessfulTransfer({
 
   if (!SUCCESS_STATUSES.has(status) && !txHash && !coboTransactionId) {
     return createBlockedExecution({
-      code: "CAW_TRANSFER_NOT_CONFIRMED",
-      reason: "CAW did not return submitted or confirmed transfer evidence.",
+      code:
+        attemptedOperation === "contract_call"
+          ? "CAW_CONTRACT_CALL_NOT_CONFIRMED"
+          : "CAW_TRANSFER_NOT_CONFIRMED",
+      reason: "CAW did not return submitted or confirmed transaction evidence.",
       details: {
         status,
         statusDisplay: record?.status_display ?? submitResult?.status_display,
@@ -387,7 +483,7 @@ function normalizeSuccessfulTransfer({
   if (!walletAddress || (!txHash && !coboTransactionId) || !auditLogId) {
     return createBlockedExecution({
       code: "CAW_LIVE_EVIDENCE_MISSING",
-      reason: "CAW transfer did not include wallet, transaction, and audit evidence required for live mode.",
+      reason: "CAW execution did not include wallet, transaction, and audit evidence required for live mode.",
       details: {
         walletAddress: Boolean(walletAddress),
         txHash: Boolean(txHash),

@@ -1,0 +1,8 @@
+{
+  "command": "caw pact status --pact-id 71e60376-8959-4f25-ab7e-83fc3e8e196c",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "account_pact_status.stdout.txt",
+  "stderr": "account_pact_status.stderr.txt",
+  "collectedAt": "2026-06-13T21:12:01.915Z"
+}

@@ -10,7 +10,7 @@ Source JSON: `evidence/sample_evidence_pack.json`
 |---|---|---|
 | Mission | `fallback` | Sample mission modeled after the dashboard/runtime demo flow. |
 | Provider challenge | `fallback` | Deterministic local/demo challenge shape. |
-| Provider trust | `mock` | Demo provider registry and ERC-8004-style trust seed data, not live registry truth. |
+| ERC-8004 trust | `mock` | Demo ERC-8004 trust seed data, not `live_erc8004` registry truth. |
 | PaymentContext | `fallback` | Sample PaymentContext facts; no live CAW payment was attempted. |
 | Guard | `fallback` | Fallback/demo guard decision at the CAW boundary. |
 | Ordinary dashboard payment | `fallback` | No live transaction hash. |
@@ -41,6 +41,15 @@ The ordinary dashboard payment remains fallback/demo and must not be described a
 - Merchant: `0xA882b939c4Ca15c904760b8c240124Cb68cc2A88`
 - Challenge amount: `0.10` `USDC` on `base-sepolia`
 - Provider/trust data: demo/mock seed data, not live registry truth.
+
+## ERC-8004 Trust
+
+- Agent ID: `erc8004:agent:runtime-demo`
+- Trust source: `demo_erc8004`
+- Registration status: `needs_registration`
+- Decision: `require_approval`
+- Live source reference: `8004scan` search for `clear402`
+- Notice: local demo trust only; Clear402 provider identity must be registered before live ERC-8004 trust can be claimed.
 
 ## PaymentContext And Guard
 
@@ -86,4 +95,4 @@ The sample omits raw CAW evidence refs, API keys, pairing tokens, wallet secrets
 - Do not claim production readiness.
 - Do not claim unrestricted CAW execution.
 - Do not claim provider/trust seed data is live registry truth.
-
+- Do not claim `demo_erc8004` as `live_erc8004`.

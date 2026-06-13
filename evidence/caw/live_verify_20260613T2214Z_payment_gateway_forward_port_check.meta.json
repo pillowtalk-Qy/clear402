@@ -1,0 +1,14 @@
+{
+  "name": "live_verify_20260613T2214Z_payment_gateway_forward_port_check",
+  "command": "lsof -nP -iTCP:8404 -sTCP:LISTEN",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T22:17:03.473Z",
+  "ended_at": "2026-06-13T22:17:03.544Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "timed_out": false,
+  "notes": {
+    "expected": "gateway process listening on 127.0.0.1:8404"
+  }
+}

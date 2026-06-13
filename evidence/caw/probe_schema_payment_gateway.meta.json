@@ -1,0 +1,10 @@
+{
+  "command": "caw schema payment gateway",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "probe_schema_payment_gateway.stdout.txt",
+  "stderr": "probe_schema_payment_gateway.stderr.txt",
+  "stdoutSha256": "21c7e308685287932ad4ad53236bcc54ce5b0d87f90251a4645ef1b48667bf30",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "collectedAt": "2026-06-13T20:58:36.816Z"
+}

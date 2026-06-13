@@ -1,0 +1,90 @@
+{
+  "activated_at": "2026-06-12T12:40:24.141781Z",
+  "approval_id": "92a53980-340e-4ba5-8b28-d3aea053d1a7",
+  "created_at": "2026-06-12T12:40:05.847495Z",
+  "expires_at": "2026-06-12T13:40:24.141781Z",
+  "id": "71e60376-8959-4f25-ab7e-83fc3e8e196c",
+  "intent": "Transfer 0.0001 SETH once to the Clear402 test merchant on Sepolia",
+  "is_default": false,
+  "name": "clear402 live caw smoke 2",
+  "operator": {
+    "created_at": "2026-06-12T11:34:17.324291Z",
+    "external_id": "caw_agent_356d721dc93e6183",
+    "id": "e5a9a8ae-b267-41df-84a4-13584a466841",
+    "is_temporary": false,
+    "metadata": {
+      "source": "self_provision"
+    },
+    "name": "Provisioned Agent",
+    "owner_principal_id": "0b995cfb-85b2-4ed1-92fd-7023b7f235c5",
+    "type": "agent",
+    "updated_at": "2026-06-12T11:44:24.0958Z"
+  },
+  "operator_id": "e5a9a8ae-b267-41df-84a4-13584a466841",
+  "original_intent": "Clear402 live CAW testnet smoke retry after pact leak handling",
+  "owner_id": "0b995cfb-85b2-4ed1-92fd-7023b7f235c5",
+  "progress_tx_count": 1,
+  "progress_usd_spent": "0",
+  "recent_txs": [
+    {
+      "created_at": "2026-06-12T13:28:06.546703Z",
+      "id": "a234e499-edb8-4e16-87ed-ee071a85df2a",
+      "operation_type": "transfer",
+      "request_id": "clear402-live-caw-smoke-1781270885558",
+      "status": "Success"
+    }
+  ],
+  "spec": {
+    "completion_conditions": [
+      {
+        "threshold": "1",
+        "type": "tx_count"
+      },
+      {
+        "threshold": "3600",
+        "type": "time_elapsed"
+      }
+    ],
+    "execution_plan": "# Summary\nTransfer 0.0001 SETH once to the Clear402 test merchant on Sepolia.\n\n# Operations\n- Transfer 0.0001 SETH to 0xA882b939c4Ca15c904760b8c240124Cb68cc2A88 on SETH.\n\n# Risk Controls\n- SETH only.\n- Destination allowlist contains only 0xA882b939c4Ca15c904760b8c240124Cb68cc2A88.\n- Per-transfer deny threshold: 0.0002 SETH.\n- 24h cumulative deny threshold: 0.0002 SETH.\n- Pact completes after one successful transaction or one hour.",
+    "policies": [
+      {
+        "is_active": true,
+        "name": "clear402-tiny-seth-transfer-2",
+        "priority": 0,
+        "rules": {
+          "deny_if": {
+            "amount_gt": "0.0002",
+            "usage_limits": {
+              "rolling_24h": {
+                "amount_gt": "0.0002",
+                "tx_count_gt": 1
+              }
+            }
+          },
+          "effect": "allow",
+          "when": {
+            "chain_in": [
+              "SETH"
+            ],
+            "destination_address_in": [
+              {
+                "address": "0xA882b939c4Ca15c904760b8c240124Cb68cc2A88",
+                "chain_id": "SETH"
+              }
+            ],
+            "token_in": [
+              {
+                "chain_id": "SETH",
+                "token_id": "SETH"
+              }
+            ]
+          }
+        },
+        "type": "transfer"
+      }
+    ]
+  },
+  "status": "completed",
+  "updated_at": "2026-06-12T13:28:07.093277Z",
+  "wallet_id": "5751d798-605b-4723-acf4-e3a03f524511"
+}

@@ -1,0 +1,33 @@
+Start a local HTTP proxy that intercepts outgoing requests and automatically
+handles payment challenges using the x402 or MPP protocol.
+
+<pact-id> is the pact UUID used to resolve the paying wallet and the
+pact-scoped API key (same behavior as 'caw tx transfer <pact-id>'). All
+payments signed by the gateway are authorized under that pact.
+
+Two proxy modes are available. In forward mode the proxy accepts plain HTTP
+requests whose URL contains the full target address. In MITM mode the proxy
+intercepts HTTPS traffic by acting as a transparent TLS terminator; a CA
+certificate is generated on first run and must be trusted by the HTTP client.
+
+Example:
+  caw payment gateway <pact-uuid> --mode mitm --protocol x402
+
+Usage:
+  caw payment gateway <pact-id> [flags]
+
+Flags:
+      --ca-cert string    Path to CA certificate for MITM (default: ~/.cobo-agentic-wallet/proxy/ca.crt)
+      --ca-key string     Path to CA private key for MITM (default: ~/.cobo-agentic-wallet/proxy/ca.key)
+      --deposit string    Initial deposit amount (in the payment token'[REDACTED] base unit) pre-funded into each MPP session
+  -h, --help              help for gateway
+  -l, --listen string     Listen address for the proxy (default "127.0.0.1:8402")
+      --mitm-port int     Listen port for MITM proxy (used when mode=all) (default 8403)
+      --mode string       Proxy mode: all, forward, or mitm (default "all")
+  -p, --protocol string   Payment protocol: auto, x402, or mpp (default "auto")
+
+Global Flags:
+      --api-key [REDACTED]   API key for authentication
+      --api-url string   API base URL to target a specific environment (env: AGENT_WALLET_API_URL)
+      --timeout float    HTTP timeout in seconds (default 30)
+  -v, --verbose          Enable debug logging

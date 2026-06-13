@@ -1,0 +1,22 @@
+{
+  "caip2_chain_id": "",
+  "chain_coin": "SOLDEV_SOL",
+  "chain_type": "SOL",
+  "coinbase_maturity": 0,
+  "confirming_threshold": 1,
+  "enable_smart_contract_op": false,
+  "explorer_address_url": "https://explorer.solana.com/address/{address}?cluster=devnet",
+  "explorer_tx_url": "https://explorer.solana.com/tx/{txn_id}?cluster=devnet",
+  "icon_url": "https://d.cobo.com/public/logos/SOL-logo%403x.png",
+  "input_utxo_limit": 0,
+  "is_case_sensitive": false,
+  "is_nonce_mandatory": false,
+  "is_testnet": false,
+  "name": "Solana Devnet",
+  "supported_address_encodings": "",
+  "supported_address_encodings_by_ksr": "",
+  "supported_fee_models": "",
+  "unique_chain_id": "SOLDEV_SOL",
+  "use_memo_to_deposit": false,
+  "use_memo_to_withdraw": false
+}

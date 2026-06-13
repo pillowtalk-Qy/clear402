@@ -1,0 +1,10 @@
+{
+  "command": "caw status --help",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "probe_status_--help.stdout.txt",
+  "stderr": "probe_status_--help.stderr.txt",
+  "stdoutSha256": "9a150fe9162df6dd7bf63bbf991f288e0b8e6c79684169cd7b39ba8c487e4e11",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "collectedAt": "2026-06-13T20:57:17.190Z"
+}

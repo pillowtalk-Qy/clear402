@@ -22,11 +22,15 @@ Clear402 treats an x402 payment as an evidence workflow. The payment header is o
 - CAW wallet identity and pact concepts for agent-controlled testnet payments.
 - Recorded Sepolia allow-path evidence for one tiny `0.0001` SETH transfer.
 - Recorded Sepolia destination-allowlist denial evidence for one rejected transfer.
+- Official x402 HTTP 402 / dry-run parsing evidence through the official x402 Express example and `caw fetch --dry-run`.
+- Official CAW gateway startup/listening/forwarding evidence through `caw payment gateway`.
+
+Official CAW execute, gateway forwarding, and `message_sign` checks currently prove the permission boundary, not additional successful payments: execute and gateway forwarding reached CAW but stopped on `INSUFFICIENT_PERMISSION` / `can_transfer`, and `message_sign` probes reached CAW but stopped on `INSUFFICIENT_PERMISSION` / `can_message_sign` while the pact waits for CAW App owner approval. Having a testnet asset balance does not make a CAW operation executable without the right approved pact.
 
 ## What Clear402 Adds
 
 - x402 challenge normalization and PaymentContext binding.
-- Provider registry checks and ERC-8004-style trust validation over demo records.
+- Provider registry checks and ERC-8004 trust validation with explicit `live_erc8004` versus `demo_erc8004` provenance.
 - Quote, nonce, budget, and replay locks.
 - Metadata firewall and redacted evidence export.
 - Clear-signing checks for malicious approval and hidden multicall behavior.
@@ -124,6 +128,11 @@ All chain evidence below is Sepolia/testnet evidence.
 | Policy-denial pact ID | `c3f6217f-dc9a-4cdd-9332-8e1661e4ab8e` |
 | Policy-denial operation | Rejected Sepolia transfer to `0x000000000000000000000000000000000000dEaD` |
 | Policy-denial result | `ADDRESS_NOT_WHITELISTED` / `policy_denied`, no tx hash produced |
+| Official x402 HTTP 402 | Official x402 Express example from `x402-foundation/x402` commit `b32a702` returned a real HTTP 402 challenge |
+| Official x402 dry-run | `caw fetch --dry-run` parsed the real 402 challenge without calling the payment API |
+| Official x402 execute | Reached CAW but stopped on `INSUFFICIENT_PERMISSION` / `can_transfer`; no paid retry, tx hash, or successful payment claim |
+| Official `message_sign` | Pact submitted and pending CAW App owner approval; allow-shaped and deny-shaped probes both stopped on `INSUFFICIENT_PERMISSION` / `can_message_sign`; no live allow/deny signing evidence yet |
+| Official gateway mode | `caw payment gateway` forward mode started, listened locally on `127.0.0.1:8404`, and forwarded the official x402 request; no payment execution or production settlement claim |
 
 Detailed reports:
 
@@ -135,6 +144,12 @@ Detailed reports:
 
 The sample evidence pack is for demo packaging and review. It is sample/fallback/mock evidence and must not be used as proof of a live CAW payment.
 
+## ERC-8004 Live Truth Status
+
+Per the official ERC-8004 specification, live Identity truth is the ERC-721 Identity Registry `tokenURI` for an `(identityRegistry, agentId)` pair; live Reputation truth is read from Reputation Registry methods such as `getSummary(...)` and `readAllFeedback(...)`; live Validation truth is read from Validation Registry methods such as `getValidationStatus(...)`, `getSummary(...)`, `getAgentValidations(...)`, and `getValidatorRequests(...)`. The official `erc-8004-contracts` repo publishes registry contract addresses, and 8004scan exposes a public API/OpenAPI for indexed agent lookup.
+
+Clear402 does not currently have a verified live ERC-8004 provider identity. A 8004scan public search for Clear402 did not return a matching registered provider, so runtime trust evidence must stay `needs_registration` / `fallback_required` unless a future run supplies a verified `live_erc8004` source.
+
 ## Security Boundaries
 
 - Hackathon demo only; not a mainnet production product.
@@ -142,6 +157,9 @@ The sample evidence pack is for demo packaging and review. It is sample/fallback
 - Use Sepolia/testnet evidence only.
 - Ordinary dashboard payment is fallback/demo state.
 - Live CAW evidence is limited to the recorded Sepolia tiny transfer and recorded destination-allowlist denial.
+- Official CAW CLI evidence also covers x402 dry-run parsing and local gateway startup/listening/forwarding; it does not add a successful execute claim.
+- Fresh raw CAW CLI stdout/stderr/meta/result evidence is indexed in `evidence/caw/live_verify_20260613T2214Z_summary.json`.
+- Asset availability alone is not execution readiness. CAW operations require the right approved pact and operation permission.
 - Attack lab inputs are mock fixtures, not external exploit traffic, but they run through the real guard pipeline.
 
 See [Security Boundaries](./docs/security_boundaries.md) and [Limitations](./docs/limitations.md).
@@ -151,7 +169,10 @@ See [Security Boundaries](./docs/security_boundaries.md) and [Limitations](./doc
 - The project does not claim mainnet readiness or unrestricted CAW execution.
 - The recorded CAW allow path covers one tiny Sepolia transfer only.
 - The recorded CAW denial covers one destination-allowlist rejection only.
-- Provider registry, ERC-8004-style trust, and capability seed data are demo records; live ERC-8004 network truth is still not claimed here.
+- Official x402 dry-run evidence proves challenge parsing only; official execute currently stops on CAW pact permission.
+- Official `message_sign` evidence is pact-submitted/pending-approval plus `can_message_sign` blocking only, not approved live signing or live policy-denial evidence.
+- Official gateway evidence proves local startup/listening/forwarding only, not payment execution or production gateway settlement.
+- Provider registry, `demo_erc8004` trust, and capability seed data are demo records. `live_erc8004` trust requires a verified registered agent identity and matching endpoint/payTo evidence.
 - Browser/E2E artifacts are local run evidence and are not committed.
 
 ## Third-Party APIs / SDKs / AI Tools

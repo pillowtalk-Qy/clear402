@@ -1,0 +1,95 @@
+{
+  "cli_suggestion": "Run `caw pact submit` to create a pact and retry with it.",
+  "code": "INSUFFICIENT_PERMISSION",
+  "details": {},
+  "error": true,
+  "message": "403 Forbidden {\"success\":false,\"error\":{\"code\":\"INSUFFICIENT_PERMISSION\",\"reason\":\"permission_check_failed\",\"details\":{\"principal\":\"e5a9a8ae-b267-41df-84a4-13584a466841\",\"wallet\":\"5751d798-605b-4723-acf4-e3a03f524511\",\"required_permission\":\"can_message_sign\",\"pact_id\":\"9e5bec06-9412-4587-a6c3-fae13dbc366f\"}},\"suggestion\":\"you need an active pact to execute transfers, contract calls, or message-sign operations. check your pact status and create a new one if necessary.\",\"api_request_uuid\":\"ba339b9c47e63a488286f87ab010df12\"}",
+  "suggestion": "you need an active pact to execute transfers, contract calls, or message-sign operations. check your pact status and create a new one if necessary.",
+  "suggestions": [
+    {
+      "command": "caw tx sign-message",
+      "description": "Sign a message using a wallet address. --pact-id is the pact that scopes the signing key and wallet; obtain it from 'caw pact list' or a pact submit response.",
+      "usage": "caw tx sign-message [flags]",
+      "flags": [
+        {
+          "name": "api-key",
+          "type": "string",
+          "description": "API key for authentication"
+        },
+        {
+          "name": "api-url",
+          "type": "string",
+          "description": "API base URL to target a specific environment (env: AGENT_WALLET_API_URL)"
+        },
+        {
+          "name": "chain-id",
+          "type": "string",
+          "required": true,
+          "description": "Chain ID, e.g. SETH, BASE_ETH (required). Use the List supported chains operation to retrieve all supported chain IDs"
+        },
+        {
+          "name": "context",
+          "type": "string",
+          "description": "Request context as JSON, saved with the response ID for tracking"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "description": "Human-readable description of what is being signed"
+        },
+        {
+          "name": "destination-type",
+          "type": "string",
+          "description": "Signing scheme, e.g. eip712 for EIP-712 typed data"
+        },
+        {
+          "name": "eip712-typed-data",
+          "type": "string",
+          "description": "EIP-712 typed data as a JSON object (required for eip712 destination type)"
+        },
+        {
+          "name": "help",
+          "type": "bool",
+          "default": "false",
+          "description": "help for sign-message"
+        },
+        {
+          "name": "pact-id",
+          "type": "string",
+          "required": true,
+          "description": "Pact UUID [required]"
+        },
+        {
+          "name": "request-id",
+          "type": "string",
+          "description": "Client-supplied idempotency key"
+        },
+        {
+          "name": "src-address",
+          "type": "string",
+          "description": "Address to sign with. If omitted, the server auto-selects the wallet address on this chain (explicit src-address takes precedence)"
+        },
+        {
+          "name": "timeout",
+          "type": "float64",
+          "default": "30",
+          "description": "HTTP timeout in seconds"
+        },
+        {
+          "name": "verbose",
+          "type": "bool",
+          "default": "false",
+          "description": "Enable debug logging"
+        }
+      ],
+      "exit_codes": {
+        "0": "success",
+        "1": "generic error",
+        "4": "authentication or permission failure",
+        "5": "policy denied",
+        "6": "insufficient balance",
+        "7": "network error (retryable)"
+      }
+    }
+  ]
+}

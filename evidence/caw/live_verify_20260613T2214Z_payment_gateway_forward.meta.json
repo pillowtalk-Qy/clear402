@@ -1,0 +1,17 @@
+{
+  "name": "live_verify_20260613T2214Z_payment_gateway_forward",
+  "command": "/Users/qy/.cobo-agentic-wallet/bin/caw payment gateway 118c2eae-4258-4b75-a36b-c2e1097890b0 --mode forward --protocol x402 --listen 127.0.0.1:8404",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T22:16:52.621Z",
+  "ended_at": "2026-06-13T22:17:04.993Z",
+  "exit_code": null,
+  "signal": "SIGKILL",
+  "error": null,
+  "timed_out": false,
+  "notes": {
+    "expected": "official CAW payment gateway forward mode starts and listens locally",
+    "target_port": 8404,
+    "listening": true,
+    "stopped_by": "evidence_runner"
+  }
+}

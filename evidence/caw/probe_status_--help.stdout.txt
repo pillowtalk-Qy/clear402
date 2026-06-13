@@ -1,0 +1,16 @@
+Show a compact wallet snapshot: whether the backend is reachable (healthy),
+the current wallet lifecycle state (wallet_status, e.g. active or pending),
+whether ownership pairing [REDACTED] been completed (wallet_paired boolean),
+active pact count, and pending transaction count.
+
+Usage:
+  caw status [flags]
+
+Flags:
+  -h, --help   help for status
+
+Global Flags:
+      --api-key [REDACTED]   API key for authentication
+      --api-url string   API base URL to target a specific environment (env: AGENT_WALLET_API_URL)
+      --timeout float    HTTP timeout in seconds (default 30)
+  -v, --verbose          Enable debug logging

@@ -1,0 +1,176 @@
+[
+  {
+    "type": "function",
+    "name": "fund",
+    "stateMutability": "payable",
+    "inputs": [
+      {
+        "name": "paymentContextHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "provider",
+        "type": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "deliver",
+    "stateMutability": "nonpayable",
+    "inputs": [
+      {
+        "name": "paymentContextHash",
+        "type": "bytes32"
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "refund",
+    "stateMutability": "nonpayable",
+    "inputs": [
+      {
+        "name": "paymentContextHash",
+        "type": "bytes32"
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "escrows",
+    "stateMutability": "view",
+    "inputs": [
+      {
+        "name": "paymentContextHash",
+        "type": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "payer",
+        "type": "address"
+      },
+      {
+        "name": "provider",
+        "type": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "name": "state",
+        "type": "uint8"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "Funded",
+    "inputs": [
+      {
+        "name": "paymentContextHash",
+        "type": "bytes32",
+        "indexed": true
+      },
+      {
+        "name": "payer",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "provider",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Delivered",
+    "inputs": [
+      {
+        "name": "paymentContextHash",
+        "type": "bytes32",
+        "indexed": true
+      },
+      {
+        "name": "provider",
+        "type": "address",
+        "indexed": true
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Refunded",
+    "inputs": [
+      {
+        "name": "paymentContextHash",
+        "type": "bytes32",
+        "indexed": true
+      },
+      {
+        "name": "payer",
+        "type": "address",
+        "indexed": true
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "InvalidContextHash",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidProvider",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidAmount",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidState",
+    "inputs": [
+      {
+        "name": "current",
+        "type": "uint8"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "Unauthorized",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "RefundFailed",
+    "inputs": []
+  }
+]

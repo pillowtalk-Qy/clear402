@@ -93,7 +93,7 @@ Show the CAW evidence docs.
 Say:
 
 ```text
-Clear402 does not claim mainnet or unrestricted CAW execution. The live CAW evidence is deliberately narrow: one recorded Sepolia tiny transfer and one recorded Sepolia destination-allowlist policy denial. That gives reviewers real wallet evidence while keeping the demo boundary honest.
+Clear402 does not claim mainnet or unrestricted CAW execution. The live CAW execution evidence is deliberately narrow: one recorded Sepolia tiny transfer and one recorded Sepolia destination-allowlist policy denial. The official CLI evidence also shows x402 dry-run parsing and local gateway startup, while execute and message signing still require the right approved pact. That gives reviewers real wallet evidence while keeping the demo boundary honest.
 ```
 
 ### 3:40-4:20 - Submission Readiness
@@ -103,7 +103,7 @@ Show `docs/final_gate_report.md` or the completion slide.
 Say:
 
 ```text
-The final gate passes lint, tests, build, Playwright browser E2E, runtime guard tests, and the attack lab. The runtime now has a basic mission timeline SSE endpoint, while the remaining championship backlog is documented as future work: ServiceEscrow fund and refund, message signing, richer policy matching, signed ProviderQuote, full dual receipt, and gateway mode.
+The final gate passes lint, tests, build, Playwright browser E2E, runtime guard tests, and the attack lab. The local championship layer now includes ServiceEscrow state, message-sign PaymentContext checks, richer policy matching, signed ProviderQuote, dual receipt, local gateway mode, and the mission timeline SSE endpoint. The remaining claims are live or production claims, not hidden local gaps: approved live message signing, onchain escrow, live ERC-8004 truth, production gateway settlement, and production dual receipt.
 ```
 
 ### 4:20-4:50 - Close

@@ -1,0 +1,60 @@
+{
+  "code": "MISSING_REQUIRED_FLAG",
+  "error": true,
+  "message": "unknown flag: --asset",
+  "suggestions": {
+    "command": "caw meta prices",
+    "description": "Get current market prices for one or more Cobo asset coins. --asset-coins is a comma-separated list of Cobo asset coin IDs, e.g. BTC,ETH. Use 'caw meta tokens' to discover supported IDs.",
+    "usage": "caw meta prices [flags]",
+    "flags": [
+      {
+        "name": "api-key",
+        "type": "string",
+        "description": "API key for authentication"
+      },
+      {
+        "name": "api-url",
+        "type": "string",
+        "description": "API base URL to target a specific environment (env: AGENT_WALLET_API_URL)"
+      },
+      {
+        "name": "asset-coins",
+        "type": "string",
+        "required": true,
+        "description": "Comma-separated Cobo asset coin IDs, e.g. BTC,ETH [required]"
+      },
+      {
+        "name": "currency",
+        "type": "string",
+        "default": "USD",
+        "description": "ISO 4217 currency code for price output, e.g. USD, EUR"
+      },
+      {
+        "name": "help",
+        "type": "bool",
+        "default": "false",
+        "description": "help for prices"
+      },
+      {
+        "name": "timeout",
+        "type": "float64",
+        "default": "30",
+        "description": "HTTP timeout in seconds"
+      },
+      {
+        "name": "verbose",
+        "type": "bool",
+        "default": "false",
+        "description": "Enable debug logging"
+      }
+    ],
+    "exit_codes": {
+      "0": "success",
+      "1": "generic error",
+      "4": "authentication or permission failure",
+      "5": "policy denied",
+      "6": "insufficient balance",
+      "7": "network error (retryable)"
+    }
+  }
+}

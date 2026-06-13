@@ -10,7 +10,11 @@ import { scanMetadata } from "../guard/metadata_firewall.ts";
 import { recordMissionTimelineEvent } from "../mission_timeline.ts";
 import { normalizeX402Challenge } from "../x402/challenge_normalizer.ts";
 import { validateERC8004Trust } from "../x402/erc8004_trust_adapter.ts";
-import { signReceiptForDemo, type DemoReceiptSignatureInput } from "../receipt/receipt_verifier.ts";
+import {
+  buildServiceResultHash,
+  signReceiptForDemo,
+  type DemoReceiptSignatureInput
+} from "../receipt/receipt_verifier.ts";
 import {
   buildAttackPaymentContext,
   collectCawBoundaryEvidence,
@@ -595,21 +599,44 @@ function makeSafeProviderChallengeArtifacts(input: {
   providerAddress?: string;
   providerPublicKey?: string;
   auditLogIds?: string[];
+  cawEvidenceRef?: string;
+  fallbackEvidenceRef?: string;
+  receiptStatus?: "paid" | "refundable" | "refunded" | "failed" | "delivered" | "paid_but_not_delivered";
 }) {
   const responseBody =
     input.responseBody ?? { ok: true, paymentContextHash: input.builtContext.paymentContextHash };
   const providerResponseHash = sha256Hex(JSON.stringify(responseBody));
   const responseSchemaHash = input.responseSchemaHash ?? DEMO_RESPONSE_SCHEMA_HASH;
+  const resource = `${input.provider.origin}/paid/report`;
+  const asset = "0x0000000000000000000000000000000000000001";
+  const paymentContextSuffix = input.builtContext.paymentContextHash.slice(2, 18);
+  const cawEvidenceRef = input.cawEvidenceRef ?? `caw-fallback:${paymentContextSuffix}`;
+  const fallbackEvidenceRef = input.fallbackEvidenceRef ?? `fallback:${paymentContextSuffix}`;
+  const receiptStatus = input.receiptStatus ?? "paid";
+  const serviceResultHash = buildServiceResultHash({
+    receiptId: `receipt_${input.builtContext.paymentContextHash.slice(2, 18)}`,
+    providerResponseHash,
+    responseSchemaHash,
+    resource,
+    asset,
+    deliveryTimestamp: input.now,
+    status: receiptStatus
+  });
   const receipt = {
     paymentContextHash: input.builtContext.paymentContextHash,
     providerResponseHash,
     responseSchemaHash,
     deliveryTimestamp: input.now,
-    status: "paid" as const
+    status: receiptStatus
   };
   const signatureInput: DemoReceiptSignatureInput = {
     paymentContextHash: receipt.paymentContextHash,
     providerResponseHash: receipt.providerResponseHash,
+    resource,
+    asset,
+    cawEvidenceRef,
+    fallbackEvidenceRef,
+    serviceResultHash,
     deliveryTimestamp: receipt.deliveryTimestamp,
     status: receipt.status,
     ...(receipt.responseSchemaHash !== undefined

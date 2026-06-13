@@ -1,0 +1,1 @@
+zsh:1: no matches found: http://127.0.0.1:4021/weather?city=Tokyo

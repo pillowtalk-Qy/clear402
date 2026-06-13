@@ -1,0 +1,21 @@
+Retrieve the full details of a single transaction record.
+
+Provide either --tx-id (the record UUID from caw tx list or submit response) or
+--request-id (the same request_id you passed on the submit call). The wallet is
+taken from your active wallet (use 'caw wallet current' to check).
+
+The response includes status, amounts, fees, and any policy evaluation results.
+
+Usage:
+  caw tx get [flags]
+
+Flags:
+  -h, --help                help for get
+      --request-id string   Same request_id as on submit; looks up the record for the configured wallet
+      --tx-id string        Transaction record UUID (from caw tx list or submit response)
+
+Global Flags:
+      --api-key [REDACTED]   API key for authentication
+      --api-url string   API base URL to target a specific environment (env: AGENT_WALLET_API_URL)
+      --timeout float    HTTP timeout in seconds (default 30)
+  -v, --verbose          Enable debug logging

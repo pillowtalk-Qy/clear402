@@ -1,0 +1,8 @@
+[caw] Forward proxy: http://127.0.0.1:8404/<target-url>
+[caw] Payment Gateway started
+[caw] Pact:          118c2eae-4258-4b75-a36b-c2e1097890b0
+[caw] Wallet:        5751d798-605b-4723-acf4-e3a03f524511
+[caw] Protocol:      x402
+
+[caw] Shutting down...
+[caw] Stopped.

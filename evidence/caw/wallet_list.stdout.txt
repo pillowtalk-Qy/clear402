@@ -1,0 +1,13 @@
+[
+  {
+    "active": true,
+    "agent_id": "caw_agent_356d721dc93e6183",
+    "api_url": "https://api.agenticwallet.cobo.com",
+    "env": "prod",
+    "onboarded_at": "2026-06-12T11:34:16.131591Z",
+    "profile_dir": "/Users/qy/.cobo-agentic-wallet/profiles/profile_caw_agent_356d721dc93e6183",
+    "status": "active",
+    "wallet_name": "default",
+    "wallet_uuid": "5751d798-605b-4723-acf4-e3a03f524511"
+  }
+]

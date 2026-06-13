@@ -1,0 +1,87 @@
+{
+  "command": "caw fetch",
+  "description": "Perform an HTTP request and automatically handle 402 Payment Required responses using the x402 or MPP machine-payment protocols. <pact-id> is the pact UUID used to resolve the paying wallet and the pact-scoped API key (same behavior as 'caw tx transfer <pact-id>'). <url> is the endpoint to fetch. When a 402 is received, caw detects the payment protocol from the response headers (unless overridden), pays using the wallet bound to the pact, and retries the request with the payment headers. Example: caw fetch <pact-uuid> https://api.example.com/data --network eip155:8453",
+  "usage": "caw fetch <pact-id> <url> [flags]",
+  "args": [
+    {
+      "position": 0,
+      "name": "pact-id",
+      "required": true
+    },
+    {
+      "position": 1,
+      "name": "url",
+      "required": true
+    }
+  ],
+  "flags": [
+    {
+      "name": "asset",
+      "type": "string",
+      "description": "Token [REDACTED] address filter that excludes payment options for other tokens (case-insensitive); x402 only"
+    },
+    {
+      "name": "data",
+      "type": "string",
+      "description": "Raw HTTP request body to send with the request"
+    },
+    {
+      "name": "deposit",
+      "type": "string",
+      "description": "Session deposit amount in raw token [REDACTED] defaults to per_request_amount multiplied by 10; MPP session intent only"
+    },
+    {
+      "name": "dry-run",
+      "type": "bool",
+      "default": "false",
+      "description": "Print the payment challenge received in the 402 response and exit without calling the payment API"
+    },
+    {
+      "name": "header",
+      "type": "stringArray",
+      "default": "[]",
+      "description": "HTTP request header in Key: Value format; may be repeated"
+    },
+    {
+      "name": "json",
+      "type": "string",
+      "description": "Send JSON data (sets Content-Type/Accept to application/json, defaults method to POST)"
+    },
+    {
+      "name": "max-amount",
+      "type": "string",
+      "description": "Maximum acceptable raw token [REDACTED] payment options requiring more than this amount are excluded; x402 only"
+    },
+    {
+      "name": "method",
+      "type": "string",
+      "default": "GET",
+      "description": "HTTP method to use for the request (e.g. GET, POST, PUT)"
+    },
+    {
+      "name": "network",
+      "type": "string",
+      "description": "CAIP-2 network filter that excludes payment options on other networks (e.g. eip155:8453); x402 only"
+    },
+    {
+      "name": "output",
+      "type": "string",
+      "default": "body",
+      "description": "Output mode: body prints the response body only, full includes status code and headers"
+    },
+    {
+      "name": "protocol",
+      "type": "string",
+      "default": "auto",
+      "description": "Payment protocol to use: auto detects from response headers, x402 forces x402, mpp forces MPP"
+    }
+  ],
+  "exit_codes": {
+    "0": "success",
+    "1": "generic error",
+    "4": "authentication or permission failure",
+    "5": "policy denied",
+    "6": "insufficient balance",
+    "7": "network error (retryable)"
+  }
+}

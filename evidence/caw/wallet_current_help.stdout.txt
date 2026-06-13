@@ -1,0 +1,17 @@
+Without --wallet-uuid: shows the currently active wallet.
+With --wallet-uuid: switches the active wallet to the given one.
+--wallet-uuid is the UUID of the wallet to switch to; obtain it from 'caw wallet list'.
+
+Usage:
+  caw wallet current [flags]
+
+Flags:
+  -h, --help                 help for current
+      --show-api-key         Include the API key in the output (sensitive; omitted by default)
+      --wallet-uuid string   UUID of the wallet to switch to; if omitted, shows the currently active wallet
+
+Global Flags:
+      --api-key string   API key for authentication
+      --api-url string   API base URL to target a specific environment (env: AGENT_WALLET_API_URL)
+      --timeout float    HTTP timeout in seconds (default 30)
+  -v, --verbose          Enable debug logging

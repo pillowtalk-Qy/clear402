@@ -44,12 +44,26 @@ export function createServiceReceipt({
 
   const normalized = challenge.normalized ?? challenge;
   const providerResponseHash = hashObject(providerResponse);
+  const serviceResultHash = runtimeHashObject({
+    receiptId: `receipt_${providerResponseHash.slice(0, 16)}`,
+    providerResponseHash,
+    responseSchemaHash: sha256Hex("clear402.provider.report.v1"),
+    resource: normalized.resource,
+    asset: normalized.asset,
+    deliveryTimestamp: deliveredAt,
+    status: "delivered"
+  });
   const receiptWithoutSignature = {
     receiptId: `receipt_${providerResponseHash.slice(0, 16)}`,
     paymentContextHash: verification.proof.paymentContextHash,
     cawWalletAddress: verification.proof.cawWalletAddress,
     pactId: verification.proof.pactId,
     providerAddress: config.merchantAddress,
+    resource: normalized.resource,
+    asset: normalized.asset,
+    serviceResultHash,
+    cawEvidenceRef: `provider-fallback:${verification.proof.paymentContextHash}`,
+    fallbackEvidenceRef: "local_debug_payment_proof",
     facilitatorUrlHash: sha256Hex(config.facilitatorUrl),
     chainId: config.chainId,
     tokenId: config.tokenId,
@@ -114,7 +128,18 @@ export function createSignedProviderQuote({
 }
 
 function signReceipt(receipt) {
-  return createHmac("sha256", DEBUG_PAYMENT_KEY).update(canonicalJson(receipt)).digest("base64url");
+  return `hmac-sha256:${createHmac("sha256", DEBUG_PAYMENT_KEY).update(canonicalJson({
+    paymentContextHash: receipt.paymentContextHash,
+    providerResponseHash: receipt.providerResponseHash,
+    resource: receipt.resource,
+    asset: receipt.asset,
+    cawEvidenceRef: receipt.cawEvidenceRef,
+    fallbackEvidenceRef: receipt.fallbackEvidenceRef,
+    serviceResultHash: receipt.serviceResultHash,
+    responseSchemaHash: receipt.responseSchemaHash,
+    deliveryTimestamp: receipt.deliveryTimestamp,
+    status: receipt.status
+  })).digest("hex")}`;
 }
 
 function signProviderQuote(secret, quote) {

@@ -1,0 +1,10 @@
+{
+  "command": "caw tx --help",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "probe_tx_--help.stdout.txt",
+  "stderr": "probe_tx_--help.stderr.txt",
+  "stdoutSha256": "1ae37f5891a0b7e4c469e91dcecf6865af4e40fbc928a29c6e64e447d8825303",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "collectedAt": "2026-06-13T20:57:14.737Z"
+}

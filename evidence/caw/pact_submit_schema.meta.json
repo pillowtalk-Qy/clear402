@@ -1,0 +1,8 @@
+{
+  "command": "caw schema pact submit",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "pact_submit_schema.stdout.txt",
+  "stderr": "pact_submit_schema.stderr.txt",
+  "collectedAt": "2026-06-13T21:22:31.755Z"
+}

@@ -1,0 +1,54 @@
+{
+  "code": "MISSING_REQUIRED_FLAG",
+  "error": true,
+  "message": "unknown command --118c2eae-4258-4b75-a36b-c2e1097890b0 for --caw pact show",
+  "suggestions": {
+    "command": "caw pact show",
+    "description": "Show the full detail of a pact, including its spec, status, policies, and completion conditions. --pact-id is returned when you run 'caw pact submit', or found via 'caw pact list'.",
+    "usage": "caw pact show [flags]",
+    "flags": [
+      {
+        "name": "api-key",
+        "type": "string",
+        "description": "API key for authentication"
+      },
+      {
+        "name": "api-url",
+        "type": "string",
+        "description": "API base URL to target a specific environment (env: AGENT_WALLET_API_URL)"
+      },
+      {
+        "name": "help",
+        "type": "bool",
+        "default": "false",
+        "description": "help for show"
+      },
+      {
+        "name": "pact-id",
+        "type": "string",
+        "required": true,
+        "description": "Pact UUID [required]"
+      },
+      {
+        "name": "timeout",
+        "type": "float64",
+        "default": "30",
+        "description": "HTTP timeout in seconds"
+      },
+      {
+        "name": "verbose",
+        "type": "bool",
+        "default": "false",
+        "description": "Enable debug logging"
+      }
+    ],
+    "exit_codes": {
+      "0": "success",
+      "1": "generic error",
+      "4": "authentication or permission failure",
+      "5": "policy denied",
+      "6": "insufficient balance",
+      "7": "network error (retryable)"
+    }
+  }
+}

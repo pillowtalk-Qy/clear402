@@ -1,0 +1,10 @@
+{
+  "command": "caw payment --help",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "probe_payment_--help.stdout.txt",
+  "stderr": "probe_payment_--help.stderr.txt",
+  "stdoutSha256": "df8f5ec0a0716c65d8193839a6d15c726a670d305c91445ab82a92001c79d2a2",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "collectedAt": "2026-06-13T20:57:14.724Z"
+}

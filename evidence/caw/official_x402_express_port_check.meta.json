@@ -1,0 +1,11 @@
+{
+  "name": "official_x402_express_port_check",
+  "cmd": "lsof -nP -iTCP:4021 -sTCP:LISTEN || true",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T21:44:11.824Z",
+  "ended_at": "2026-06-13T21:44:11.928Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "timed_out": false
+}

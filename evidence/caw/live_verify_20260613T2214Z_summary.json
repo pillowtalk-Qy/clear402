@@ -1,0 +1,82 @@
+{
+  "run_id": "live_verify_20260613T2214Z",
+  "generated_at": "2026-06-13T22:17:05Z",
+  "scope": "CAW live capability verification only; no dashboard or runtime refactor.",
+  "official_x402_source": {
+    "repo": "https://github.com/x402-foundation/x402",
+    "commit": "b32a702",
+    "example": "examples/typescript/servers/express",
+    "target_url": "http://127.0.0.1:4021/weather?city=Tokyo"
+  },
+  "results": [
+    {
+      "capability": "caw_cli",
+      "status": "verified",
+      "evidence_refs": [
+        "evidence/caw/live_verify_20260613T2214Z_caw_version.stdout.txt",
+        "evidence/caw/live_verify_20260613T2214Z_caw_version.meta.json",
+        "evidence/caw/live_verify_20260613T2214Z_caw_version.result.json"
+      ],
+      "summary": "Official CAW CLI returned v0.2.86."
+    },
+    {
+      "capability": "official_x402_http_402_challenge",
+      "status": "verified",
+      "evidence_refs": [
+        "evidence/caw/live_verify_20260613T2214Z_official_x402_curl_402.stdout.txt",
+        "evidence/caw/live_verify_20260613T2214Z_official_x402_curl_402.meta.json",
+        "evidence/caw/live_verify_20260613T2214Z_official_x402_curl_402.result.json"
+      ],
+      "summary": "The official x402 Express example returned HTTP/1.1 402 Payment Required with a Payment-Required challenge."
+    },
+    {
+      "capability": "official_x402_dry_run",
+      "status": "verified",
+      "evidence_refs": [
+        "evidence/caw/live_verify_20260613T2214Z_official_x402_caw_fetch_dry_run.stderr.txt",
+        "evidence/caw/live_verify_20260613T2214Z_official_x402_caw_fetch_dry_run.meta.json",
+        "evidence/caw/live_verify_20260613T2214Z_official_x402_caw_fetch_dry_run.result.json"
+      ],
+      "summary": "caw fetch --dry-run parsed the real x402 challenge and listed the accepted eip155:84532 USDC payment option without calling the payment API."
+    },
+    {
+      "capability": "official_x402_execute",
+      "status": "needs_manual_step",
+      "evidence_refs": [
+        "evidence/caw/live_verify_20260613T2214Z_official_x402_caw_fetch_execute.stderr.txt",
+        "evidence/caw/live_verify_20260613T2214Z_official_x402_caw_fetch_execute.meta.json",
+        "evidence/caw/live_verify_20260613T2214Z_official_x402_caw_fetch_execute.result.json"
+      ],
+      "summary": "caw fetch execute reached CAW but failed with INSUFFICIENT_PERMISSION / can_transfer; no paid retry or tx hash was produced."
+    },
+    {
+      "capability": "message_sign_payment_context",
+      "status": "needs_manual_step",
+      "evidence_refs": [
+        "evidence/caw/live_verify_20260613T2214Z_pact_status_message_sign.stdout.txt",
+        "evidence/caw/live_verify_20260613T2214Z_message_sign_allow_probe.stderr.txt",
+        "evidence/caw/live_verify_20260613T2214Z_message_sign_deny_probe.stderr.txt",
+        "evidence/caw/live_verify_20260613T2214Z_message_sign_allow_probe.result.json",
+        "evidence/caw/live_verify_20260613T2214Z_message_sign_deny_probe.result.json"
+      ],
+      "summary": "The message_sign pact remains pending_approval. Both allow-shaped and deny-shaped EIP-712 PaymentContext probes reached CAW but failed with INSUFFICIENT_PERMISSION / can_message_sign, so no live allow/deny signing evidence exists yet."
+    },
+    {
+      "capability": "payment_gateway_mode",
+      "status": "verified",
+      "evidence_refs": [
+        "evidence/caw/live_verify_20260613T2214Z_payment_gateway_forward.stderr.txt",
+        "evidence/caw/live_verify_20260613T2214Z_payment_gateway_forward_port_check.stdout.txt",
+        "evidence/caw/live_verify_20260613T2214Z_payment_gateway_forward_request.stdout.txt",
+        "evidence/caw/live_verify_20260613T2214Z_payment_gateway_forward.result.json",
+        "evidence/caw/live_verify_20260613T2214Z_payment_gateway_forward_request.result.json"
+      ],
+      "summary": "caw payment gateway forward mode started, listened on 127.0.0.1:8404, and forwarded the official x402 request. The forwarded payment still failed on CAW can_transfer permission, so this proves local gateway run path only, not settlement."
+    }
+  ],
+  "redaction": {
+    "stdout_stderr_raw_results_saved": true,
+    "secret_values_redacted": true,
+    "secret_scan_note": "No API keys, private keys, seed phrases, or bearer tokens were intentionally written. Command help text may contain non-secret flag names such as api-key."
+  }
+}

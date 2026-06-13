@@ -1,0 +1,7 @@
+{
+  "name": "official_x402_express_server",
+  "cmd": "EVM_ADDRESS=0xab42bb255c4660b0879f007ab3ed9ae049d85859 SVM_ADDRESS=11111111111111111111111111111111 FACILITATOR_URL=https://x402.org/facilitator pnpm --filter @x402/express-server-example dev",
+  "cwd": "/tmp/x402-official/examples/typescript",
+  "started_by": "functions.exec_command session 93992",
+  "note": "stdout/stderr captured while official x402 express example served CAW fetch probes"
+}

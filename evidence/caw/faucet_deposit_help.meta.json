@@ -1,0 +1,8 @@
+{
+  "command": "caw faucet deposit --help",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "faucet_deposit_help.stdout.txt",
+  "stderr": "faucet_deposit_help.stderr.txt",
+  "collectedAt": "2026-06-13T21:22:29.724Z"
+}

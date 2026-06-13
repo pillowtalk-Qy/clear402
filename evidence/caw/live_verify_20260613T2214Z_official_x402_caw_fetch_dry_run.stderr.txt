@@ -1,0 +1,2 @@
+[DEBUG] available accepts (1):
+[DEBUG]   [0] network=eip155:84532 asset=0x036CbD53842c5426634e7929541eC2318f3dCF7e(USDC) amount=1000

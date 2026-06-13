@@ -1,0 +1,37 @@
+caw is the command-line interface for Cobo Agentic Wallet. Use it to
+manage wallets, addresses, transactions, approvals, payments, and more
+through the Cobo Go SDK.
+
+Usage:
+  caw [command]
+
+Available Commands:
+  address     Manage wallet addresses
+  completion  Generate the autocompletion script for the specified shell
+  faucet      Request testnet tokens from the faucet
+  fetch       Machine payment-aware HTTP fetch (x402/MPP)
+  help        Help about any command
+  meta        Query supported chains, tokens, and prices
+  onboard     Agent provisioning and wallet creation (interactive by default)
+  pact        Manage pacts (delegated access agreements)
+  payment     Manage payment sessions and gateway integrations
+  pending     Manage pending operations awaiting approval
+  recipe      Search and retrieve recipes
+  schema      Show JSON schema for a command (flags, args, exit codes)
+  status      Show wallet health, lifecycle status, and pairing [REDACTED] in a single call
+  track       Check status of tracked transactions
+  tx          Submit and query transactions
+  update      Update caw CLI to a specific version
+  util        Utility commands (ABI, base64, hex) — for development use
+  version     Print the version number
+  wallet      Manage wallets: wallets and on-chain operations
+
+Flags:
+      --api-key [REDACTED]   API key for authentication
+      --api-url string   API base URL to target a specific environment (env: AGENT_WALLET_API_URL)
+  -h, --help             help for caw
+      --timeout float    HTTP timeout in seconds (default 30)
+  -v, --verbose          Enable debug logging
+      --version          version for caw
+
+Use "caw [command] --help" for more information about a command.

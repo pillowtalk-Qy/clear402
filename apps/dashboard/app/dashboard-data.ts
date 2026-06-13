@@ -713,6 +713,8 @@ export function createInitialWorkspace(options: DashboardInitOptions): Dashboard
     },
     trustResult: {
       agentId: "erc8004:agent:clear402-demo",
+      trustSource: "demo_erc8004",
+      registrationStatus: "needs_registration",
       identityVerified: true,
       endpointMatches: true,
       payToMatches: true,
@@ -725,7 +727,9 @@ export function createInitialWorkspace(options: DashboardInitOptions): Dashboard
         { tag: "pii_safe_metadata", issuer: "Clear402 metadata firewall" }
       ],
       decision: "require_approval",
-      reason: "ERC-8004 trust is demo-backed until the runtime adapter lands."
+      reason: "ERC-8004 trust is demo-backed until a Clear402 provider is registered on live ERC-8004.",
+      demoFallbackUsed: true,
+      evidenceMode: "mock"
     },
     evidenceMode: "fallback",
     state: "empty"

@@ -232,8 +232,14 @@ export const serviceReceiptSchema = z.object({
   cawWalletAddress: z.string().min(1),
   pactId: z.string().min(1),
   providerAddress: z.string().min(1),
+  resource: z.string().min(1).optional(),
+  asset: z.string().min(1).optional(),
+  serviceResultHash: z.string().min(1).optional(),
+  cawEvidenceRef: z.string().min(1).optional(),
+  fallbackEvidenceRef: z.string().min(1).optional(),
   facilitatorUrlHash: z.string().min(1).optional(),
   txHash: z.string().min(1).optional(),
+  coboTransactionId: z.string().min(1).optional(),
   chainId: z.string().min(1),
   tokenId: z.string().min(1),
   amount: z.string().min(1),
@@ -250,6 +256,8 @@ export const serviceReceiptSchema = z.object({
 
 export const erc8004TrustResultSchema = z.object({
   agentId: z.string().min(1),
+  trustSource: z.enum(["live_erc8004", "demo_erc8004", "unavailable"]),
+  registrationStatus: z.enum(["registered", "needs_registration", "unavailable"]),
   identityVerified: z.boolean(),
   endpointMatches: z.boolean(),
   payToMatches: z.boolean(),
@@ -268,8 +276,15 @@ export const erc8004TrustResultSchema = z.object({
       evidenceUri: z.string().url().optional()
     })
   ),
-  decision: z.enum(["allow", "require_approval", "block"]),
+  decision: z.enum(["allow", "require_approval", "block", "fallback_required"]),
   reason: z.string().min(1).optional(),
+  liveSource: z.object({
+    source: z.enum(["registry_contract", "8004scan", "official_indexer"]),
+    status: z.enum(["verified", "unavailable", "needs_registration"]),
+    reference: z.string().min(1).optional(),
+    checkedAt: z.number().int().nonnegative().optional()
+  }).optional(),
+  demoFallbackUsed: z.boolean(),
   evidenceMode: evidenceModeSchema
 });
 

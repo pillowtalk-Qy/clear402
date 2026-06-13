@@ -1,0 +1,48 @@
+{
+  "code": "MISSING_REQUIRED_FLAG",
+  "error": true,
+  "message": "unknown command --5751d798-605b-4723-acf4-e3a03f524511 for --caw wallet get",
+  "suggestions": {
+    "command": "caw wallet get",
+    "description": "Get details for the active wallet on the Cobo platform.",
+    "usage": "caw wallet get [flags]",
+    "flags": [
+      {
+        "name": "api-key",
+        "type": "string",
+        "description": "API key for authentication"
+      },
+      {
+        "name": "api-url",
+        "type": "string",
+        "description": "API base URL to target a specific environment (env: AGENT_WALLET_API_URL)"
+      },
+      {
+        "name": "help",
+        "type": "bool",
+        "default": "false",
+        "description": "help for get"
+      },
+      {
+        "name": "timeout",
+        "type": "float64",
+        "default": "30",
+        "description": "HTTP timeout in seconds"
+      },
+      {
+        "name": "verbose",
+        "type": "bool",
+        "default": "false",
+        "description": "Enable debug logging"
+      }
+    ],
+    "exit_codes": {
+      "0": "success",
+      "1": "generic error",
+      "4": "authentication or permission failure",
+      "5": "policy denied",
+      "6": "insufficient balance",
+      "7": "network error (retryable)"
+    }
+  }
+}

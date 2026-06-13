@@ -1,0 +1,38 @@
+{
+  "message": "",
+  "meta": {
+    "before": "cBQAGVA50FVf_QHK46j22QQ2AW1q6CKwEow",
+    "has_more": false
+  },
+  "result": [
+    {
+      "address": "0xab42bb255c4660b0879f007ab3ed9ae049d85859",
+      "amount": "0.009518770566051",
+      "balance_updated_at": "2026-06-12T13:28:33.852Z",
+      "chain_id": "SETH",
+      "chain_type": "ETH",
+      "cobo_wallet_id": "4a48980c-07f2-4257-9ee8-4c520a2d36bf",
+      "compatible_chains": [
+        "SETH",
+        "BASE_ETH",
+        "MATIC",
+        "TBASE_SETH",
+        "ETH",
+        "ARBITRUM_ETH",
+        "OPT_ETH",
+        "BSC_BNB",
+        "AVAXC",
+        "HYPEREVM_HYPE"
+      ],
+      "id": "4072b8ea-3db6-410d-805b-5aba08ac04a3",
+      "locked": "0",
+      "pending": "0",
+      "token_id": "SETH",
+      "total": "0.009518770566051",
+      "updated_at": "2026-06-12T13:28:34.095103Z",
+      "user_id": "0b995cfb-85b2-4ed1-92fd-7023b7f235c5",
+      "wallet_uuid": "5751d798-605b-4723-acf4-e3a03f524511"
+    }
+  ],
+  "success": true
+}

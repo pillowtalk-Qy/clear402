@@ -7,8 +7,9 @@ This document defines where Clear402 can make security claims in the Phase 21 de
 | Boundary | What Clear402 Owns | What Clear402 Does Not Claim |
 |---|---|---|
 | CAW boundary | PaymentContext validation before adapter handoff; recorded Sepolia evidence references | Mainnet, unrestricted CAW execution, frontend CAW keys, or live execution outside the adapter |
-| Clear402 guard boundary | Provider, metadata, PaymentContext, quote/nonce/budget, clearsig, receipt, and evidence decisions | CAW policy replacement or direct money movement outside guard |
-| Provider boundary | Local provider health, challenge, receipt, and fixture helpers | Live external provider registry truth |
+| Clear402 guard boundary | Provider, metadata, PaymentContext, quote/nonce/budget, clearsig, ServiceEscrow calldata binding, receipt, and evidence decisions | CAW policy replacement or direct money movement outside guard |
+| ServiceEscrow boundary | Minimal onchain escrow source/ABI and guarded `fund`/`refund` calldata generation bound to `paymentContextHash` | Deployed contract evidence, successful live CAW `contract_call`, or chain-native settlement truth without tx/audit evidence |
+| Provider / ERC-8004 boundary | Local provider health, challenge, receipt, fixture helpers, and source-aware trust adapter output | Live external provider registry truth without verified ERC-8004 registration, reputation, and validation sources |
 | Dashboard boundary | Operator console and labeled evidence display | Source of payment truth or hidden live payment execution |
 | Evidence/redaction boundary | Mode labels, redacted hashes, omitted secrets, sample packs | Raw secrets, pairing tokens, wallet secrets, or unredacted CAW logs in committed artifacts |
 
@@ -23,6 +24,7 @@ Rules:
 - Live CAW claims require request ID, wallet/transaction evidence, audit or pact evidence, and a raw evidence reference.
 - The current live CAW scope is only one recorded Sepolia tiny transfer and one recorded Sepolia destination-allowlist denial.
 - CAW denial coverage must not be generalized beyond the recorded destination-allowlist denial.
+- CAW `contract_call` may only be claimed live after an approved pact executes against a deployed ServiceEscrow address and returns request ID, wallet, tx or Cobo transaction ID, audit ID, and raw evidence reference.
 
 ## Clear402 Guard Boundary
 
@@ -30,7 +32,7 @@ The guard is the policy and evidence layer before any money-moving attempt. It o
 
 - x402 challenge normalization;
 - provider registry validation;
-- ERC-8004-style trust checks over demo records;
+- ERC-8004 trust checks with source labels for `live_erc8004`, `demo_erc8004`, and unavailable/registration-required state;
 - metadata firewalling and redaction hashes;
 - request/challenge/metadata resource binding;
 - PaymentContext construction;
@@ -38,14 +40,39 @@ The guard is the policy and evidence layer before any money-moving attempt. It o
 - clearsig semantic transaction checks;
 - service receipt verification;
 - evidence mode classification.
+- ServiceEscrow `fund(bytes32,address,uint256)` / `refund(bytes32)` calldata generation and context-hash policy matching.
 
 No money-moving path may bypass the guard. If a future endpoint, dashboard action, script, or provider helper can trigger CAW execution, it must first pass the same guard sequence and preserve evidence mode labels.
+
+## ServiceEscrow Boundary
+
+The ServiceEscrow path is onchain-ready, not deployed-proof in this branch.
+
+Rules:
+
+- `paymentContextHash` must be the first escrow calldata argument and must match the built PaymentContext hash.
+- `fund` calldata must bind provider and amount through clear-sign `functionAbis` and `paramsMatch`.
+- `refund` calldata must only be allowed for the same `paymentContextHash`; selector or params mismatch is a block.
+- A delivered escrow is not refundable in the local state model, and the Solidity contract enforces the same funded-only refund state.
+- The current Solidity escrow is native-value only (`msg.value == amount`), not ERC-20 custody or production x402 settlement.
+- A live CAW `contract_call` result is not successful unless the CAW evidence includes transaction and audit anchors. Missing executor, pact approval, deployed address, or evidence remains `fallback_required` / non-success.
 
 ## Provider Boundary
 
 The local provider is a deterministic demo provider. It can produce a 402 challenge, debug verification, deterministic receipt artifacts, and attack fixtures for the local demo.
 
-Provider/trust/capability seed data is demo/mock data. It proves the shape of the flow and test coverage, not live external registry truth. ERC-8004-style records in the demo are local trust records unless a future document explicitly records live network evidence.
+Provider/trust/capability seed data is demo/mock data. It proves the shape of the flow and test coverage, not live external registry truth. Demo ERC-8004 records must be labeled `demo_erc8004` and cannot be upgraded to live trust.
+
+## ERC-8004 Boundary
+
+Live ERC-8004 truth may only come from official live sources:
+
+- Identity Registry ERC-721 agent token and `tokenURI` registration file for the provider agent;
+- Reputation Registry `getSummary(...)` / `readAllFeedback(...)` results;
+- Validation Registry `getValidationStatus(...)`, `getSummary(...)`, `getAgentValidations(...)`, or `getValidatorRequests(...)` results;
+- an official indexer/API such as 8004scan, when the returned agent identity matches the provider.
+
+Clear402 does not currently have a verified registered provider identity in those sources. Without that identity, evidence must remain `needs_registration` / `fallback_required`; local demo records must stay `demo_erc8004` and `mock`.
 
 ## Dashboard Boundary
 
@@ -82,5 +109,5 @@ Redaction rules:
 - No ordinary dashboard payment presented as live CAW payment.
 - No attack fixture presented as external attack traffic.
 - No provider/trust/capability seed data presented as live registry truth.
+- No `demo_erc8004` record presented as `live_erc8004`.
 - No sample evidence pack presented as a live CAW audit artifact.
-

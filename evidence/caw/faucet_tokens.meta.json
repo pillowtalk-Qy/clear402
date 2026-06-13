@@ -1,0 +1,11 @@
+{
+  "name": "faucet_tokens",
+  "cmd": "caw faucet tokens",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T21:39:31.035Z",
+  "ended_at": "2026-06-13T21:39:33.317Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "timed_out": false
+}

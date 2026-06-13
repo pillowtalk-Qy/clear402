@@ -1,0 +1,11 @@
+{
+  "name": "faucet_deposit_tbase_usdc",
+  "cmd": "caw faucet deposit --address 0xab42bb255c4660b0879f007ab3ed9ae049d85859 --token-id TBASE_USDC",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T21:39:33.319Z",
+  "ended_at": "2026-06-13T21:39:37.505Z",
+  "exit_code": 1,
+  "signal": null,
+  "error": null,
+  "timed_out": false
+}

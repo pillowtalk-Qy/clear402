@@ -1,0 +1,11 @@
+{
+  "name": "pact_submit_message_sign_clear402",
+  "cmd": "caw pact submit --name 'clear402 live message_sign verification' --intent 'Sign one Clear402 PaymentContext EIP-712 message on SETH' --original-intent 'Verify CAW message_sign live allow and deny evidence for Clear402' --policies '[{\"name\":\"clear402-message-sign\",\"type\":\"message_sign\",\"rules\":{\"effect\":\"allow\",\"when\":{\"domain_match\":[{\"param_name\":\"name\",\"op\":\"eq\",\"value\":\"Clear402\"},{\"param_name\":\"version\",\"op\":\"eq\",\"value\":\"1\"}]}}}]' --completion-conditions '[{\"type\":\"time_elapsed\",\"threshold\":\"3600\"}]' --execution-plan '# Summary\nSign one Clear402 PaymentContext EIP-712 message on SETH.\n\n# Operations\n- Sign an EIP-712 PaymentContext with domain name Clear402 and version 1.\n- Attempt a mismatched-domain denial check under the same pact.\n\n# Risk Controls\n- message_sign only.\n- Domain allowlist is Clear402 version 1.\n- No transfers or contract calls.'",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T21:53:21.352Z",
+  "ended_at": "2026-06-13T21:53:25.960Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "timed_out": false
+}

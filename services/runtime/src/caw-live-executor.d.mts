@@ -12,6 +12,9 @@ export declare function createCawLiveExecutor(options?: {
   paymentContextHash: string;
   attemptedOperation?: "transfer" | "contract_call" | "message_sign";
   requestId: string;
+  contractAddress?: string;
+  calldata?: string;
+  amount?: string;
 }) => Promise<unknown>;
 
 export declare function toCawDecimalAmount(amount: string, decimals: number): string;

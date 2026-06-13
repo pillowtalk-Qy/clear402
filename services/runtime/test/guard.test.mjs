@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   buildPaymentContext,
+  buildServiceEscrowFundCalldata,
+  buildServiceEscrowRefundCalldata,
   clearSign,
   createDualReceipt,
   createServiceEscrow,
@@ -13,6 +15,7 @@ import {
   refundServiceEscrow,
   runGuardPipeline,
   scanMetadata,
+  serviceEscrowAmountFromPaymentContext,
   signReceiptForDemo,
   verifyDualReceipt,
   validateERC8004Trust,
@@ -21,6 +24,7 @@ import {
   verifyServiceReceipt
 } from "../src/index.mjs";
 import { sha256Hex as guardSha256Hex } from "../src/guard/hash.ts";
+import { buildServiceResultHash } from "../src/receipt/receipt_verifier.ts";
 
 describe("guard primitives", () => {
   const providerEntry = makeProviderEntry();
@@ -62,6 +66,130 @@ describe("guard primitives", () => {
 
     assert.equal(result.decision, "block");
     assert.match(result.reason ?? "", /payTo does not match/);
+  });
+
+  it("marks unavailable live ERC-8004 source as fallback_required needs_registration", () => {
+    const result = validateERC8004Trust({
+      entry: providerEntry,
+      records: [],
+      endpoint: providerEntry.erc8004AgentUri,
+      payTo: providerEntry.merchantAddress,
+      amount: "5",
+      liveSource: {
+        source: "8004scan",
+        status: "unavailable",
+        reference: "https://8004scan.io/api/v1/public/agents/search?q=clear402",
+        checkedAt: 1_800_000_000_000,
+        reason: "Clear402 provider was not found in the live ERC-8004 index."
+      },
+      requireLiveForRegisteredAgent: true
+    });
+
+    assert.equal(result.decision, "fallback_required");
+    assert.equal(result.trustSource, "unavailable");
+    assert.equal(result.registrationStatus, "needs_registration");
+    assert.equal(result.evidenceMode, "fallback");
+    assert.equal(result.liveSource.status, "unavailable");
+    assert.match(result.reason ?? "", /not found/);
+  });
+
+  it("does not mark demo ERC-8004 records as live trust", () => {
+    const result = validateERC8004Trust({
+      entry: providerEntry,
+      records: [
+        {
+          agentId: providerEntry.erc8004AgentId,
+          agentUri: providerEntry.erc8004AgentUri,
+          payTo: providerEntry.merchantAddress,
+          reputationScore: 95,
+          deliverySuccessRate: 0.99,
+          identityVerified: true,
+          validationAttestations: []
+        }
+      ],
+      endpoint: providerEntry.erc8004AgentUri,
+      payTo: providerEntry.merchantAddress,
+      amount: "5",
+      liveSource: {
+        source: "registry_contract",
+        status: "needs_registration",
+        reason: "No live agent token is registered for this provider."
+      }
+    });
+
+    assert.equal(result.decision, "require_approval");
+    assert.equal(result.trustSource, "demo_erc8004");
+    assert.equal(result.registrationStatus, "needs_registration");
+    assert.equal(result.demoFallbackUsed, true);
+    assert.equal(result.evidenceMode, "mock");
+    assert.notEqual(result.evidenceMode, "live");
+    assert.match(result.reason ?? "", /demo-backed/);
+  });
+
+  it("allows verified live ERC-8004 records with matching endpoint and payTo", () => {
+    const result = validateERC8004Trust({
+      entry: providerEntry,
+      records: [
+        {
+          agentId: providerEntry.erc8004AgentId,
+          agentUri: "https://evil.example/paid/report",
+          payTo: "0x2222222222222222222222222222222222222222",
+          reputationScore: 99,
+          identityVerified: true,
+          validationAttestations: []
+        }
+      ],
+      endpoint: providerEntry.erc8004AgentUri,
+      payTo: providerEntry.merchantAddress,
+      amount: "5",
+      liveSource: {
+        source: "registry_contract",
+        status: "verified",
+        reference: "eip155:8453:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432:123",
+        record: {
+          agentId: providerEntry.erc8004AgentId,
+          agentUri: providerEntry.erc8004AgentUri,
+          payTo: providerEntry.merchantAddress,
+          reputationScore: 95,
+          deliverySuccessRate: 0.99,
+          identityVerified: true,
+          validationAttestations: []
+        }
+      }
+    });
+
+    assert.equal(result.decision, "allow");
+    assert.equal(result.trustSource, "live_erc8004");
+    assert.equal(result.registrationStatus, "registered");
+    assert.equal(result.demoFallbackUsed, false);
+    assert.equal(result.evidenceMode, "live");
+  });
+
+  it("blocks ERC-8004 endpoint mismatch before any live trust claim", () => {
+    const result = validateERC8004Trust({
+      entry: providerEntry,
+      records: [],
+      endpoint: providerEntry.erc8004AgentUri,
+      payTo: providerEntry.merchantAddress,
+      amount: "5",
+      liveSource: {
+        source: "registry_contract",
+        status: "verified",
+        record: {
+          agentId: providerEntry.erc8004AgentId,
+          agentUri: "https://evil.example/paid/report",
+          payTo: providerEntry.merchantAddress,
+          reputationScore: 95,
+          identityVerified: true,
+          validationAttestations: []
+        }
+      }
+    });
+
+    assert.equal(result.decision, "block");
+    assert.equal(result.trustSource, "live_erc8004");
+    assert.equal(result.endpointMatches, false);
+    assert.match(result.reason ?? "", /endpoint does not match/);
   });
 
   it("redacts, hashes, and blocks metadata as required", () => {
@@ -422,6 +550,148 @@ describe("guard primitives", () => {
     assert.match(refundDelivered.reason ?? "", /cannot refund from delivered/);
   });
 
+  it("builds ServiceEscrow fund calldata bound to PaymentContext", () => {
+    const paymentContextHash = "0x" + "e".repeat(64);
+    const fund = buildServiceEscrowFundCalldata({
+      paymentContextHash,
+      providerAddress: providerEntry.merchantAddress,
+      amount: "5000000000000000"
+    });
+    const review = clearSign({
+      chainId: providerEntry.chainId,
+      to: "0x3333333333333333333333333333333333333333",
+      calldata: fund.calldata,
+      expected: {
+        allowedSelectors: [fund.policy.selector],
+        paymentContextHash,
+        functionAbis: [
+          {
+            selector: fund.policy.selector,
+            signature: fund.policy.functionSignature
+          }
+        ],
+        paramsMatch: fund.policy.paramsMatch
+      }
+    });
+
+    assert.equal(fund.calldata.slice(0, 10), "0xf8388f0f");
+    assert.equal(fund.value, "5000000000000000");
+    assert.equal(review.decision, "allow");
+    assert.equal(review.decodedParams.paymentContextHash, paymentContextHash);
+    assert.equal(review.decodedParams.provider, providerEntry.merchantAddress);
+    assert.equal(review.decodedParams.amount, "5000000000000000");
+  });
+
+  it("builds ServiceEscrow refund calldata and blocks delivered refund state", () => {
+    const paymentContextHash = "0x" + "f".repeat(64);
+    const refund = buildServiceEscrowRefundCalldata({ paymentContextHash });
+    const review = clearSign({
+      chainId: providerEntry.chainId,
+      to: "0x3333333333333333333333333333333333333333",
+      calldata: refund.calldata,
+      expected: {
+        allowedSelectors: [refund.policy.selector],
+        paymentContextHash,
+        functionAbis: [
+          {
+            selector: refund.policy.selector,
+            signature: refund.policy.functionSignature
+          }
+        ],
+        paramsMatch: refund.policy.paramsMatch
+      }
+    });
+    const escrow = createServiceEscrow({
+      paymentContextHash,
+      payer: "0xCAW0000000000000000000000000000000000001",
+      provider: providerEntry.merchantAddress,
+      amount: "5"
+    });
+    const funded = fundServiceEscrow(escrow);
+    const delivered = markServiceEscrowDelivered(funded.account);
+    const refundDelivered = refundServiceEscrow(delivered.account, { reason: "late" });
+
+    assert.equal(refund.calldata.slice(0, 10), "0x7249fbb6");
+    assert.equal(review.decision, "allow");
+    assert.equal(review.decodedParams.paymentContextHash, paymentContextHash);
+    assert.equal(refundDelivered.decision, "block");
+  });
+
+  it("blocks ServiceEscrow contextHash mismatch", () => {
+    const paymentContextHash = "0x" + "1".repeat(64);
+    const fund = buildServiceEscrowFundCalldata({
+      paymentContextHash,
+      providerAddress: providerEntry.merchantAddress,
+      amount: "5"
+    });
+    const review = clearSign({
+      chainId: providerEntry.chainId,
+      to: "0x3333333333333333333333333333333333333333",
+      calldata: fund.calldata,
+      expected: {
+        allowedSelectors: [fund.policy.selector],
+        paymentContextHash: "0x" + "2".repeat(64),
+        functionAbis: [
+          {
+            selector: fund.policy.selector,
+            signature: fund.policy.functionSignature
+          }
+        ],
+        paramsMatch: {
+          ...fund.policy.paramsMatch,
+          paymentContextHash: "0x" + "2".repeat(64)
+        }
+      }
+    });
+
+    assert.equal(review.decision, "block");
+    assert.match(review.reason ?? "", /context_hash_mismatch|params_match_failed/);
+  });
+
+  it("blocks refund selector or params policy mismatch", () => {
+    const paymentContextHash = "0x" + "3".repeat(64);
+    const refund = buildServiceEscrowRefundCalldata({ paymentContextHash });
+    const selectorMismatch = clearSign({
+      chainId: providerEntry.chainId,
+      to: "0x3333333333333333333333333333333333333333",
+      calldata: refund.calldata,
+      expected: {
+        allowedSelectors: ["0xf8388f0f"],
+        paymentContextHash,
+        functionAbis: [
+          {
+            selector: "0xf8388f0f",
+            signature: "fund(bytes32,address,uint256)"
+          }
+        ],
+        paramsMatch: refund.policy.paramsMatch
+      }
+    });
+    const paramsMismatch = clearSign({
+      chainId: providerEntry.chainId,
+      to: "0x3333333333333333333333333333333333333333",
+      calldata: refund.calldata,
+      expected: {
+        allowedSelectors: [refund.policy.selector],
+        paymentContextHash,
+        functionAbis: [
+          {
+            selector: refund.policy.selector,
+            signature: refund.policy.functionSignature
+          }
+        ],
+        paramsMatch: {
+          paymentContextHash: "0x" + "4".repeat(64)
+        }
+      }
+    });
+
+    assert.equal(selectorMismatch.decision, "block");
+    assert.match(selectorMismatch.reason ?? "", /selector_not_allowed|function_abi_mismatch/);
+    assert.equal(paramsMismatch.decision, "block");
+    assert.match(paramsMismatch.reason ?? "", /params_match_failed/);
+  });
+
   it("blocks tampered service receipts", () => {
     const challenge = makeChallenge(providerEntry, 1_800_000_000_000).normalized;
     const metadata = scanMetadata({
@@ -491,6 +761,20 @@ describe("guard primitives", () => {
   });
 
   it("creates and verifies production-shaped dual receipts", () => {
+    const resource = "https://provider.example/paid/report";
+    const asset = providerEntry.tokenId;
+    const deliveryTimestamp = 1_800_000_000_000;
+    const providerResponseHash = guardSha256Hex(JSON.stringify({ ok: true }));
+    const responseSchemaHash = guardSha256Hex("schema-v1");
+    const serviceResultHash = buildServiceResultHash({
+      receiptId: "receipt-dual-1",
+      providerResponseHash,
+      responseSchemaHash,
+      resource,
+      asset,
+      deliveryTimestamp,
+      status: "delivered"
+    });
     const serviceReceipt = {
       receiptId: "receipt-dual-1",
       paymentContextHash: "0x" + "d".repeat(64),
@@ -498,27 +782,54 @@ describe("guard primitives", () => {
       cawWalletAddress: "0xCAW0000000000000000000000000000000000001",
       pactId: "pact-1",
       providerAddress: providerEntry.merchantAddress,
+      resource,
+      asset,
+      serviceResultHash,
+      cawEvidenceRef: "caw-live:receipt-dual-1",
       txHash: "0x" + "1".repeat(64),
       chainId: providerEntry.chainId,
       tokenId: providerEntry.tokenId,
       amount: "5",
-      providerResponseHash: guardSha256Hex(JSON.stringify({ ok: true })),
-      providerSignature: "hmac-sha256:delivery",
-      responseSchemaHash: guardSha256Hex("schema-v1"),
-      deliveryTimestamp: 1_800_000_000_000,
+      providerResponseHash,
+      providerSignature: signReceiptForDemo(providerEntry.publicKey, {
+        paymentContextHash: "0x" + "d".repeat(64),
+        providerResponseHash,
+        resource,
+        asset,
+        cawEvidenceRef: "caw-live:receipt-dual-1",
+        serviceResultHash,
+        responseSchemaHash,
+        deliveryTimestamp,
+        status: "delivered"
+      }),
+      responseSchemaHash,
+      deliveryTimestamp,
       status: "delivered",
       auditLogIds: ["audit-1"],
       evidenceMode: "live"
     };
-    const dualReceipt = createDualReceipt({ serviceReceipt });
+    const dualReceipt = createDualReceipt({
+      serviceReceipt,
+      providerPublicKey: providerEntry.publicKey,
+      resource,
+      cawEvidenceRef: serviceReceipt.cawEvidenceRef
+    });
     const verified = verifyDualReceipt({
       dualReceipt,
       expectedPaymentContextHash: serviceReceipt.paymentContextHash,
+      expectedRequestId: serviceReceipt.cawRequestId,
       expectedPactId: "pact-1",
       expectedProviderAddress: providerEntry.merchantAddress,
+      expectedMerchantAddress: providerEntry.merchantAddress,
+      expectedProviderPublicKey: providerEntry.publicKey,
       expectedAmount: "5",
+      expectedAsset: asset,
       expectedChainId: providerEntry.chainId,
-      expectedTokenId: providerEntry.tokenId
+      expectedTokenId: providerEntry.tokenId,
+      expectedResource: resource,
+      expectedServiceResultHash: serviceResultHash,
+      expectedPaymentReceiptHash: dualReceipt.paymentReceipt.paymentReceiptHash,
+      expectedDeliveryReceiptHash: dualReceipt.deliveryReceipt.deliveryReceiptHash
     });
     const tampered = verifyDualReceipt({
       dualReceipt: {
@@ -529,11 +840,19 @@ describe("guard primitives", () => {
         }
       },
       expectedPaymentContextHash: serviceReceipt.paymentContextHash,
+      expectedRequestId: serviceReceipt.cawRequestId,
       expectedPactId: "pact-1",
       expectedProviderAddress: providerEntry.merchantAddress,
+      expectedMerchantAddress: providerEntry.merchantAddress,
+      expectedProviderPublicKey: providerEntry.publicKey,
       expectedAmount: "5",
+      expectedAsset: asset,
       expectedChainId: providerEntry.chainId,
-      expectedTokenId: providerEntry.tokenId
+      expectedTokenId: providerEntry.tokenId,
+      expectedResource: resource,
+      expectedServiceResultHash: serviceResultHash,
+      expectedPaymentReceiptHash: dualReceipt.paymentReceipt.paymentReceiptHash,
+      expectedDeliveryReceiptHash: dualReceipt.deliveryReceipt.deliveryReceiptHash
     });
 
     assert.equal(dualReceipt.finalStatus, "delivered");
@@ -592,6 +911,12 @@ describe("guard pipeline", () => {
         evidenceMode,
         requestId: `request-${evidenceMode}`,
         txHash: `0x${evidenceMode === "fallback" ? "2" : "3".repeat(64)}`
+      });
+      scenario.input.providerChallenge = buildProviderChallengeForScenario({
+        provider: scenario.providerEntry,
+        builtContext: scenario.builtContext,
+        now: 1_800_000_000_000,
+        cawEvidenceRef: `caw-${evidenceMode}:request-${evidenceMode}`
       });
 
       const result = await runGuardPipeline(db, scenario.input);
@@ -728,6 +1053,19 @@ describe("guard pipeline", () => {
           validationAttestations: []
         }
       ],
+      erc8004LiveSource: {
+        source: "registry_contract",
+        status: "verified",
+        record: {
+          agentId: secondaryProvider.erc8004AgentId,
+          agentUri: secondaryProvider.erc8004AgentUri,
+          payTo: secondaryProvider.merchantAddress,
+          reputationScore: 95,
+          deliverySuccessRate: 0.99,
+          identityVerified: true,
+          validationAttestations: []
+        }
+      },
       challenge: challenge.rawChallenge,
       request: {
         method: "GET",
@@ -762,6 +1100,18 @@ describe("guard pipeline", () => {
         providerSignature: signReceiptForDemo(secondaryProvider.publicKey, {
           paymentContextHash: builtContext.paymentContextHash,
           providerResponseHash,
+          resource: "https://provider-two.example/paid/report",
+          asset: "0x0000000000000000000000000000000000000001",
+          cawEvidenceRef: "caw-live:mission-two-provider",
+          serviceResultHash: buildServiceResultHash({
+            receiptId: `receipt_${builtContext.paymentContextHash.slice(2, 18)}`,
+            providerResponseHash,
+            responseSchemaHash,
+            resource: "https://provider-two.example/paid/report",
+            asset: "0x0000000000000000000000000000000000000001",
+            deliveryTimestamp: now,
+            status: "paid"
+          }),
           responseSchemaHash,
           deliveryTimestamp: now,
           status: "paid"
@@ -776,6 +1126,78 @@ describe("guard pipeline", () => {
 
     assert.equal(result.decision, "allow");
     assert.equal(result.providerRegistryResult?.providerId, secondaryProvider.providerId);
+  });
+
+  it("prepares ServiceEscrow contract_call calldata and keeps fallback_required without live CAW evidence", async () => {
+    const db = makeDb();
+    const scenario = makePipelineScenario("mission-service-escrow", "100", {
+      serviceMode: "escrowed-delivery",
+      paymentOperation: "contract_call"
+    });
+    let cawCall;
+    scenario.input.providerChallenge.serviceEscrowAddress =
+      "0x3333333333333333333333333333333333333333";
+    scenario.input.cawAdapter = {
+      transferTokens: async () => {
+        throw new Error("escrowed contract_call must not use transferTokens");
+      },
+      contractCall: async (input) => {
+        cawCall = input;
+        return {
+          evidenceMode: "fallback",
+          requestId: input.requestId,
+          walletAddress: "unavailable",
+          decision: "fallback_required",
+          denial: {
+            code: "CAW_CONTRACT_CALL_NOT_CONFIGURED_FOR_TEST",
+            reason: "contract_call live CAW evidence is not configured in this test.",
+            details: {
+              contractAddress: input.contractAddress,
+              calldata: input.calldata
+            },
+            attemptedOperation: "contract_call",
+            paymentContextHash: input.paymentContextHash,
+            cawRequestId: input.requestId,
+            evidenceMode: "fallback"
+          }
+        };
+      }
+    };
+
+    const result = await runGuardPipeline(db, scenario.input);
+
+    assert.equal(result.decision, "fallback_required");
+    assert.equal(cawCall.contractAddress, "0x3333333333333333333333333333333333333333");
+    assert.equal(cawCall.calldata.slice(0, 10), "0xf8388f0f");
+    assert.equal(
+      cawCall.amount,
+      serviceEscrowAmountFromPaymentContext(
+        result.paymentContext.amount,
+        result.paymentContext.amountDecimals
+      )
+    );
+    assert.equal(result.clearsig.decision, "allow");
+    assert.equal(result.clearsig.decodedParams.paymentContextHash, result.paymentContextHash);
+    assert.equal(result.clearsig.decodedParams.provider, scenario.providerEntry.merchantAddress);
+  });
+
+  it("stops the guard with fallback_required when live ERC-8004 trust needs registration", async () => {
+    const db = makeDb();
+    const scenario = makePipelineScenario("mission-erc8004-needs-registration", "10");
+    scenario.input.trustRecords = [];
+    delete scenario.input.erc8004LiveSource;
+
+    const result = await runGuardPipeline(db, scenario.input);
+
+    assert.equal(result.decision, "fallback_required");
+    assert.equal(result.status, "blocked");
+    assert.equal(result.trustResult.trustSource, "unavailable");
+    assert.equal(result.trustResult.registrationStatus, "needs_registration");
+    assert.equal(result.trustResult.evidenceMode, "fallback");
+    assert.equal(result.evidenceBundle.live.length, 0);
+    assert.equal(result.evidenceBundle.fallback.length, 1);
+    assert.equal(result.evidenceBundle.fallback[0].layer, "erc8004");
+    assert.match(result.reason ?? "", /live ERC-8004 identity/);
   });
 });
 
@@ -795,6 +1217,45 @@ function makeProviderEntry(overrides = {}) {
     reputationThreshold: 60,
     validationTags: [],
     ...overrides
+  };
+}
+
+function buildProviderChallengeForScenario(input) {
+  const responseBody = { ok: true, paymentContextHash: input.builtContext.paymentContextHash };
+  const responseSchemaHash = guardSha256Hex("schema-v1");
+  const providerResponseHash = guardSha256Hex(JSON.stringify(responseBody));
+  const asset = "0x0000000000000000000000000000000000000001";
+  const serviceResultHash = buildServiceResultHash({
+    receiptId: `receipt_${input.builtContext.paymentContextHash.slice(2, 18)}`,
+    providerResponseHash,
+    responseSchemaHash,
+    resource: `${input.provider.origin}/paid/report`,
+    asset,
+    deliveryTimestamp: input.now,
+    status: "paid"
+  });
+  const cawEvidenceRef =
+    input.cawEvidenceRef ?? `caw-fallback:${input.builtContext.paymentContextHash.slice(2, 18)}`;
+
+  return {
+    providerCalldata: encodeTransferCalldata(input.provider.merchantAddress, "5"),
+    providerSignature: signReceiptForDemo(input.provider.publicKey, {
+      paymentContextHash: input.builtContext.paymentContextHash,
+      providerResponseHash,
+      resource: `${input.provider.origin}/paid/report`,
+      asset,
+      cawEvidenceRef,
+      ...(input.fallbackEvidenceRef !== undefined ? { fallbackEvidenceRef: input.fallbackEvidenceRef } : {}),
+      serviceResultHash,
+      responseSchemaHash,
+      deliveryTimestamp: input.now,
+      status: "paid"
+    }),
+    responseBody,
+    providerAddress: input.provider.merchantAddress,
+    providerPublicKey: input.provider.publicKey,
+    responseSchemaHash,
+    auditLogIds: ["audit-1"]
   };
 }
 
@@ -934,7 +1395,7 @@ function makeDb() {
   return db;
 }
 
-function makePipelineScenario(missionId, budgetLimitUsd) {
+function makePipelineScenario(missionId, budgetLimitUsd, overrides = {}) {
   const now = 1_800_000_000_000;
   const providerEntry = makeProviderEntry();
   const challenge = makeChallenge(providerEntry, now);
@@ -957,12 +1418,27 @@ function makePipelineScenario(missionId, budgetLimitUsd) {
     nonce: `nonce_${missionId}_${providerEntry.providerId}`,
     issuedAt: now,
     cawPactId: "pact-1",
-    serviceMode: "caw-fetch"
+    serviceMode: overrides.serviceMode ?? "caw-fetch",
+    ...(overrides.paymentOperation !== undefined
+      ? { operation: overrides.paymentOperation }
+      : {})
   });
 
   const responseBody = { ok: true, paymentContextHash: builtContext.paymentContextHash };
   const responseSchemaHash = guardSha256Hex("schema-v1");
   const providerResponseHash = guardSha256Hex(JSON.stringify(responseBody));
+  const resource = "https://provider.example/paid/report";
+  const asset = "0x0000000000000000000000000000000000000001";
+  const cawEvidenceRef = `caw-live:${missionId}`;
+  const serviceResultHash = buildServiceResultHash({
+    receiptId: `receipt_${builtContext.paymentContextHash.slice(2, 18)}`,
+    providerResponseHash,
+    responseSchemaHash,
+    resource,
+    asset,
+    deliveryTimestamp: now,
+    status: "paid"
+  });
 
   return {
     input: {
@@ -979,6 +1455,19 @@ function makePipelineScenario(missionId, budgetLimitUsd) {
           validationAttestations: []
         }
       ],
+      erc8004LiveSource: {
+        source: "registry_contract",
+        status: "verified",
+        record: {
+          agentId: providerEntry.erc8004AgentId,
+          agentUri: providerEntry.erc8004AgentUri,
+          payTo: providerEntry.merchantAddress,
+          reputationScore: 95,
+          deliverySuccessRate: 0.99,
+          identityVerified: true,
+          validationAttestations: []
+        }
+      },
       challenge: challenge.rawChallenge,
       request: {
         method: "GET",
@@ -996,7 +1485,10 @@ function makePipelineScenario(missionId, budgetLimitUsd) {
       reservedBudgetUsd: "1",
       amountDecimals: 6,
       cawPactId: "pact-1",
-      serviceMode: "caw-fetch",
+      serviceMode: overrides.serviceMode ?? "caw-fetch",
+      ...(overrides.paymentOperation !== undefined
+        ? { paymentOperation: overrides.paymentOperation }
+        : {}),
       cawAdapter: {
         transferTokens: async ({ requestId, missionId: currentMissionId }) => ({
           evidenceMode: "live",
@@ -1013,6 +1505,10 @@ function makePipelineScenario(missionId, budgetLimitUsd) {
         providerSignature: signReceiptForDemo(providerEntry.publicKey, {
           paymentContextHash: builtContext.paymentContextHash,
           providerResponseHash,
+          resource,
+          asset,
+          cawEvidenceRef,
+          serviceResultHash,
           responseSchemaHash,
           deliveryTimestamp: now,
           status: "paid"
@@ -1024,6 +1520,7 @@ function makePipelineScenario(missionId, budgetLimitUsd) {
         auditLogIds: ["audit-1"]
       }
     },
+    providerEntry,
     builtContext
   };
 }
@@ -1046,4 +1543,32 @@ function makePassingCawAdapter({ evidenceMode, requestId, txHash }) {
       decision: "allow"
     })
   };
+}
+
+function signPipelineProviderChallenge(providerPublicKey, builtContext, cawEvidenceRef, now) {
+  const providerResponseHash = guardSha256Hex(
+    JSON.stringify({ ok: true, paymentContextHash: builtContext.paymentContextHash })
+  );
+  const responseSchemaHash = guardSha256Hex("schema-v1");
+  const resource = "https://provider.example/paid/report";
+  const asset = "0x0000000000000000000000000000000000000001";
+  return signReceiptForDemo(providerPublicKey, {
+    paymentContextHash: builtContext.paymentContextHash,
+    providerResponseHash,
+    resource,
+    asset,
+    cawEvidenceRef,
+    serviceResultHash: buildServiceResultHash({
+      receiptId: `receipt_${builtContext.paymentContextHash.slice(2, 18)}`,
+      providerResponseHash,
+      responseSchemaHash,
+      resource,
+      asset,
+      deliveryTimestamp: now,
+      status: "paid"
+    }),
+    responseSchemaHash,
+    deliveryTimestamp: now,
+    status: "paid"
+  });
 }

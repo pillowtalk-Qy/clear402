@@ -1,0 +1,30 @@
+Manage Cobo Agentic Wallet wallets and perform on-chain operations.
+
+Local wallet commands (list, current) operate on credentials stored on this
+machine. Platform commands (get, balance, rename, archive, pair) call the Cobo
+Agentic Wallet service and require an active wallet with valid credentials.
+
+Run 'caw wallet --help' for a full list of subcommands.
+
+Usage:
+  caw wallet [command]
+
+Available Commands:
+  balance     List token balances, optionally filtered by token, chain, or address
+  current     Show the currently active wallet, or switch to another wallet when a UUID is provided
+  get         Get details for a wallet
+  list        List wallets stored on this machine
+  pair        Issue a one-time pairing token so a user can complete wallet ownership pairing
+  pair-status Check the status of a pending wallet ownership pairing
+  rename      Rename a wallet
+
+Flags:
+  -h, --help   help for wallet
+
+Global Flags:
+      --api-key string   API key for authentication
+      --api-url string   API base URL to target a specific environment (env: AGENT_WALLET_API_URL)
+      --timeout float    HTTP timeout in seconds (default 30)
+  -v, --verbose          Enable debug logging
+
+Use "caw wallet [command] --help" for more information about a command.

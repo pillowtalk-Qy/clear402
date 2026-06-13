@@ -1,0 +1,10 @@
+{
+  "command": "caw schema tx sign-message",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "probe_schema_tx_sign-message.stdout.txt",
+  "stderr": "probe_schema_tx_sign-message.stderr.txt",
+  "stdoutSha256": "6077512169d1fbcddaa024b3cc232f0764431caf9913b1af9f2421434f5fcb4e",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "collectedAt": "2026-06-13T20:58:33.318Z"
+}

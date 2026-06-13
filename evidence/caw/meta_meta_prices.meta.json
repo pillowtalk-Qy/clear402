@@ -1,0 +1,8 @@
+{
+  "command": "caw meta prices --asset USDC",
+  "exitCode": 2,
+  "signal": null,
+  "stdout": "meta_meta_prices.stdout.txt",
+  "stderr": "meta_meta_prices.stderr.txt",
+  "collectedAt": "2026-06-13T21:16:04.134Z"
+}

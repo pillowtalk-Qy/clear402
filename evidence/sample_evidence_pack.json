@@ -19,7 +19,7 @@
     "counts": {
       "live": 0,
       "fallback": 6,
-      "mock": 4
+      "mock": 5
     },
     "components": [
       {
@@ -33,9 +33,9 @@
         "note": "Deterministic local/demo challenge shape."
       },
       {
-        "component": "providerTrust",
+        "component": "erc8004Trust",
         "evidenceMode": "mock",
-        "note": "Demo provider registry and ERC-8004-style trust seed data."
+        "note": "Demo ERC-8004 trust seed data; not live_erc8004."
       },
       {
         "component": "paymentContext",
@@ -95,13 +95,25 @@
       "evidenceMode": "fallback"
     }
   },
-  "providerTrust": {
+  "erc8004Trust": {
     "evidenceMode": "mock",
     "agentId": "erc8004:agent:runtime-demo",
     "agentUri": "https://127.0.0.1:4010/paid/report",
+    "trustSource": "demo_erc8004",
+    "registrationStatus": "needs_registration",
+    "decision": "require_approval",
+    "identityVerified": false,
+    "endpointMatches": true,
+    "payToMatches": true,
     "reputationScore": 84,
     "deliverySuccessRate": 0.97,
-    "notice": "Local demo trust record only; not live ERC-8004 network data."
+    "demoFallbackUsed": true,
+    "liveSource": {
+      "source": "8004scan",
+      "status": "needs_registration",
+      "reference": "https://8004scan.io/api/v1/public/agents/search?q=clear402"
+    },
+    "notice": "Local demo trust record only; not live ERC-8004 network data. Clear402 provider identity needs registration before live trust can be claimed."
   },
   "paymentContext": {
     "version": "clear402.payment.v1",
@@ -196,7 +208,7 @@
     "Do not claim mainnet execution.",
     "Do not claim production readiness.",
     "Do not claim unrestricted CAW execution.",
-    "Do not claim provider/trust seed data is live registry truth."
+    "Do not claim provider/trust seed data is live registry truth.",
+    "Do not claim demo_erc8004 as live_erc8004."
   ]
 }
-

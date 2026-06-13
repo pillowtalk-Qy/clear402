@@ -1,0 +1,14 @@
+{
+  "name": "live_verify_20260613T2214Z_official_x402_curl_402",
+  "command": "curl -sS -i --max-time 10 http://127.0.0.1:4021/weather?city=Tokyo",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T22:16:31.839Z",
+  "ended_at": "2026-06-13T22:16:32.811Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "timed_out": false,
+  "notes": {
+    "expected": "HTTP 402 Payment Required from official x402 Express example"
+  }
+}

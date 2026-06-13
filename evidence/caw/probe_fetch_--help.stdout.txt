@@ -1,0 +1,34 @@
+Perform an HTTP request and automatically handle 402 Payment Required
+responses using the x402 or MPP machine-payment protocols.
+
+<pact-id> is the pact UUID used to resolve the paying wallet and the
+pact-scoped API key (same behavior as 'caw tx transfer <pact-id>'). <url> is
+the endpoint to fetch. When a 402 is received, caw detects the payment
+protocol from the response headers (unless overridden), pays using the wallet
+bound to the pact, and retries the request with the payment headers.
+
+Example:
+  caw fetch <pact-uuid> https://api.example.com/data --network eip155:8453
+
+Usage:
+  caw fetch <pact-id> <url> [flags]
+
+Flags:
+      --asset string         Token [REDACTED] address filter that excludes payment options for other tokens (case-insensitive); x402 only
+  -d, --data string          Raw HTTP request body to send with the request
+      --deposit string       Session deposit amount in raw token [REDACTED] defaults to per_request_amount multiplied by 10; MPP session intent only
+      --dry-run              Print the payment challenge received in the 402 response and exit without calling the payment API
+  -H, --header stringArray   HTTP request header in Key: Value format; may be repeated
+  -h, --help                 help for fetch
+      --json string          Send JSON data (sets Content-Type/Accept to application/json, defaults method to POST)
+      --max-amount string    Maximum acceptable raw token [REDACTED] payment options requiring more than this amount are excluded; x402 only
+  -X, --method string        HTTP method to use for the request (e.g. GET, POST, PUT) (default "GET")
+      --network string       CAIP-2 network filter that excludes payment options on other networks (e.g. eip155:8453); x402 only
+  -o, --output string        Output mode: body prints the response body only, full includes status code and headers (default "body")
+  -p, --protocol string      Payment protocol to use: auto detects from response headers, x402 forces x402, mpp forces MPP (default "auto")
+
+Global Flags:
+      --api-key [REDACTED]   API key for authentication
+      --api-url string   API base URL to target a specific environment (env: AGENT_WALLET_API_URL)
+      --timeout float    HTTP timeout in seconds (default 30)
+  -v, --verbose          Enable debug logging

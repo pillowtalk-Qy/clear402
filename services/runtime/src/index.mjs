@@ -27,6 +27,15 @@ export {
   refundServiceEscrow
 } from "./escrow/service_escrow.ts";
 export {
+  SERVICE_ESCROW_DELIVER_SELECTOR,
+  SERVICE_ESCROW_FUNCTION_ABIS,
+  SERVICE_ESCROW_FUND_SELECTOR,
+  SERVICE_ESCROW_REFUND_SELECTOR,
+  buildServiceEscrowFundCalldata,
+  buildServiceEscrowRefundCalldata,
+  serviceEscrowAmountFromPaymentContext
+} from "./escrow/service_escrow_onchain.ts";
+export {
   ATTACK_NAMES,
   ATTACK_SCENARIOS
 } from "./attack_lab/scenarios.ts";

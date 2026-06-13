@@ -1,0 +1,7 @@
+{
+  "active_pacts_count": 0,
+  "healthy": true,
+  "pending_txs_count": 0,
+  "wallet_paired": true,
+  "wallet_status": "active"
+}

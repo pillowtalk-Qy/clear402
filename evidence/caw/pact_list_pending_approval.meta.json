@@ -1,0 +1,11 @@
+{
+  "name": "pact_list_pending_approval",
+  "cmd": "caw pact list --status pending_approval --limit 20",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T21:54:25.430Z",
+  "ended_at": "2026-06-13T21:54:27.873Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "timed_out": false
+}

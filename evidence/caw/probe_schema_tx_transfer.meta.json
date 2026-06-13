@@ -1,0 +1,10 @@
+{
+  "command": "caw schema tx transfer",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "probe_schema_tx_transfer.stdout.txt",
+  "stderr": "probe_schema_tx_transfer.stderr.txt",
+  "stdoutSha256": "315fc5d50ccef5bee0d07f466af3f97b3382b63546cae8f52c556eb1779bd764",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "collectedAt": "2026-06-13T20:58:35.032Z"
+}

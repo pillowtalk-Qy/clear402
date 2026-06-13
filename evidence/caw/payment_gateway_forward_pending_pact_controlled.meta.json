@@ -1,0 +1,11 @@
+{
+  "name": "payment_gateway_forward_pending_pact_controlled",
+  "cmd": "sh -lc 'caw payment gateway 118c2eae-4258-4b75-a36b-c2e1097890b0 --mode forward --protocol x402 --listen 127.0.0.1:8402 > /Users/qy/Documents/clear402/evidence/caw/payment_gateway_forward_pending_pact.stdout.txt 2> /Users/qy/Documents/clear402/evidence/caw/payment_gateway_forward_pending_pact.stderr.txt & pid=$!; sleep 5; kill $pid; wait $pid || true'",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T21:55:54.399Z",
+  "ended_at": "2026-06-13T21:55:59.486Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "timed_out": false
+}

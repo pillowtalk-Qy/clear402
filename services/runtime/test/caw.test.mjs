@@ -433,6 +433,54 @@ describe("CAW live executor", () => {
     assert.equal(calls.filter((call) => call.method === "transferTokens").length, 0);
   });
 
+  it("routes contract_call through CAW contractCall with calldata and value", async () => {
+    const calls = [];
+    const executor = createCawLiveExecutor({
+      env: cawEnv(),
+      sdkLoader: async () =>
+        fakeCawSdk({
+          calls,
+          auditItems: [
+            {
+              id: 103,
+              request: { request_id: "clear402:contract-call" },
+              resource_id: "clear402:contract-call",
+              result: "allowed"
+            }
+          ]
+        })
+    });
+
+    const result = await executor({
+      paymentContext: paymentContext({
+        cawPactId: "pact_test",
+        chainId: "BASE_SEPOLIA",
+        tokenId: "BASE_SEPOLIA_USDC",
+        operation: "contract_call",
+        serviceMode: "escrowed-delivery",
+        amount: "10000",
+        amountDecimals: 6
+      }),
+      paymentContextHash: "0x" + "a".repeat(64),
+      attemptedOperation: "contract_call",
+      requestId: "clear402:contract-call",
+      contractAddress: "0x3333333333333333333333333333333333333333",
+      calldata: "0xf8388f0f" + "a".repeat(64),
+      amount: "10000"
+    });
+
+    const contractCall = calls.find((call) => call.method === "contractCall");
+
+    assert.equal(result.ok, true);
+    assert.equal(calls.filter((call) => call.method === "transferTokens").length, 0);
+    assert.equal(contractCall.body.pact_id, "pact_test");
+    assert.equal(contractCall.body.chain_id, "BASE_SEPOLIA");
+    assert.equal(contractCall.body.contract_addr, "0x3333333333333333333333333333333333333333");
+    assert.equal(contractCall.body.value, "0.01");
+    assert.equal(contractCall.body.calldata, "0xf8388f0f" + "a".repeat(64));
+    assert.equal(contractCall.body.request_id, "clear402:contract-call");
+  });
+
   it("reuses the stable request_id result for idempotency", async () => {
     const calls = [];
     const executor = createCawLiveExecutor({
@@ -536,6 +584,8 @@ function fakeCawSdk({
   calls = [],
   transferResult,
   transferError,
+  contractCallResult,
+  contractCallError,
   transactionRecord,
   auditItems
 } = {}) {
@@ -560,6 +610,24 @@ function fakeCawSdk({
               status: 900,
               status_display: "Success",
               ...transferResult
+            }
+          }
+        };
+      }
+      async contractCall(walletUuid, body, apiKey) {
+        if (contractCallError) {
+          throw contractCallError;
+        }
+        calls.push({ walletUuid, body, apiKey, method: "contractCall" });
+        return {
+          data: {
+            result: {
+              id: "contract-call-submit-1",
+              request_id: body.request_id,
+              transaction_hash: "0x" + "9".repeat(64),
+              status: 900,
+              status_display: "Success",
+              ...contractCallResult
             }
           }
         };

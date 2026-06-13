@@ -1,0 +1,27 @@
+Manage pacts — delegated access agreements that grant an operator agent
+permission to act on a wallet owner's behalf within defined policy limits.
+
+Use submit to request a new pact, status or show to inspect one, and revoke to
+terminate an active pact.
+
+Usage:
+  caw pact [command]
+
+Available Commands:
+  events      Get lifecycle event history for a pact
+  list        List pacts, filterable by status
+  revoke      Revoke an active pact (wallet owner only)
+  show        Show full pact detail
+  status      Check pact status (triggers lazy activation)
+  submit      Submit a new pact for approval
+
+Flags:
+  -h, --help   help for pact
+
+Global Flags:
+      --api-key [REDACTED]   API key for authentication
+      --api-url string   API base URL to target a specific environment (env: AGENT_WALLET_API_URL)
+      --timeout float    HTTP timeout in seconds (default 30)
+  -v, --verbose          Enable debug logging
+
+Use "caw pact [command] --help" for more information about a command.

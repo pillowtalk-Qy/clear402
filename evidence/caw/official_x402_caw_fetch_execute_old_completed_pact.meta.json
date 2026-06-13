@@ -1,0 +1,11 @@
+{
+  "name": "official_x402_caw_fetch_execute_old_completed_pact",
+  "cmd": "caw fetch 71e60376-8959-4f25-ab7e-83fc3e8e196c 'http://127.0.0.1:4021/weather?city=Tokyo' --protocol x402 --network eip155:84532 --asset 0x036cbd53842c5426634e7929541ec2318f3dcf7e --max-amount 1000 --output full",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T21:43:44.226Z",
+  "ended_at": "2026-06-13T21:43:55.319Z",
+  "exit_code": 1,
+  "signal": null,
+  "error": null,
+  "timed_out": false
+}

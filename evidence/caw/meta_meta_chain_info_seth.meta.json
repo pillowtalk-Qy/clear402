@@ -1,0 +1,8 @@
+{
+  "command": "caw meta chain-info --chain-id SETH",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "meta_meta_chain_info_seth.stdout.txt",
+  "stderr": "meta_meta_chain_info_seth.stderr.txt",
+  "collectedAt": "2026-06-13T21:16:06.401Z"
+}

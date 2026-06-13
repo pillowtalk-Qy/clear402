@@ -1,0 +1,73 @@
+Scope: all 53 workspace projects
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +1705
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 1705, reused 1260, downloaded 0, added 367
+Progress: resolved 1705, reused 1260, downloaded 19, added 702
+Progress: resolved 1705, reused 1260, downloaded 40, added 954
+Progress: resolved 1705, reused 1260, downloaded 52, added 1205
+[WARN] Tarball download average speed 36 KiB/s (size 60 KiB) is below 50 KiB/s: https://registry.npmjs.org/@typescript-eslint/scope-manager/-/scope-manager-8.48.0.tgz (GET)
+Progress: resolved 1705, reused 1260, downloaded 66, added 1424
+[WARN] Tarball download average speed 31 KiB/s (size 43 KiB) is below 50 KiB/s: https://registry.npmjs.org/@solana/options/-/options-2.3.0.tgz (GET)
+Progress: resolved 1705, reused 1260, downloaded 71, added 1426
+[WARN] Tarball download average speed 31 KiB/s (size 51 KiB) is below 50 KiB/s: https://registry.npmjs.org/commander/-/commander-14.0.0.tgz (GET)
+Progress: resolved 1705, reused 1260, downloaded 94, added 1428
+Progress: resolved 1705, reused 1260, downloaded 117, added 1430
+[WARN] Tarball download average speed 33 KiB/s (size 59 KiB) is below 50 KiB/s: https://registry.npmjs.org/@solana/rpc-subscriptions/-/rpc-subscriptions-3.0.3.tgz (GET)
+[WARN] Tarball download average speed 39 KiB/s (size 48 KiB) is below 50 KiB/s: https://registry.npmjs.org/@solana/rpc-subscriptions-spec/-/rpc-subscriptions-spec-3.0.3.tgz (GET)
+[WARN] Tarball download average speed 13 KiB/s (size 13 KiB) is below 50 KiB/s: https://registry.npmjs.org/@redis/json/-/json-5.12.1.tgz (GET)
+[WARN] Tarball download average speed 15 KiB/s (size 48 KiB) is below 50 KiB/s: https://registry.npmjs.org/@solana/transactions/-/transactions-3.0.3.tgz (GET)
+Progress: resolved 1705, reused 1260, downloaded 133, added 1432
+Progress: resolved 1705, reused 1260, downloaded 149, added 1516
+[WARN] Tarball download average speed 27 KiB/s (size 99 KiB) is below 50 KiB/s: https://registry.npmjs.org/@solana-program/token/-/token-0.6.0.tgz (GET)
+[WARN] Tarball download average speed 24 KiB/s (size 53 KiB) is below 50 KiB/s: https://registry.npmjs.org/@solana/sysvars/-/sysvars-3.0.3.tgz (GET)
+Progress: resolved 1705, reused 1260, downloaded 158, added 1647
+Progress: resolved 1705, reused 1260, downloaded 169, added 1658
+Progress: resolved 1705, reused 1260, downloaded 178, added 1667
+[WARN] Tarball download average speed 9 KiB/s (size 70 KiB) is below 50 KiB/s: https://registry.npmjs.org/@typescript-eslint/typescript-estree/-/typescript-estree-8.48.0.tgz (GET)
+Progress: resolved 1705, reused 1260, downloaded 186, added 1678
+[WARN] Tarball download average speed 42 KiB/s (size 229 KiB) is below 50 KiB/s: https://registry.npmjs.org/@x402/core/-/core-2.11.0.tgz (GET)
+Progress: resolved 1705, reused 1260, downloaded 192, added 1684
+[WARN] Tarball download average speed 29 KiB/s (size 52 KiB) is below 50 KiB/s: https://registry.npmjs.org/chai/-/chai-5.3.1.tgz (GET)
+Progress: resolved 1705, reused 1260, downloaded 195, added 1687
+Progress: resolved 1705, reused 1260, downloaded 196, added 1688
+Progress: resolved 1705, reused 1260, downloaded 198, added 1690
+[WARN] Tarball download average speed 31 KiB/s (size 538 KiB) is below 50 KiB/s: https://registry.npmjs.org/rollup/-/rollup-4.46.4.tgz (GET)
+Progress: resolved 1705, reused 1260, downloaded 201, added 1693
+Progress: resolved 1705, reused 1260, downloaded 202, added 1693
+Progress: resolved 1705, reused 1260, downloaded 202, added 1694
+Progress: resolved 1705, reused 1260, downloaded 203, added 1695
+[WARN] Tarball download average speed 45 KiB/s (size 1007 KiB) is below 50 KiB/s: https://registry.npmjs.org/@rollup/rollup-darwin-arm64/-/rollup-darwin-arm64-4.46.4.tgz (GET)
+Progress: resolved 1705, reused 1260, downloaded 204, added 1696
+Progress: resolved 1705, reused 1260, downloaded 205, added 1696
+Progress: resolved 1705, reused 1260, downloaded 206, added 1698
+Progress: resolved 1705, reused 1260, downloaded 207, added 1699
+Progress: resolved 1705, reused 1260, downloaded 208, added 1700
+Progress: resolved 1705, reused 1260, downloaded 209, added 1700
+Progress: resolved 1705, reused 1260, downloaded 209, added 1702
+Progress: resolved 1705, reused 1260, downloaded 210, added 1703
+Progress: resolved 1705, reused 1260, downloaded 211, added 1703
+Progress: resolved 1705, reused 1260, downloaded 211, added 1704
+Progress: resolved 1705, reused 1260, downloaded 212, added 1704
+Progress: resolved 1705, reused 1260, downloaded 212, added 1705, done
+.../node_modules/protobufjs postinstall$ node scripts/postinstall
+.../sharp@0.34.5/node_modules/sharp install$ node install/check.js || npm run build
+.../node_modules/utf-8-validate install$ node-gyp-build
+.../node_modules/bufferutil install$ node-gyp-build
+.../esbuild@0.25.9/node_modules/esbuild postinstall$ node install.js
+.../node_modules/protobufjs postinstall: Done
+.../node_modules/unrs-resolver postinstall$ napi-postinstall unrs-resolver 1.11.1 check
+.../esbuild@0.25.9/node_modules/esbuild postinstall: Done
+.../node_modules/unrs-resolver postinstall: Done
+.../node_modules/bufferutil install: Done
+.../sharp@0.34.5/node_modules/sharp install: Done
+.../node_modules/utf-8-validate install: Done
+
+devDependencies:
++ prettier-linter-helpers 1.0.1
++ tsup 8.5.0
++ turbo 2.5.6
++ typescript 5.9.3
+
+Done in 1m 2.6s using pnpm v11.1.1

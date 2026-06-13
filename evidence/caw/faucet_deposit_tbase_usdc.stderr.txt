@@ -1,0 +1,69 @@
+{
+  "code": "FAUCET_TOKEN_NOT_AVAILABLE",
+  "details": {},
+  "error": true,
+  "message": "400 Bad Request {\"success\":false,\"error\":{\"code\":\"FAUCET_TOKEN_NOT_AVAILABLE\",\"reason\":\"token_not_available\",\"details\":{\"token_id\":\"TBASE_USDC\"}},\"suggestion\":\"Call the list faucet tokens endpoint to see supported tokens.\",\"api_request_uuid\":\"8a1b66d7eb83bce4f5fe0d0d035014bc\"}",
+  "suggestion": "Call the list faucet tokens endpoint to see supported tokens.",
+  "suggestions": [
+    {
+      "command": "caw faucet deposit",
+      "description": "Request a testnet token deposit from the Cobo faucet to an on-chain address. Example: caw faucet deposit --address \u003con-chain-address\u003e --token-id SOLDEV_SOL_USDC",
+      "usage": "caw faucet deposit [flags]",
+      "flags": [
+        {
+          "name": "address",
+          "type": "string",
+          "required": true,
+          "description": "On-chain address to receive the testnet tokens (required)"
+        },
+        {
+          "name": "api-key",
+          "type": "string",
+          "description": "API key for authentication"
+        },
+        {
+          "name": "api-url",
+          "type": "string",
+          "description": "API base URL to target a specific environment (env: AGENT_WALLET_API_URL)"
+        },
+        {
+          "name": "context",
+          "type": "string",
+          "description": "Request context as JSON, saved with the response ID for tracking"
+        },
+        {
+          "name": "help",
+          "type": "bool",
+          "default": "false",
+          "description": "help for deposit"
+        },
+        {
+          "name": "timeout",
+          "type": "float64",
+          "default": "30",
+          "description": "HTTP timeout in seconds"
+        },
+        {
+          "name": "token-id",
+          "type": "string",
+          "required": true,
+          "description": "Testnet token ID to request, e.g. SOLDEV_SOL_USDC. Use `caw faucet tokens` to list available tokens (required)"
+        },
+        {
+          "name": "verbose",
+          "type": "bool",
+          "default": "false",
+          "description": "Enable debug logging"
+        }
+      ],
+      "exit_codes": {
+        "0": "success",
+        "1": "generic error",
+        "4": "authentication or permission failure",
+        "5": "policy denied",
+        "6": "insufficient balance",
+        "7": "network error (retryable)"
+      }
+    }
+  ]
+}

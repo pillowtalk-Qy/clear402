@@ -1,0 +1,143 @@
+{
+  "message": "",
+  "meta": {
+    "total": 12
+  },
+  "result": {
+    "data": [
+      {
+        "chain_id": "ARBITRUM_ETH",
+        "chain_type": "ETH",
+        "coinbase_maturity": 0,
+        "confirming_threshold": 100,
+        "explorer_address_url": "https://arbiscan.io/address/{address}",
+        "explorer_tx_url": "https://arbiscan.io/tx/{txn_id}",
+        "icon_url": "https://d.cobo.com/public/logos/ARB.png",
+        "require_memo": false,
+        "symbol": "Arbitrum"
+      },
+      {
+        "chain_id": "AVAXC",
+        "chain_type": "ETH",
+        "coinbase_maturity": 0,
+        "confirming_threshold": 18,
+        "explorer_address_url": "https://avascan.info/blockchain/c/address/{address}",
+        "explorer_tx_url": "https://avascan.info/blockchain/c/tx/{txn_id}",
+        "icon_url": "https://d.cobo.com/public/logos/AVAXC-logo.png",
+        "require_memo": false,
+        "symbol": "Avalanche C-Chain"
+      },
+      {
+        "chain_id": "BASE_ETH",
+        "chain_type": "ETH",
+        "coinbase_maturity": 0,
+        "confirming_threshold": 100,
+        "explorer_address_url": "https://basescan.org/address/{address}",
+        "explorer_tx_url": "https://basescan.org/tx/{txn_id}",
+        "icon_url": "https://d.cobo.com/public/logos/BSAE.png",
+        "require_memo": false,
+        "symbol": "Base"
+      },
+      {
+        "chain_id": "BSC_BNB",
+        "chain_type": "ETH",
+        "coinbase_maturity": 0,
+        "confirming_threshold": 15,
+        "explorer_address_url": "https://bscscan.com/address/{address}",
+        "explorer_tx_url": "https://bscscan.com/tx/{txn_id}",
+        "icon_url": "https://d.cobo.com/public/logos/BNB%403x.png",
+        "require_memo": false,
+        "symbol": "BNB Smart Chain"
+      },
+      {
+        "chain_id": "ETH",
+        "chain_type": "ETH",
+        "coinbase_maturity": 0,
+        "confirming_threshold": 64,
+        "explorer_address_url": "https://etherscan.io/address/{address}",
+        "explorer_tx_url": "https://etherscan.io/tx/{txn_id}",
+        "icon_url": "https://d.cobo.com/public/logos/eth%403x.png",
+        "require_memo": false,
+        "symbol": "Ethereum"
+      },
+      {
+        "chain_id": "HYPEREVM_HYPE",
+        "chain_type": "ETH",
+        "coinbase_maturity": 0,
+        "confirming_threshold": 30,
+        "explorer_address_url": "https://hyperevmscan.io/address/{address}",
+        "explorer_tx_url": "https://hyperevmscan.io/tx/{txn_id}",
+        "icon_url": "https://d.cobo.com/public/logos/HYPEREVM_HYPE.png",
+        "require_memo": false,
+        "symbol": "HyperEVM Mainnet"
+      },
+      {
+        "chain_id": "MATIC",
+        "chain_type": "ETH",
+        "coinbase_maturity": 0,
+        "confirming_threshold": 128,
+        "explorer_address_url": "https://polygonscan.com/address/{address}",
+        "explorer_tx_url": "https://polygonscan.com/tx/{txn_id}",
+        "icon_url": "https://d.cobo.com/apk/android/MATIC.png",
+        "require_memo": false,
+        "symbol": "Polygon"
+      },
+      {
+        "chain_id": "OPT_ETH",
+        "chain_type": "ETH",
+        "coinbase_maturity": 0,
+        "confirming_threshold": 100,
+        "explorer_address_url": "https://optimistic.etherscan.io/address/{address}",
+        "explorer_tx_url": "https://optimistic.etherscan.io/tx/{txn_id}",
+        "icon_url": "https://d.cobo.com/apk/android/OP.png",
+        "require_memo": false,
+        "symbol": "Optimism"
+      },
+      {
+        "chain_id": "SETH",
+        "chain_type": "ETH",
+        "coinbase_maturity": 0,
+        "confirming_threshold": 64,
+        "explorer_address_url": "https://sepolia.etherscan.io/address/{address}",
+        "explorer_tx_url": "https://sepolia.etherscan.io/tx/{txn_id}",
+        "icon_url": "https://d.cobo.com/public/logos/eth%403x.png",
+        "require_memo": false,
+        "symbol": "Ethereum Sepolia Testnet"
+      },
+      {
+        "chain_id": "SOL",
+        "chain_type": "SOL",
+        "coinbase_maturity": 0,
+        "confirming_threshold": 1,
+        "explorer_address_url": "https://explorer.solana.com/address/{address}",
+        "explorer_tx_url": "https://explorer.solana.com/tx/{txn_id}",
+        "icon_url": "https://d.cobo.com/public/logos/SOL-logo%403x.png",
+        "require_memo": false,
+        "symbol": "Solana Mainnet"
+      },
+      {
+        "chain_id": "SOLDEV_SOL",
+        "chain_type": "SOL",
+        "coinbase_maturity": 0,
+        "confirming_threshold": 1,
+        "explorer_address_url": "https://explorer.solana.com/address/{address}?cluster=devnet",
+        "explorer_tx_url": "https://explorer.solana.com/tx/{txn_id}?cluster=devnet",
+        "icon_url": "https://d.cobo.com/public/logos/SOL-logo%403x.png",
+        "require_memo": false,
+        "symbol": "Solana Devnet"
+      },
+      {
+        "chain_id": "TBASE_SETH",
+        "chain_type": "ETH",
+        "coinbase_maturity": 0,
+        "confirming_threshold": 100,
+        "explorer_address_url": "https://sepolia.basescan.org/address/{address}",
+        "explorer_tx_url": "https://sepolia.basescan.org/tx/{txn_id}",
+        "icon_url": "https://d.cobo.com/public/logos/BSAE.png",
+        "require_memo": false,
+        "symbol": "Base Sepolia Testnet"
+      }
+    ]
+  },
+  "success": true
+}

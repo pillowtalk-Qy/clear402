@@ -1,0 +1,33 @@
+{
+  "message": "",
+  "meta": {
+    "before": "cAgAGVA3GvYaA7g01TdsbQRCQ4rfqSM6B6A",
+    "has_more": false
+  },
+  "result": {
+    "events": [
+      {
+        "created_at": "2026-06-12T12:40:05.881472Z",
+        "event_type": "submitted",
+        "id": "ee0d354d-db1b-4110-90e2-b7ea48ce81e8",
+        "pact_id": "71e60376-8959-4f25-ab7e-83fc3e8e196c"
+      },
+      {
+        "created_at": "2026-06-12T12:40:24.163147Z",
+        "event_type": "activated",
+        "id": "bb5dee60-a588-40c1-96bd-0b1130ca2439",
+        "pact_id": "71e60376-8959-4f25-ab7e-83fc3e8e196c"
+      },
+      {
+        "created_at": "2026-06-12T13:28:07.093277Z",
+        "event_type": "completed",
+        "id": "7c306b48-dd43-401a-9e65-16cd347066a7",
+        "metadata": {
+          "reason": "tx_count>=1"
+        },
+        "pact_id": "71e60376-8959-4f25-ab7e-83fc3e8e196c"
+      }
+    ]
+  },
+  "success": true
+}

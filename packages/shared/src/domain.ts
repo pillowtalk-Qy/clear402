@@ -211,8 +211,14 @@ export interface ServiceReceipt {
   cawWalletAddress: string;
   pactId: string;
   providerAddress: string;
+  resource?: string;
+  asset?: string;
+  serviceResultHash?: string;
+  cawEvidenceRef?: string;
+  fallbackEvidenceRef?: string;
   facilitatorUrlHash?: string;
   txHash?: string;
+  coboTransactionId?: string;
   chainId: string;
   tokenId: string;
   amount: string;
@@ -229,6 +235,8 @@ export interface ServiceReceipt {
 
 export interface ERC8004TrustResult {
   agentId: string;
+  trustSource: "live_erc8004" | "demo_erc8004" | "unavailable";
+  registrationStatus: "registered" | "needs_registration" | "unavailable";
   identityVerified: boolean;
   endpointMatches: boolean;
   payToMatches: boolean;
@@ -244,8 +252,15 @@ export interface ERC8004TrustResult {
     issuer: string;
     evidenceUri?: string;
   }>;
-  decision: "allow" | "require_approval" | "block";
+  decision: "allow" | "require_approval" | "block" | "fallback_required";
   reason?: string;
+  liveSource?: {
+    source: "registry_contract" | "8004scan" | "official_indexer";
+    status: "verified" | "unavailable" | "needs_registration";
+    reference?: string;
+    checkedAt?: number;
+  };
+  demoFallbackUsed: boolean;
   evidenceMode: EvidenceMode;
 }
 

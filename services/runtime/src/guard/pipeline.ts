@@ -24,7 +24,11 @@ import {
 } from "./payment_context.ts";
 import { normalizeX402Challenge, type NormalizedX402Challenge } from "../x402/challenge_normalizer.ts";
 import { validateProviderRegistry, type ProviderRegistryValidationResult } from "../x402/provider_registry.ts";
-import { validateERC8004Trust, type ERC8004TrustRecord } from "../x402/erc8004_trust_adapter.ts";
+import {
+  validateERC8004Trust,
+  type ERC8004LiveSourceResult,
+  type ERC8004TrustRecord
+} from "../x402/erc8004_trust_adapter.ts";
 import { scanMetadata, type MetadataTriple } from "./metadata_firewall.ts";
 import {
   ensureProvider,
@@ -36,11 +40,21 @@ import {
 } from "./quote_lock.ts";
 import { hashObject, sha256Hex } from "./hash.ts";
 import { recordGuardEvent, listGuardEvents } from "./events.ts";
-import { verifyServiceReceipt, type VerifyServiceReceiptInput } from "../receipt/receipt_verifier.ts";
+import {
+  buildServiceResultHash,
+  verifyServiceReceipt,
+  type VerifyServiceReceiptInput
+} from "../receipt/receipt_verifier.ts";
 import {
   verifySignedProviderQuote,
   type ProviderQuoteVerificationResult
 } from "../x402/provider_quote.ts";
+import {
+  SERVICE_ESCROW_FUNCTION_ABIS,
+  SERVICE_ESCROW_FUND_SELECTOR,
+  buildServiceEscrowFundCalldata,
+  serviceEscrowAmountFromPaymentContext
+} from "../escrow/service_escrow_onchain.ts";
 
 export interface CawAdapterLike {
   transferTokens(input: {
@@ -127,6 +141,7 @@ export interface GuardPipelineInput {
   missionId: string;
   providerRegistryEntries: ProviderRegistryEntry[];
   trustRecords: ERC8004TrustRecord[];
+  erc8004LiveSource?: ERC8004LiveSourceResult;
   challenge: unknown;
   request: {
     method: "GET" | "POST";
@@ -153,6 +168,7 @@ export interface GuardPipelineInput {
     responseSchemaHash?: string;
     responseHeaders?: Record<string, string | string[] | undefined>;
     providerCalldata?: string;
+    serviceEscrowAddress?: string;
     providerSignature?: string;
     providerPublicKey?: string;
     providerAddress?: string;
@@ -261,6 +277,7 @@ function inferEventEvidenceMode(evidence: Record<string, unknown>, decision: Gua
     evidenceModeFromRecord(nestedRecord(evidence, ["cawEvidence"])),
     evidenceModeFromRecord(nestedRecord(evidence, ["receipt"])),
     evidenceModeFromRecord(nestedRecord(evidence, ["receiptResult", "receipt"])),
+    evidenceModeFromRecord(nestedRecord(evidence, ["trustResult"])),
     evidenceModeFromRecord(nestedRecord(evidence, ["metadataFirewall"])),
     evidenceModeFromRecord(nestedRecord(evidence, ["challenge"]))
   ].filter((mode): mode is EvidenceMode => mode !== undefined);
@@ -448,15 +465,25 @@ function hasCompleteLiveCawEvidence(cawEvidence: {
   );
 }
 
+function isEscrowContractCall(input: {
+  operation: PaymentOperation;
+  serviceMode: GuardPipelineInput["serviceMode"];
+}): boolean {
+  return input.operation === "contract_call" && input.serviceMode === "escrowed-delivery";
+}
+
 async function executeCawOperation(input: {
   cawAdapter: CawAdapterLike;
   operation: PaymentOperation;
+  serviceMode: GuardPipelineInput["serviceMode"];
   builtContext: BuiltPaymentContext;
   missionId: string;
   providerEntry: ProviderRegistryEntry;
   challenge: NormalizedX402Challenge;
   cawPactId: string;
+  contractAddress?: string;
   providerCalldata?: string;
+  contractCallValue?: string;
 }): Promise<Awaited<ReturnType<CawAdapterLike["transferTokens"]>>> {
   const base = {
     requestId: input.builtContext.cawRequestId,
@@ -488,6 +515,19 @@ async function executeCawOperation(input: {
       });
     }
 
+    if (
+      input.contractAddress === undefined &&
+      isEscrowContractCall({ operation: input.operation, serviceMode: input.serviceMode })
+    ) {
+      return localCawOperationFailure({
+        base,
+        attemptedOperation: "contract_call",
+        code: "CONTRACT_ADDRESS_REQUIRED",
+        reason: "contract_call PaymentContext requires an escrow contract address.",
+        decision: "block"
+      });
+    }
+
     if (input.cawAdapter.contractCall === undefined) {
       return localCawOperationFailure({
         base,
@@ -500,9 +540,16 @@ async function executeCawOperation(input: {
 
     return input.cawAdapter.contractCall({
       ...base,
-      contractAddress: input.providerEntry.merchantAddress,
+      contractAddress: input.contractAddress ?? input.providerEntry.merchantAddress,
       calldata: input.providerCalldata,
-      amount: input.challenge.amount
+      amount:
+        input.contractCallValue ??
+        (isEscrowContractCall({ operation: input.operation, serviceMode: input.serviceMode })
+          ? serviceEscrowAmountFromPaymentContext(
+              input.builtContext.context.amount,
+              input.builtContext.context.amountDecimals
+            )
+          : input.challenge.amount)
     });
   }
 
@@ -744,7 +791,8 @@ export async function runGuardPipeline(
     records: input.trustRecords,
     endpoint: challenge.resource,
     payTo: challenge.payTo,
-    amount: challenge.amount
+    amount: challenge.amount,
+    ...(input.erc8004LiveSource !== undefined ? { liveSource: input.erc8004LiveSource } : {})
   });
 
   if (trustResult.decision === "block") {
@@ -758,6 +806,26 @@ export async function runGuardPipeline(
 
     return {
       decision: "block",
+      status: "blocked",
+      ...(trustResult.reason !== undefined ? { reason: trustResult.reason } : {}),
+      guardEventId: event.id,
+      providerRegistryResult: registryResult,
+      trustResult,
+      evidenceBundle: evidenceBundleForMission(database, input.missionId)
+    };
+  }
+
+  if (trustResult.decision === "fallback_required") {
+    const event = createFailure(database, {
+      missionId: input.missionId,
+      layer: "erc8004",
+      reason: trustResult.reason ?? "ERC-8004 live trust source is unavailable",
+      decision: "fallback_required",
+      evidence: { challenge, registryResult, trustResult }
+    });
+
+    return {
+      decision: "fallback_required",
       status: "blocked",
       ...(trustResult.reason !== undefined ? { reason: trustResult.reason } : {}),
       guardEventId: event.id,
@@ -1030,9 +1098,15 @@ export async function runGuardPipeline(
     };
   }
 
-  const clearSignInput = {
+  const clearSignInput: ClearSignInput = {
     chainId: providerEntry.chainId,
-    to: providerEntry.merchantAddress,
+    to:
+      isEscrowContractCall({
+        operation: input.paymentOperation ?? "transfer",
+        serviceMode: input.serviceMode
+      }) && input.providerChallenge?.serviceEscrowAddress !== undefined
+        ? input.providerChallenge.serviceEscrowAddress
+        : providerEntry.merchantAddress,
     expected: {
       ...(input.policyBindings ?? {}),
       merchantAddress: providerEntry.merchantAddress,
@@ -1047,15 +1121,75 @@ export async function runGuardPipeline(
         ],
       paymentContextHash: builtContext.paymentContextHash
     },
-    ...(input.providerChallenge?.providerCalldata !== undefined
-      ? { calldata: input.providerChallenge.providerCalldata }
-      : input.providerChallenge?.providerSignature !== undefined
-        ? { calldata: input.providerChallenge.providerSignature }
-        : {}),
     ...(input.providerChallenge?.responseBody !== undefined
       ? { typedData: input.providerChallenge.responseBody }
       : {})
   };
+  if (
+    isEscrowContractCall({
+      operation: input.paymentOperation ?? "transfer",
+      serviceMode: input.serviceMode
+    })
+  ) {
+    if (input.providerChallenge?.serviceEscrowAddress === undefined) {
+      const event = createFailure(database, {
+        missionId: input.missionId,
+        layer: "service_escrow",
+        reason: "ServiceEscrow contract address is required for escrowed contract_call.",
+        decision: "block",
+        evidence: {
+          challenge,
+          registryResult,
+          trustResult,
+          metadataFirewall,
+          paymentContext: builtContext.context
+        }
+      });
+      releaseReservationBudget(database, builtContext.paymentContextHash);
+      return {
+        decision: "block",
+        status: "blocked",
+        reason: "ServiceEscrow contract address is required for escrowed contract_call.",
+        guardEventId: event.id,
+        providerRegistryResult: registryResult,
+        trustResult,
+        metadataFirewall,
+        paymentContext: builtContext.context,
+        paymentContextHash: builtContext.paymentContextHash,
+        cawRequestId: builtContext.cawRequestId,
+        reservation: {
+          quoteId: reservationResult.reservation.quoteId,
+          paymentContextHash: reservationResult.reservation.paymentContextHash,
+          nonce: reservationResult.reservation.nonce,
+          reservedBudget: reservationResult.reservation.reservedBudget
+        },
+        evidenceBundle: evidenceBundleForMission(database, input.missionId)
+      };
+    }
+
+    const escrowCalldata = buildServiceEscrowFundCalldata({
+      paymentContextHash: builtContext.paymentContextHash,
+      providerAddress: providerEntry.merchantAddress,
+      amount: serviceEscrowAmountFromPaymentContext(
+        builtContext.context.amount,
+        builtContext.context.amountDecimals
+      )
+    });
+    Object.assign(clearSignInput, {
+      calldata: escrowCalldata.calldata,
+      expected: {
+        ...clearSignInput.expected,
+        amount: escrowCalldata.value,
+        allowedSelectors: [SERVICE_ESCROW_FUND_SELECTOR],
+        functionAbis: [...SERVICE_ESCROW_FUNCTION_ABIS],
+        paramsMatch: escrowCalldata.policy.paramsMatch
+      }
+    });
+  } else if (input.providerChallenge?.providerCalldata !== undefined) {
+    Object.assign(clearSignInput, { calldata: input.providerChallenge.providerCalldata });
+  } else if (input.providerChallenge?.providerSignature !== undefined) {
+    Object.assign(clearSignInput, { calldata: input.providerChallenge.providerSignature });
+  }
   const clearSignResult = clearSign(clearSignInput);
 
   if (clearSignResult.decision === "block") {
@@ -1100,13 +1234,26 @@ export async function runGuardPipeline(
   const cawEvidence = await executeCawOperation({
     cawAdapter: input.cawAdapter,
     operation: input.paymentOperation ?? "transfer",
+    serviceMode: input.serviceMode,
     builtContext,
     missionId: input.missionId,
     providerEntry,
     challenge,
     cawPactId: input.cawPactId,
-    ...(input.providerChallenge?.providerCalldata !== undefined
-      ? { providerCalldata: input.providerChallenge.providerCalldata }
+    ...(input.providerChallenge?.serviceEscrowAddress !== undefined
+      ? { contractAddress: input.providerChallenge.serviceEscrowAddress }
+      : {}),
+    ...(clearSignInput.calldata !== undefined ? { providerCalldata: clearSignInput.calldata } : {}),
+    ...(isEscrowContractCall({
+      operation: input.paymentOperation ?? "transfer",
+      serviceMode: input.serviceMode
+    })
+      ? {
+          contractCallValue: serviceEscrowAmountFromPaymentContext(
+            builtContext.context.amount,
+            builtContext.context.amountDecimals
+          )
+        }
       : {})
   });
 
@@ -1327,38 +1474,72 @@ export async function runGuardPipeline(
   }
 
   markReservationSpent(database, builtContext.paymentContextHash);
+  const receiptId = `receipt_${builtContext.paymentContextHash.slice(2, 18)}`;
+  const receiptStatus: ServiceReceipt["status"] = "paid";
+  const providerResponseHash =
+    input.providerChallenge?.responseBody !== undefined
+      ? sha256Hex(JSON.stringify(input.providerChallenge.responseBody))
+      : undefined;
+  const serviceResultHash =
+    providerResponseHash !== undefined
+      ? buildServiceResultHash({
+          receiptId,
+          providerResponseHash,
+          ...(input.providerChallenge?.responseSchemaHash !== undefined
+            ? { responseSchemaHash: input.providerChallenge.responseSchemaHash }
+            : {}),
+          resource: challenge.resource,
+          asset: challenge.asset,
+          deliveryTimestamp: now,
+          status: receiptStatus
+        })
+      : undefined;
+  const cawEvidenceRef =
+    cawEvidence.rawEvidenceRef ?? `caw-fallback:${builtContext.paymentContextHash.slice(2, 18)}`;
+  const fallbackEvidenceRef =
+    cawEvidence.rawEvidenceRef === undefined
+      ? `fallback:${builtContext.paymentContextHash.slice(2, 18)}`
+      : undefined;
 
   const receiptInput: VerifyServiceReceiptInput = {
     receipt: ensureReceiptBody(
-      input.providerChallenge?.responseBody !== undefined &&
+        input.providerChallenge?.responseBody !== undefined &&
         input.providerChallenge?.providerSignature !== undefined &&
         input.providerChallenge?.providerAddress !== undefined
         ? {
-            receiptId: `receipt_${builtContext.paymentContextHash.slice(2, 18)}`,
+            receiptId,
             paymentContextHash: builtContext.paymentContextHash,
             cawRequestId: builtContext.cawRequestId,
             cawWalletAddress: cawEvidence.walletAddress,
             pactId: input.cawPactId,
             providerAddress: input.providerChallenge.providerAddress,
+            resource: challenge.resource,
+            asset: challenge.asset,
+            serviceResultHash,
+            cawEvidenceRef,
+            ...(fallbackEvidenceRef !== undefined ? { fallbackEvidenceRef } : {}),
             ...(challenge.facilitatorUrl !== undefined
               ? { facilitatorUrlHash: sha256Hex(challenge.facilitatorUrl) }
               : {}),
             ...(cawEvidence.txHash !== undefined ? { txHash: cawEvidence.txHash } : {}),
+            ...(cawEvidence.coboTransactionId !== undefined
+              ? { coboTransactionId: cawEvidence.coboTransactionId }
+              : {}),
             chainId: providerEntry.chainId,
             tokenId: providerEntry.tokenId,
             amount: challenge.amount,
-            providerResponseHash: sha256Hex(JSON.stringify(input.providerChallenge.responseBody)),
+            providerResponseHash: providerResponseHash ?? "",
             providerSignature: input.providerChallenge.providerSignature,
             ...(input.providerChallenge.responseSchemaHash !== undefined
               ? { responseSchemaHash: input.providerChallenge.responseSchemaHash }
               : {}),
             deliveryTimestamp: now,
-            status: "paid",
+            status: receiptStatus,
             ...(clearSignResult.calldataDigest ?? clearSignResult.typedDataDigest
               ? {
                   clearsigDigest:
                     clearSignResult.calldataDigest ?? clearSignResult.typedDataDigest
-                }
+              }
               : {}),
             auditLogIds: input.providerChallenge.auditLogIds ?? [],
             redactionSummaryHash: metadataFirewall.piiPolicyHash,
@@ -1371,6 +1552,7 @@ export async function runGuardPipeline(
     expectedPaymentContextHash: builtContext.paymentContextHash,
     expectedPactId: input.cawPactId,
     expectedProviderAddress: providerEntry.merchantAddress,
+    expectedResource: challenge.resource,
     expectedAmount: challenge.amount,
     expectedChainId: providerEntry.chainId,
     expectedTokenId: providerEntry.tokenId,

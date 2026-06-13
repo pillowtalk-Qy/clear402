@@ -1,0 +1,11 @@
+{
+  "name": "meta_search_tokens_usdc_retry",
+  "cmd": "caw meta search-tokens --symbol USDC",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T21:40:02.611Z",
+  "ended_at": "2026-06-13T21:40:05.148Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "timed_out": false
+}

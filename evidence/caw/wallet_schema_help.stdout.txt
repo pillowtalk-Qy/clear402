@@ -1,0 +1,23 @@
+{
+  "command": "caw wallet",
+  "description": "Manage Cobo Agentic Wallet wallets and perform on-chain operations. Local wallet commands (list, current) operate on credentials stored on this machine. Platform commands (get, balance, rename, archive, pair) call the Cobo Agentic Wallet service and require an active wallet with valid credentials. Run 'caw wallet --help' for a full list of subcommands.",
+  "usage": "caw wallet",
+  "flags": null,
+  "subcommands": [
+    "balance",
+    "current",
+    "get",
+    "list",
+    "pair",
+    "pair-status",
+    "rename"
+  ],
+  "exit_codes": {
+    "0": "success",
+    "1": "generic error",
+    "4": "authentication or permission failure",
+    "5": "policy denied",
+    "6": "insufficient balance",
+    "7": "network error (retryable)"
+  }
+}

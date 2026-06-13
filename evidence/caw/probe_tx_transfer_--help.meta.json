@@ -1,0 +1,10 @@
+{
+  "command": "caw tx transfer --help",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "probe_tx_transfer_--help.stdout.txt",
+  "stderr": "probe_tx_transfer_--help.stderr.txt",
+  "stdoutSha256": "157db87b2d21028e08b5c8ebddf9876ac83e57de13f21ae39a6bdb07d99f616e",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "collectedAt": "2026-06-13T20:58:29.396Z"
+}

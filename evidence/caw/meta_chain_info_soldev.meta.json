@@ -1,0 +1,11 @@
+{
+  "name": "meta_chain_info_soldev",
+  "cmd": "caw meta chain-info --chain-id SOLDEV_SOL",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T21:40:12.383Z",
+  "ended_at": "2026-06-13T21:40:14.633Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "timed_out": false
+}

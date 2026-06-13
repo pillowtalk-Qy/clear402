@@ -1,0 +1,54 @@
+{
+  "code": "MISSING_REQUIRED_FLAG",
+  "error": true,
+  "message": "unknown flag: --limit",
+  "suggestions": {
+    "command": "caw meta search-tokens",
+    "description": "Search for token candidates matching a symbol and return matching token IDs and their metadata across supported chains.",
+    "usage": "caw meta search-tokens [flags]",
+    "flags": [
+      {
+        "name": "api-key",
+        "type": "string",
+        "description": "API key for authentication"
+      },
+      {
+        "name": "api-url",
+        "type": "string",
+        "description": "API base URL to target a specific environment (env: AGENT_WALLET_API_URL)"
+      },
+      {
+        "name": "help",
+        "type": "bool",
+        "default": "false",
+        "description": "help for search-tokens"
+      },
+      {
+        "name": "symbol",
+        "type": "string",
+        "required": true,
+        "description": "Token symbol to search for, e.g. USDC, ETH"
+      },
+      {
+        "name": "timeout",
+        "type": "float64",
+        "default": "30",
+        "description": "HTTP timeout in seconds"
+      },
+      {
+        "name": "verbose",
+        "type": "bool",
+        "default": "false",
+        "description": "Enable debug logging"
+      }
+    ],
+    "exit_codes": {
+      "0": "success",
+      "1": "generic error",
+      "4": "authentication or permission failure",
+      "5": "policy denied",
+      "6": "insufficient balance",
+      "7": "network error (retryable)"
+    }
+  }
+}

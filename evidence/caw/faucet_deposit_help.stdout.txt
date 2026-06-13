@@ -1,0 +1,19 @@
+Request a testnet token [REDACTED] from the Cobo faucet to an on-chain address.
+
+Example:
+  caw faucet deposit --address <on-chain-address> --token-id SOLDEV_SOL_USDC
+
+Usage:
+  caw faucet deposit [flags]
+
+Flags:
+  -a, --address string               On-chain address to receive the testnet tokens (required)
+      --context string               Request context as JSON, saved with the response ID for tracking
+  -h, --help                         help for deposit
+  -t, --token-id caw faucet tokens   Testnet token [REDACTED] to request, e.g. SOLDEV_SOL_USDC. Use caw faucet tokens to list available tokens (required)
+
+Global Flags:
+      --api-key [REDACTED]   API key for authentication
+      --api-url string   API base URL to target a specific environment (env: AGENT_WALLET_API_URL)
+      --timeout float    HTTP timeout in seconds (default 30)
+  -v, --verbose          Enable debug logging

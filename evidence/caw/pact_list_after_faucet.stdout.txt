@@ -1,0 +1,10 @@
+{
+  "message": "",
+  "meta": {
+    "has_more": false
+  },
+  "result": {
+    "pacts": []
+  },
+  "success": true
+}

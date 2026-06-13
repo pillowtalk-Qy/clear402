@@ -1,0 +1,20 @@
+{
+  "name": "live_verify_20260613T2214Z_official_x402_express_server",
+  "command": "pnpm --filter @x402/express-server-example dev",
+  "cwd": "/tmp/x402-official/examples/typescript",
+  "started_at": "2026-06-13T22:16:30.931Z",
+  "ended_at": "2026-06-13T22:18:58.891Z",
+  "exit_code": null,
+  "signal": "SIGKILL",
+  "error": null,
+  "timed_out": false,
+  "notes": {
+    "official_repo": "https://github.com/x402-foundation/x402",
+    "official_repo_commit": "b32a702",
+    "target_port": 4021,
+    "listening": true,
+    "stopped_by": "evidence_runner"
+  },
+  "stdout": "Server listening at http://localhost:4021\n/private/tmp/x402-official/examples/typescript/servers/express:\n[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @x402/express-server-example@ dev: `tsx index.ts`\nExit status 143\n",
+  "stderr": "$ tsx index.ts\n"
+}

@@ -20,6 +20,13 @@ import { listGuardEvents, recordGuardEvent } from "./guard/events.ts";
 import { runGuardPipeline, type GuardPipelineResult } from "./guard/pipeline.ts";
 import { canonicalJson, hashObject, sha256Hex } from "./guard/hash.ts";
 import {
+  createDualReceipt,
+  verifyDualReceipt,
+  type DualReceipt,
+  type DualReceiptVerificationResult
+} from "./receipt/dual_receipt.ts";
+import { buildServiceResultHash, signReceiptForDemo } from "./receipt/receipt_verifier.ts";
+import {
   buildMissionTimelineEventFromReceipt,
   recordMissionTimelineEvent
 } from "./mission_timeline.ts";
@@ -81,18 +88,30 @@ export interface MissionFlowGuardSummary {
 
 export interface MissionFlowReceiptSummary {
   receiptId: string;
+  dualReceiptHash?: string;
+  paymentReceiptHash?: string;
+  deliveryReceiptHash?: string;
+  serviceResultHash?: string;
+  cawEvidenceRef?: string;
+  fallbackEvidenceRef?: string;
+  coboTransactionId?: string;
+  deliveryTimestamp?: number;
+  dualReceipt?: DualReceipt;
+  verificationResult?: DualReceiptVerificationResult;
   paymentReceipt: {
     status: "failed" | "paid";
     requestId: string;
     walletAddress: string;
     pactId: string;
     amount: string;
+    asset?: string;
     txHash?: string;
     evidenceMode: EvidenceMode;
   };
   deliveryReceipt: {
     status: "failed" | "delivered" | "paid_but_not_delivered";
     responseHash: string;
+    resource?: string;
     providerSignature: string;
     schemaHash: string;
     redactionSummaryHash?: string;
@@ -124,6 +143,12 @@ interface PaymentContextRow {
   cawRequestId: string | null;
 }
 
+interface ProviderContextRow {
+  providerId: string;
+  merchantAddress: string;
+  providerPublicKey: string;
+}
+
 interface ReceiptRow {
   receiptId: string;
   paymentContextHash: string;
@@ -131,17 +156,43 @@ interface ReceiptRow {
   cawWalletAddress: string;
   pactId: string;
   providerAddress: string;
+  resource: string | null;
+  asset: string | null;
+  serviceResultHash: string | null;
+  cawEvidenceRef: string | null;
+  fallbackEvidenceRef: string | null;
   txHash: string | null;
+  coboTransactionId: string | null;
   chainId: string;
   tokenId: string;
   amount: string;
   providerResponseHash: string;
   providerSignature: string;
   responseSchemaHash: string | null;
+  deliveryTimestamp: number;
   status: ServiceReceipt["status"];
   auditLogIds: string;
   redactionSummaryHash: string | null;
   evidenceMode: EvidenceMode;
+}
+
+interface DualReceiptRow {
+  dualReceiptHash: string;
+  receiptId: string;
+  missionId: string;
+  paymentContextHash: string;
+  paymentReceiptHash: string;
+  deliveryReceiptHash: string;
+  serviceResultHash: string;
+  resource: string;
+  providerAddress: string;
+  providerPublicKeyHash: string | null;
+  finalStatus: DualReceipt["finalStatus"];
+  verificationDecision: DualReceiptVerificationResult["decision"];
+  verificationResultJson: string;
+  dualReceiptJson: string;
+  evidenceMode: EvidenceMode;
+  createdAt: number;
 }
 
 const evidenceMode: EvidenceMode = "fallback";
@@ -357,6 +408,9 @@ export function verifyMission(database: DatabaseSync, missionId: string): Missio
   const now = Date.now();
   const context = parsePaymentContext(paymentContextRow.rawContextJson);
   const guard = latestGuardSummary(database, missionId);
+  const providerContext = readLatestProviderContext(database, missionId);
+  const providerPublicKey = providerContext?.providerPublicKey ?? demoProviderPublicKey;
+  const merchantAddress = providerContext?.merchantAddress ?? mission.cawWalletAddress ?? demoProvider.merchantAddress;
   const receiptInput = {
     missionId,
     paymentContextHash: paymentContextRow.paymentContextHash,
@@ -367,9 +421,62 @@ export function verifyMission(database: DatabaseSync, missionId: string): Missio
   const receipt = insertFallbackReceipt(
     database,
     guard.guardEventId === undefined
-      ? receiptInput
-      : { ...receiptInput, guardEventId: guard.guardEventId }
+      ? {
+          ...receiptInput,
+          resource: resourceUrl,
+          providerAddress: merchantAddress,
+          providerPublicKey
+        }
+      : {
+          ...receiptInput,
+          resource: resourceUrl,
+          providerAddress: merchantAddress,
+          providerPublicKey,
+          guardEventId: guard.guardEventId
+        }
   );
+  const storedReceipt = requireLatestReceipt(database, missionId);
+  const serviceReceipt = serviceReceiptFromRow(storedReceipt);
+  const dualReceipt = serviceReceipt
+      ? createDualReceipt({
+        serviceReceipt,
+        providerPublicKey,
+        resource: resourceUrl,
+        cawEvidenceRef: serviceReceipt.cawEvidenceRef ?? `fallback:${serviceReceipt.receiptId}`,
+        fallbackEvidenceRef: serviceReceipt.fallbackEvidenceRef ?? `fallback:${serviceReceipt.receiptId}`,
+        verifierMetadata: {
+          verifiedAt: storedReceipt?.deliveryTimestamp ?? now
+        }
+      })
+    : undefined;
+  const verificationResult = dualReceipt
+    ? verifyDualReceipt({
+        dualReceipt,
+        expectedPaymentContextHash: paymentContextRow.paymentContextHash,
+        expectedRequestId: dualReceipt.paymentReceipt.requestId,
+        expectedPactId: context.cawPactId,
+        expectedProviderAddress: merchantAddress,
+        expectedMerchantAddress: merchantAddress,
+        expectedProviderPublicKey: providerPublicKey,
+        expectedAmount: context.amount,
+        expectedAsset: dualReceipt.paymentReceipt.asset,
+        expectedChainId: context.chainId,
+        expectedTokenId: context.tokenId,
+        expectedResource: resourceUrl,
+        expectedServiceResultHash: dualReceipt.deliveryReceipt.serviceResultHash,
+        expectedPaymentReceiptHash: dualReceipt.paymentReceipt.paymentReceiptHash,
+        expectedDeliveryReceiptHash: dualReceipt.deliveryReceipt.deliveryReceiptHash,
+        existingRecords: readDualReceiptReplayRecords(database, missionId)
+      })
+    : undefined;
+  if (dualReceipt && verificationResult) {
+    upsertDualReceipt(database, {
+      missionId,
+      dualReceipt,
+      verificationResult,
+      createdAt: now
+    });
+  }
   updateMissionStatus(database, missionId, "blocked", now);
 
   return {
@@ -381,7 +488,15 @@ export function verifyMission(database: DatabaseSync, missionId: string): Missio
     paymentContextHash: paymentContextRow.paymentContextHash,
     cawRequestId: paymentContextRow.cawRequestId ?? receipt.paymentReceipt.requestId,
     guard,
-    receipt
+    receipt: {
+      ...receipt,
+      ...(dualReceipt !== undefined ? { dualReceipt } : {}),
+      ...(verificationResult !== undefined ? { verificationResult } : {}),
+      ...(dualReceipt !== undefined ? { dualReceiptHash: dualReceipt.dualReceiptHash } : {}),
+      ...(dualReceipt !== undefined ? { paymentReceiptHash: dualReceipt.paymentReceipt.paymentReceiptHash } : {}),
+      ...(dualReceipt !== undefined ? { deliveryReceiptHash: dualReceipt.deliveryReceipt.deliveryReceiptHash } : {}),
+      ...(dualReceipt !== undefined ? { serviceResultHash: dualReceipt.deliveryReceipt.serviceResultHash } : {})
+    }
   };
 }
 
@@ -390,6 +505,7 @@ export function getMission(database: DatabaseSync, missionId: string): MissionFl
   const resourceUrl = missionResourceUrl(database, mission);
   const paymentContextRow = readLatestPaymentContext(database, missionId);
   const latestReceipt = readLatestReceipt(database, missionId);
+  const latestDualReceipt = readLatestDualReceipt(database, missionId);
   const context = paymentContextRow
     ? parsePaymentContext(paymentContextRow.rawContextJson)
     : undefined;
@@ -409,7 +525,11 @@ export function getMission(database: DatabaseSync, missionId: string): MissionFl
         }
       : {}),
     guard: latestGuardSummary(database, missionId),
-    ...(latestReceipt !== undefined ? { receipt: receiptSummaryFromRow(latestReceipt) } : {})
+    ...(latestDualReceipt !== undefined
+      ? { receipt: dualReceiptSummaryFromRow(latestDualReceipt) }
+      : latestReceipt !== undefined
+        ? { receipt: receiptSummaryFromRow(latestReceipt) }
+        : {})
   };
 }
 
@@ -673,13 +793,20 @@ function readLatestReceipt(database: DatabaseSync, missionId: string): ReceiptRo
         caw_wallet_address as cawWalletAddress,
         pact_id as pactId,
         provider_address as providerAddress,
+        resource,
+        asset,
+        service_result_hash as serviceResultHash,
+        caw_evidence_ref as cawEvidenceRef,
+        fallback_evidence_ref as fallbackEvidenceRef,
         tx_hash as txHash,
+        cobo_transaction_id as coboTransactionId,
         chain_id as chainId,
         token_id as tokenId,
         amount,
         provider_response_hash as providerResponseHash,
         provider_signature as providerSignature,
         response_schema_hash as responseSchemaHash,
+        delivery_timestamp as deliveryTimestamp,
         status,
         audit_log_ids as auditLogIds,
         redaction_summary_hash as redactionSummaryHash,
@@ -690,6 +817,50 @@ function readLatestReceipt(database: DatabaseSync, missionId: string): ReceiptRo
       limit 1`
     )
     .get(missionId) as ReceiptRow | undefined;
+}
+
+function readLatestProviderContext(database: DatabaseSync, missionId: string): ProviderContextRow | undefined {
+  return database
+    .prepare(
+      `select
+        pr.provider_id as providerId,
+        pr.merchant_address as merchantAddress,
+        pr.public_key as providerPublicKey
+      from payment_contexts pc
+      join provider_registry pr on pr.provider_id = pc.provider_id
+      where pc.mission_id = ?
+      order by pc.issued_at desc, pc.payment_context_hash desc
+      limit 1`
+    )
+    .get(missionId) as ProviderContextRow | undefined;
+}
+
+function readLatestDualReceipt(database: DatabaseSync, missionId: string): DualReceiptRow | undefined {
+  return database
+    .prepare(
+      `select
+        dual_receipt_hash as dualReceiptHash,
+        receipt_id as receiptId,
+        mission_id as missionId,
+        payment_context_hash as paymentContextHash,
+        payment_receipt_hash as paymentReceiptHash,
+        delivery_receipt_hash as deliveryReceiptHash,
+        service_result_hash as serviceResultHash,
+        resource,
+        provider_address as providerAddress,
+        provider_public_key_hash as providerPublicKeyHash,
+        final_status as finalStatus,
+        verification_decision as verificationDecision,
+        verification_result_json as verificationResultJson,
+        dual_receipt_json as dualReceiptJson,
+        evidence_mode as evidenceMode,
+        created_at as createdAt
+      from dual_receipts
+      where mission_id = ?
+      order by created_at desc, dual_receipt_hash desc
+      limit 1`
+    )
+    .get(missionId) as DualReceiptRow | undefined;
 }
 
 function latestGuardSummary(database: DatabaseSync, missionId: string): MissionFlowGuardSummary {
@@ -719,6 +890,9 @@ function insertFallbackReceipt(
     paymentContextHash: string;
     cawRequestId: string;
     context: PaymentContext;
+    resource: string;
+    providerAddress: string;
+    providerPublicKey: string;
     guardEventId?: string;
     now: number;
   }
@@ -733,6 +907,31 @@ function insertFallbackReceipt(
   };
   const providerResponseHash = sha256Hex(canonicalJson(responseBody));
   const responseSchemaHash = sha256Hex("clear402.runtime.fallback_receipt.v1");
+  const asset = input.context.tokenId;
+  const cawEvidenceRef = "runtime-api:fallback-only";
+  const fallbackEvidenceRef = `fallback:${receiptId}`;
+  const receiptStatus: ServiceReceipt["status"] = "failed";
+  const serviceResultHash = buildServiceResultHash({
+    receiptId,
+    providerResponseHash,
+    responseSchemaHash,
+    resource: input.resource,
+    asset,
+    deliveryTimestamp: input.now,
+    status: receiptStatus
+  });
+  const providerSignature = signReceiptForDemo(input.providerPublicKey, {
+    paymentContextHash: input.paymentContextHash,
+    providerResponseHash,
+    resource: input.resource,
+    asset,
+    cawEvidenceRef,
+    fallbackEvidenceRef,
+    serviceResultHash,
+    responseSchemaHash,
+    deliveryTimestamp: input.now,
+    status: receiptStatus
+  });
   const auditLogIds = [input.guardEventId, `runtime-fallback-${input.missionId}`].filter(
     (value): value is string => typeof value === "string"
   );
@@ -747,8 +946,14 @@ function insertFallbackReceipt(
         caw_wallet_address,
         pact_id,
         provider_address,
+        resource,
+        asset,
+        service_result_hash,
+        caw_evidence_ref,
+        fallback_evidence_ref,
         facilitator_url_hash,
         tx_hash,
+        cobo_transaction_id,
         chain_id,
         token_id,
         amount,
@@ -762,10 +967,16 @@ function insertFallbackReceipt(
         redaction_summary_hash,
         evidence_mode,
         created_at
-      ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'failed', ?, ?, ?, 'fallback', ?)
+      ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'failed', ?, ?, ?, 'fallback', ?)
       on conflict(receipt_id) do update set
         caw_request_id = excluded.caw_request_id,
+        resource = excluded.resource,
+        asset = excluded.asset,
+        service_result_hash = excluded.service_result_hash,
+        caw_evidence_ref = excluded.caw_evidence_ref,
+        fallback_evidence_ref = excluded.fallback_evidence_ref,
         provider_response_hash = excluded.provider_response_hash,
+        provider_signature = excluded.provider_signature,
         response_schema_hash = excluded.response_schema_hash,
         delivery_timestamp = excluded.delivery_timestamp,
         status = 'failed',
@@ -781,14 +992,20 @@ function insertFallbackReceipt(
       input.cawRequestId,
       demoWalletAddress,
       input.context.cawPactId,
-      input.context.merchantAddress,
+      input.providerAddress,
+      input.resource,
+      asset,
+      serviceResultHash,
+      cawEvidenceRef,
+      fallbackEvidenceRef,
       input.context.facilitatorUrlHash ?? null,
+      null,
       null,
       input.context.chainId,
       input.context.tokenId,
       input.context.amount,
       providerResponseHash,
-      "runtime-fallback-signature",
+      providerSignature,
       responseSchemaHash,
       input.now,
       input.context.clearSignDigest ?? null,
@@ -822,18 +1039,25 @@ function receiptSummaryFromRow(row: ReceiptRow): MissionFlowReceiptSummary {
 
   return {
     receiptId: row.receiptId,
+    ...(row.serviceResultHash !== null ? { serviceResultHash: row.serviceResultHash } : {}),
+    ...(row.cawEvidenceRef !== null ? { cawEvidenceRef: row.cawEvidenceRef } : {}),
+    ...(row.fallbackEvidenceRef !== null ? { fallbackEvidenceRef: row.fallbackEvidenceRef } : {}),
+    ...(row.coboTransactionId !== null ? { coboTransactionId: row.coboTransactionId } : {}),
+    deliveryTimestamp: row.deliveryTimestamp,
     paymentReceipt: {
       status: row.status === "paid" || row.status === "delivered" ? "paid" : "failed",
       requestId: row.cawRequestId ?? `clear402:${row.paymentContextHash.slice(2, 18)}`,
       walletAddress: row.cawWalletAddress,
       pactId: row.pactId,
       amount: row.amount,
+      ...(row.asset !== null ? { asset: row.asset } : {}),
       ...(row.txHash !== null ? { txHash: row.txHash } : {}),
       evidenceMode: row.evidenceMode
     },
     deliveryReceipt: {
       status: row.status === "delivered" ? "delivered" : row.status === "paid_but_not_delivered" ? "paid_but_not_delivered" : "failed",
       responseHash: row.providerResponseHash,
+      ...(row.resource !== null ? { resource: row.resource } : {}),
       providerSignature: row.providerSignature,
       schemaHash: row.responseSchemaHash ?? "n/a",
       ...(row.redactionSummaryHash !== null ? { redactionSummaryHash: row.redactionSummaryHash } : {}),
@@ -843,6 +1067,157 @@ function receiptSummaryFromRow(row: ReceiptRow): MissionFlowReceiptSummary {
     auditLogIds,
     evidenceMode: row.evidenceMode
   };
+}
+
+function dualReceiptSummaryFromRow(row: DualReceiptRow): MissionFlowReceiptSummary {
+  const dualReceipt = JSON.parse(row.dualReceiptJson) as DualReceipt;
+  const verificationResult = JSON.parse(row.verificationResultJson) as DualReceiptVerificationResult;
+
+  return {
+    receiptId: row.receiptId,
+    dualReceiptHash: row.dualReceiptHash,
+    paymentReceiptHash: row.paymentReceiptHash,
+    deliveryReceiptHash: row.deliveryReceiptHash,
+    serviceResultHash: row.serviceResultHash,
+    dualReceipt,
+    verificationResult,
+    paymentReceipt: {
+      status: dualReceipt.paymentReceipt.status === "failed" ? "failed" : "paid",
+      requestId: dualReceipt.paymentReceipt.requestId,
+      walletAddress: dualReceipt.paymentReceipt.cawWalletAddress,
+      pactId: dualReceipt.paymentReceipt.pactId,
+      amount: dualReceipt.paymentReceipt.amount,
+      asset: dualReceipt.paymentReceipt.asset,
+      ...(dualReceipt.paymentReceipt.txHash !== undefined
+        ? { txHash: dualReceipt.paymentReceipt.txHash }
+        : {}),
+      evidenceMode: dualReceipt.paymentReceipt.evidenceMode
+    },
+    deliveryReceipt: {
+      status: dualReceipt.deliveryReceipt.status,
+      responseHash: dualReceipt.deliveryReceipt.providerResponseHash,
+      resource: dualReceipt.deliveryReceipt.resource,
+      providerSignature: dualReceipt.deliveryReceipt.providerSignature,
+      schemaHash: dualReceipt.deliveryReceipt.responseSchemaHash ?? "n/a",
+      ...(dualReceipt.deliveryReceipt.redactionSummaryHash !== undefined
+        ? { redactionSummaryHash: dualReceipt.deliveryReceipt.redactionSummaryHash }
+        : {}),
+      evidenceMode: dualReceipt.deliveryReceipt.evidenceMode
+    },
+    finalStatus:
+      row.finalStatus === "delivered" ||
+      row.finalStatus === "paid_but_not_delivered" ||
+      row.finalStatus === "refunded"
+        ? row.finalStatus
+        : "failed",
+    auditLogIds: [...dualReceipt.paymentReceipt.auditLogIds],
+    evidenceMode: row.evidenceMode
+  };
+}
+
+function serviceReceiptFromRow(row: ReceiptRow): ServiceReceipt {
+  return {
+    receiptId: row.receiptId,
+    paymentContextHash: row.paymentContextHash,
+    ...(row.cawRequestId !== null ? { cawRequestId: row.cawRequestId } : {}),
+    cawWalletAddress: row.cawWalletAddress,
+    pactId: row.pactId,
+    providerAddress: row.providerAddress,
+    ...(row.resource !== null ? { resource: row.resource } : {}),
+    ...(row.asset !== null ? { asset: row.asset } : {}),
+    ...(row.serviceResultHash !== null ? { serviceResultHash: row.serviceResultHash } : {}),
+    ...(row.cawEvidenceRef !== null ? { cawEvidenceRef: row.cawEvidenceRef } : {}),
+    ...(row.fallbackEvidenceRef !== null ? { fallbackEvidenceRef: row.fallbackEvidenceRef } : {}),
+    ...(row.txHash !== null ? { txHash: row.txHash } : {}),
+    ...(row.coboTransactionId !== null ? { coboTransactionId: row.coboTransactionId } : {}),
+    chainId: row.chainId,
+    tokenId: row.tokenId,
+    amount: row.amount,
+    providerResponseHash: row.providerResponseHash,
+    providerSignature: row.providerSignature,
+    ...(row.responseSchemaHash !== null ? { responseSchemaHash: row.responseSchemaHash } : {}),
+    deliveryTimestamp: row.deliveryTimestamp,
+    status: row.status,
+    auditLogIds: parseJsonArray(row.auditLogIds).filter(
+      (value): value is string => typeof value === "string"
+    ),
+    ...(row.redactionSummaryHash !== null ? { redactionSummaryHash: row.redactionSummaryHash } : {}),
+    evidenceMode: row.evidenceMode
+  };
+}
+
+function readDualReceiptReplayRecords(database: DatabaseSync, missionId: string) {
+  return database
+    .prepare(
+      `select
+        payment_context_hash as paymentContextHash,
+        delivery_receipt_hash as deliveryReceiptHash,
+        dual_receipt_hash as dualReceiptHash,
+        created_at as createdAt
+      from dual_receipts
+      where mission_id = ?`
+    )
+    .all(missionId) as Array<{
+      paymentContextHash: string;
+      deliveryReceiptHash: string;
+      dualReceiptHash: string;
+      createdAt: number;
+    }>;
+}
+
+function upsertDualReceipt(
+  database: DatabaseSync,
+  input: {
+    missionId: string;
+    dualReceipt: DualReceipt;
+    verificationResult: DualReceiptVerificationResult;
+    createdAt: number;
+  }
+) {
+  database
+    .prepare(
+      `insert into dual_receipts (
+        dual_receipt_hash,
+        receipt_id,
+        mission_id,
+        payment_context_hash,
+        payment_receipt_hash,
+        delivery_receipt_hash,
+        service_result_hash,
+        resource,
+        provider_address,
+        provider_public_key_hash,
+        final_status,
+        verification_decision,
+        verification_result_json,
+        dual_receipt_json,
+        evidence_mode,
+        created_at
+      ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      on conflict(payment_context_hash, delivery_receipt_hash) do update set
+        verification_decision = excluded.verification_decision,
+        verification_result_json = excluded.verification_result_json,
+        dual_receipt_json = excluded.dual_receipt_json,
+        created_at = excluded.created_at`
+    )
+    .run(
+      input.dualReceipt.dualReceiptHash,
+      input.dualReceipt.deliveryReceipt.receiptId,
+      input.missionId,
+      input.dualReceipt.paymentReceipt.paymentContextHash,
+      input.dualReceipt.paymentReceipt.paymentReceiptHash,
+      input.dualReceipt.deliveryReceipt.deliveryReceiptHash,
+      input.dualReceipt.deliveryReceipt.serviceResultHash,
+      input.dualReceipt.deliveryReceipt.resource,
+      input.dualReceipt.deliveryReceipt.providerAddress,
+      input.dualReceipt.verifierMetadata.providerPublicKeyHash ?? null,
+      input.dualReceipt.finalStatus,
+      input.verificationResult.decision,
+      canonicalJson(input.verificationResult),
+      canonicalJson(input.dualReceipt),
+      input.dualReceipt.evidenceMode,
+      input.createdAt
+    );
 }
 
 function requireLatestReceipt(database: DatabaseSync, missionId: string): ReceiptRow {

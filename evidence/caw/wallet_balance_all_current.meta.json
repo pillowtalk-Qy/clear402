@@ -1,0 +1,11 @@
+{
+  "name": "wallet_balance_all_current",
+  "cmd": "caw wallet balance",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T21:40:46.239Z",
+  "ended_at": "2026-06-13T21:40:48.979Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "timed_out": false
+}

@@ -1,0 +1,22 @@
+{
+  "caip2_chain_id": "",
+  "chain_coin": "BASE_ETH",
+  "chain_type": "ETH",
+  "coinbase_maturity": 0,
+  "confirming_threshold": 100,
+  "enable_smart_contract_op": false,
+  "explorer_address_url": "https://basescan.org/address/{address}",
+  "explorer_tx_url": "https://basescan.org/tx/{txn_id}",
+  "icon_url": "https://d.cobo.com/public/logos/BSAE.png",
+  "input_utxo_limit": 0,
+  "is_case_sensitive": false,
+  "is_nonce_mandatory": false,
+  "is_testnet": false,
+  "name": "Base",
+  "supported_address_encodings": "",
+  "supported_address_encodings_by_ksr": "",
+  "supported_fee_models": "",
+  "unique_chain_id": "BASE_ETH",
+  "use_memo_to_deposit": false,
+  "use_memo_to_withdraw": false
+}

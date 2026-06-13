@@ -1,0 +1,14 @@
+{
+  "name": "live_verify_20260613T2214Z_payment_gateway_forward_request",
+  "command": "curl -sS -i --max-time 15 http://127.0.0.1:8404/http://127.0.0.1:4021/weather?city=Tokyo",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T22:17:03.545Z",
+  "ended_at": "2026-06-13T22:17:03.788Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "timed_out": false,
+  "notes": {
+    "expected": "request through official gateway forward path; payment may still require active pact permission"
+  }
+}

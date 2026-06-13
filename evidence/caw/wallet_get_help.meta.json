@@ -1,0 +1,11 @@
+{
+  "name": "wallet_get_help",
+  "cmd": "caw wallet get --help",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T21:45:41.773Z",
+  "ended_at": "2026-06-13T21:45:41.826Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "timed_out": false
+}

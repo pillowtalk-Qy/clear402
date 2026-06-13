@@ -1,0 +1,1 @@
+sh: line 1:  3900 Terminated: 15          caw payment gateway 118c2eae-4258-4b75-a36b-c2e1097890b0 --mode forward --protocol x402 --listen 127.0.0.1:8402 > /Users/qy/Documents/clear402/evidence/caw/payment_gateway_forward_pending_pact.stdout.txt 2> /Users/qy/Documents/clear402/evidence/caw/payment_gateway_forward_pending_pact.stderr.txt

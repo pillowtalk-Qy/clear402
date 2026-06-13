@@ -1,0 +1,11 @@
+{
+  "name": "pact_status_message_sign_pending",
+  "cmd": "caw pact status 118c2eae-4258-4b75-a36b-c2e1097890b0",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T21:53:42.817Z",
+  "ended_at": "2026-06-13T21:53:44.801Z",
+  "exit_code": 2,
+  "signal": null,
+  "error": null,
+  "timed_out": false
+}

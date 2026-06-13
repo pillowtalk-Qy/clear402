@@ -1,0 +1,11 @@
+{
+  "name": "official_x402_examples_build_express_filter",
+  "cmd": "pnpm --filter @x402/express-server-example... build",
+  "cwd": "/tmp/x402-official/examples/typescript",
+  "started_at": "2026-06-13T21:42:23.070Z",
+  "ended_at": "2026-06-13T21:42:41.989Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "timed_out": false
+}

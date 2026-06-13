@@ -45,7 +45,10 @@ const functionSignatures: Record<string, string> = {
   "0x23b872dd": "transferFrom(address,address,uint256)",
   "0xac9650d8": "multicall(bytes[])",
   "0x40c10f19": "mint(address,uint256)",
-  "0x2e1a7d4d": "withdraw(uint256)"
+  "0x2e1a7d4d": "withdraw(uint256)",
+  "0xf8388f0f": "fund(bytes32,address,uint256)",
+  "0x7249fbb6": "refund(bytes32)",
+  "0x0fa566fa": "deliver(bytes32)"
 };
 
 const maxUint256 =
@@ -80,6 +83,10 @@ function wordToAddress(word: string): string {
 
 function wordToBigIntString(word: string): string {
   return BigInt(`0x${word}`).toString();
+}
+
+function wordToBytes32(word: string): string {
+  return `0x${word}`.toLowerCase();
 }
 
 function sameAddress(left: string | undefined, right: string | undefined): boolean {
@@ -134,6 +141,35 @@ function decodeKnownCalldata(calldata: string): {
       functionSignature,
       decodedParams: { nestedSelectors: findNestedSelectors(calldata) },
       intent: "Execute multicall"
+    };
+  }
+
+  if (functionSignature === "fund(bytes32,address,uint256)") {
+    const paymentContextHash = wordToBytes32(readWord(calldata, 0));
+    const provider = wordToAddress(readWord(calldata, 1));
+    const amount = wordToBigIntString(readWord(calldata, 2));
+    return {
+      functionSignature,
+      decodedParams: { paymentContextHash, provider, amount },
+      intent: `Fund ServiceEscrow ${paymentContextHash} for ${provider} with ${amount} wei`
+    };
+  }
+
+  if (functionSignature === "refund(bytes32)") {
+    const paymentContextHash = wordToBytes32(readWord(calldata, 0));
+    return {
+      functionSignature,
+      decodedParams: { paymentContextHash },
+      intent: `Refund ServiceEscrow ${paymentContextHash}`
+    };
+  }
+
+  if (functionSignature === "deliver(bytes32)") {
+    const paymentContextHash = wordToBytes32(readWord(calldata, 0));
+    return {
+      functionSignature,
+      decodedParams: { paymentContextHash },
+      intent: `Deliver ServiceEscrow ${paymentContextHash}`
     };
   }
 
@@ -318,6 +354,20 @@ export function clearSign(input: ClearSignInput): ClearSignResult {
     const hidden = nestedSelectors.filter((nested) => !allowedSelectors.includes(nested));
     if (hidden.length > 0) {
       riskTags.push("multicall_hidden_selector");
+    }
+  }
+
+  if (
+    ["fund(bytes32,address,uint256)", "refund(bytes32)", "deliver(bytes32)"].includes(
+      decoded.functionSignature ?? ""
+    )
+  ) {
+    const paymentContextHash = String(decoded.decodedParams?.paymentContextHash ?? "");
+    if (
+      input.expected.paymentContextHash !== undefined &&
+      paymentContextHash.toLowerCase() !== input.expected.paymentContextHash.toLowerCase()
+    ) {
+      riskTags.push("context_hash_mismatch");
     }
   }
 

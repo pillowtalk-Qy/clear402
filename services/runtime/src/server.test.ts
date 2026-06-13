@@ -282,6 +282,53 @@ describe("runtime", () => {
     }
   });
 
+  test("exports dual receipt facts from guard evidence when no dual receipt row exists", async () => {
+    const seededDatabasePath = join(databaseDir, "event-dual-receipt-export.sqlite");
+    const handle = initializeRuntimeDatabase({ databasePath: seededDatabasePath });
+    seedEventDualReceiptMission(handle.database, "mission-event-dual-receipt");
+    handle.database.close();
+
+    const server = await startRuntimeServer({
+      host: "127.0.0.1",
+      port: 0,
+      databasePath: seededDatabasePath
+    });
+
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:${server.port}/api/evidence/mission-event-dual-receipt/export.json`
+      );
+      expect(response.status).toBe(200);
+
+      const payload = (await response.json()) as any;
+      expect(payload.dualReceipt).toEqual(
+        expect.objectContaining({
+          status: "recorded",
+          evidenceMode: "fallback",
+          dualReceiptHash: "0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          paymentReceiptHash:
+            "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          deliveryReceiptHash:
+            "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          verificationDecision: "allow"
+        })
+      );
+      expect(payload.dualReceipt.verificationResult).toEqual(
+        expect.objectContaining({ decision: "allow" })
+      );
+      expect(payload.evidenceModeSummary.components).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            component: "dualReceipt",
+            evidenceMode: "fallback"
+          })
+        ])
+      );
+    } finally {
+      await server.close();
+    }
+  });
+
   test("mission timeline replays existing events on first SSE connection", async () => {
     const databasePath = join(databaseDir, "timeline-first-connect.sqlite");
     const handle = initializeRuntimeDatabase({ databasePath });
@@ -511,6 +558,78 @@ function seedTimelineMission(
       "0xCAW0000000000000000000000000000000000001",
       "pact-timeline",
       now,
+      now
+    );
+}
+
+function seedEventDualReceiptMission(
+  database: ReturnType<typeof initializeRuntimeDatabase>["database"],
+  missionId: string
+) {
+  const now = 1_800_000_000_000;
+  database
+    .prepare(
+      `insert into missions (
+        id,
+        user_prompt,
+        budget_usd,
+        status,
+        caw_wallet_uuid,
+        caw_wallet_address,
+        pact_id,
+        created_at,
+        updated_at
+      ) values (?, ?, ?, 'complete', ?, ?, ?, ?, ?)`
+    )
+    .run(
+      missionId,
+      "Export dual receipt from guard event.",
+      "1",
+      "wallet-event-dual-receipt",
+      "0xCAW0000000000000000000000000000000000001",
+      "pact-event-dual-receipt",
+      now,
+      now
+    );
+
+  database
+    .prepare(
+      `insert into guard_events (
+        id,
+        mission_id,
+        layer,
+        decision,
+        reason,
+        evidence_json,
+        created_at
+      ) values (?, ?, 'receipt_verifier', 'allow', ?, ?, ?)`
+    )
+    .run(
+      "guard-event-dual-receipt",
+      missionId,
+      "Dual receipt recorded in guard evidence.",
+      canonicalJson({
+        dualReceipt: {
+          dualReceiptHash:
+            "0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          paymentReceipt: {
+            paymentReceiptHash:
+              "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          },
+          deliveryReceipt: {
+            deliveryReceiptHash:
+              "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          },
+          verificationResult: {
+            decision: "allow",
+            checks: {
+              paymentContext: true,
+              providerSignature: true
+            }
+          },
+          evidenceMode: "fallback"
+        }
+      }),
       now
     );
 }

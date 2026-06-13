@@ -1,0 +1,10 @@
+{
+  "command": "caw --version",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "probe_root_version.stdout.txt",
+  "stderr": "probe_root_version.stderr.txt",
+  "stdoutSha256": "4cdcc134e38e76b5debfbf9dafc7639da260f89b547bbda8ee9e83ca50b1642a",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "collectedAt": "2026-06-13T20:57:14.705Z"
+}

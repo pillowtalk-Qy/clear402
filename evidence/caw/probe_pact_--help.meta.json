@@ -1,0 +1,10 @@
+{
+  "command": "caw pact --help",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "probe_pact_--help.stdout.txt",
+  "stderr": "probe_pact_--help.stderr.txt",
+  "stdoutSha256": "798ee41c3286fa85fe4780d568e4bf9f9d3db90f8372b84c4727b0b593c127f8",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "collectedAt": "2026-06-13T20:57:14.741Z"
+}

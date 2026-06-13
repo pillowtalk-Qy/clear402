@@ -1,0 +1,47 @@
+{
+  "message": "",
+  "result": {
+    "approval_id": "62834d43-2be3-45e1-b41b-12a8e08862c9",
+    "message": "Pact submitted. Awaiting owner approval in CAW App.",
+    "pact_id": "118c2eae-4258-4b75-a36b-c2e1097890b0",
+    "status": "pending_approval",
+    "submitted_spec": {
+      "completion_conditions": [
+        {
+          "threshold": "3600",
+          "type": "time_elapsed"
+        }
+      ],
+      "execution_plan": "# Summary\nSign one Clear402 PaymentContext EIP-712 message on SETH.\n\n# Operations\n- Sign an EIP-712 PaymentContext with domain name Clear402 and version 1.\n- Attempt a mismatched-domain denial check under the same pact.\n\n# Risk Controls\n- message_sign only.\n- Domain allowlist is Clear402 version 1.\n- No transfers or contract calls.",
+      "intent": "Sign one Clear402 PaymentContext EIP-712 message on SETH",
+      "policies": [
+        {
+          "name": "clear402-message-sign",
+          "rules": {
+            "effect": "allow",
+            "when": {
+              "domain_match": [
+                {
+                  "op": "eq",
+                  "param_name": "name",
+                  "value": "Clear402"
+                },
+                {
+                  "op": "eq",
+                  "param_name": "version",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "type": "message_sign"
+        }
+      ]
+    }
+  },
+  "success": true,
+  "suggestions": [
+    "The pact has been submitted. Tell the user:\nthey should open the Cobo Agentic Wallet app to review and approve it.",
+    "No --recipe-slugs provided. Run 'caw recipe search --query <operation>' to find the matching recipe and resubmit with --recipe-slugs to link this pact to the authoritative recipe source."
+  ]
+}

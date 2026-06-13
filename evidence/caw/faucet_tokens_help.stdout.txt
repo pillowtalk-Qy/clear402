@@ -1,0 +1,16 @@
+List all testnet tokens currently available from the Cobo faucet.
+
+The returned token [REDACTED] can be passed to --token-id when running caw faucet deposit
+to request a specific token [REDACTED] sent to an address.
+
+Usage:
+  caw faucet tokens [flags]
+
+Flags:
+  -h, --help   help for tokens
+
+Global Flags:
+      --api-key [REDACTED]   API key for authentication
+      --api-url string   API base URL to target a specific environment (env: AGENT_WALLET_API_URL)
+      --timeout float    HTTP timeout in seconds (default 30)
+  -v, --verbose          Enable debug logging

@@ -1,0 +1,11 @@
+{
+  "name": "wallet_get_current",
+  "cmd": "caw wallet get 5751d798-605b-4723-acf4-e3a03f524511",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T21:40:44.372Z",
+  "ended_at": "2026-06-13T21:40:46.238Z",
+  "exit_code": 2,
+  "signal": null,
+  "error": null,
+  "timed_out": false
+}

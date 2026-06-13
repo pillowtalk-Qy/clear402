@@ -1,0 +1,8 @@
+{
+  "command": "caw wallet balance --chain-id SETH --token-id SETH",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "balance_balance_seth.stdout.txt",
+  "stderr": "balance_balance_seth.stderr.txt",
+  "collectedAt": "2026-06-13T21:13:51.276Z"
+}

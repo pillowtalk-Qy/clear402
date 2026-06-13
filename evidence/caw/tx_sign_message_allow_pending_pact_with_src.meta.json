@@ -1,0 +1,11 @@
+{
+  "name": "tx_sign_message_allow_pending_pact_with_src",
+  "cmd": "caw tx sign-message --pact-id 118c2eae-4258-4b75-a36b-c2e1097890b0 --chain-id SETH --src-address 0xab42bb255c4660b0879f007ab3ed9ae049d85859 --destination-type eip712 --eip712-typed-data '{\"types\":{\"EIP712Domain\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"chainId\",\"type\":\"uint256\"}],\"PaymentContext\":[{\"name\":\"paymentContextHash\",\"type\":\"bytes32\"},{\"name\":\"intent\",\"type\":\"string\"}]},\"primaryType\":\"PaymentContext\",\"domain\":{\"name\":\"Clear402\",\"version\":\"1\",\"chainId\":11155111},\"message\":{\"paymentContextHash\":\"0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"intent\":\"pay_for_report\"}}' --request-id caw-live-message-sign-allow-1 --context '{\"purpose\":\"clear402_message_sign_allow_probe\"}'",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T21:55:50.996Z",
+  "ended_at": "2026-06-13T21:55:54.397Z",
+  "exit_code": 4,
+  "signal": null,
+  "error": null,
+  "timed_out": false
+}

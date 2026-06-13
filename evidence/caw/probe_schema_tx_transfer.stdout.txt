@@ -1,0 +1,70 @@
+{
+  "command": "caw tx transfer",
+  "description": "Transfer tokens from a wallet to a destination address. The transfer is evaluated against all active policies before submission. If a policy denies the transfer, the command exits non-zero and writes structured denial details to stderr. If a policy requires manual approval, the transfer is queued as a pending operation. Pass --request-id as an idempotency key — retrying with the same value returns the existing record without re-submitting.",
+  "usage": "caw tx transfer [flags]",
+  "flags": [
+    {
+      "name": "amount",
+      "type": "string",
+      "required": true,
+      "description": "Transfer amount as a decimal string, e.g. 1.5 (required)"
+    },
+    {
+      "name": "chain-id",
+      "type": "string",
+      "default": "ETH",
+      "description": "Chain ID, e.g. SETH, BASE_ETH. Resolved automatically from token [REDACTED] if omitted"
+    },
+    {
+      "name": "context",
+      "type": "string",
+      "description": "Request context as JSON, saved with the response ID for tracking"
+    },
+    {
+      "name": "description",
+      "type": "string",
+      "description": "Optional description for this transaction"
+    },
+    {
+      "name": "dst-address",
+      "type": "string",
+      "required": true,
+      "description": "Destination on-chain address (required)"
+    },
+    {
+      "name": "fee",
+      "type": "string",
+      "description": "Custom fee parameters as a JSON object (EIP-1559 or SOL). If omitted, the network default is used"
+    },
+    {
+      "name": "pact-id",
+      "type": "string",
+      "required": true,
+      "description": "Pact UUID [required]"
+    },
+    {
+      "name": "request-id",
+      "type": "string",
+      "description": "Client-supplied idempotency key. If a transfer with the same request-id already exists, the existing record is returned"
+    },
+    {
+      "name": "src-address",
+      "type": "string",
+      "description": "Source address to transfer from. If omitted, the server auto-selects the wallet address on this chain with the highest available token [REDACTED] (explicit src-address takes precedence)"
+    },
+    {
+      "name": "token-id",
+      "type": "string",
+      "required": true,
+      "description": "Token [REDACTED], e.g. SETH, SETH_USDC (required). Use the List supported assets operation to retrieve all supported token [REDACTED]"
+    }
+  ],
+  "exit_codes": {
+    "0": "success",
+    "1": "generic error",
+    "4": "authentication or permission failure",
+    "5": "policy denied",
+    "6": "insufficient balance",
+    "7": "network error (retryable)"
+  }
+}

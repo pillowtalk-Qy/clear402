@@ -142,7 +142,10 @@ async function exportEvidence(page: Page, testInfo: TestInfo) {
   const renderedJson = JSON.parse(jsonText);
   const evidence = typeof renderedJson === "string" ? JSON.parse(renderedJson) : renderedJson;
   expect(evidence.version).toBe("clear402.evidence-export.v1");
-  expect(evidence.evidenceMode).toBe("fallback");
+  expect(evidence.evidenceMode).not.toBe("live");
+  expect(evidence.erc8004Trust.trustSource).toBe("demo_erc8004");
+  expect(evidence.erc8004Trust.registrationStatus).toBe("needs_registration");
+  expect(evidence.erc8004Trust.evidenceMode).toBe("mock");
   expect(evidence.guard.decision).toBe("fallback_required");
   expect(evidence.serviceReceipt.evidenceMode).toBe("fallback");
   expect(evidence.serviceReceipt.txHash).toBeUndefined();

@@ -1,0 +1,10 @@
+{
+  "command": "caw schema fetch",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "probe_schema_fetch.stdout.txt",
+  "stderr": "probe_schema_fetch.stderr.txt",
+  "stdoutSha256": "cd6a72bc95b0dae5500979b07da9a8be00fea1ac8988b6c1e46f9da90b7481bc",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "collectedAt": "2026-06-13T20:58:31.441Z"
+}

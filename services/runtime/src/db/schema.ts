@@ -114,8 +114,14 @@ CREATE TABLE IF NOT EXISTS receipts (
   caw_wallet_address TEXT NOT NULL,
   pact_id TEXT NOT NULL,
   provider_address TEXT NOT NULL,
+  resource TEXT,
+  asset TEXT,
+  service_result_hash TEXT,
+  caw_evidence_ref TEXT,
+  fallback_evidence_ref TEXT,
   facilitator_url_hash TEXT,
   tx_hash TEXT,
+  cobo_transaction_id TEXT,
   chain_id TEXT NOT NULL,
   token_id TEXT NOT NULL,
   amount TEXT NOT NULL,
@@ -129,6 +135,26 @@ CREATE TABLE IF NOT EXISTS receipts (
   redaction_summary_hash TEXT,
   evidence_mode TEXT NOT NULL CHECK (evidence_mode IN ('live', 'fallback', 'mock')),
   created_at INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS dual_receipts (
+  dual_receipt_hash TEXT PRIMARY KEY,
+  receipt_id TEXT NOT NULL REFERENCES receipts(receipt_id) ON DELETE CASCADE,
+  mission_id TEXT NOT NULL REFERENCES missions(id) ON DELETE CASCADE,
+  payment_context_hash TEXT NOT NULL REFERENCES payment_contexts(payment_context_hash) ON DELETE CASCADE,
+  payment_receipt_hash TEXT NOT NULL,
+  delivery_receipt_hash TEXT NOT NULL,
+  service_result_hash TEXT NOT NULL,
+  resource TEXT NOT NULL,
+  provider_address TEXT NOT NULL,
+  provider_public_key_hash TEXT,
+  final_status TEXT NOT NULL CHECK (final_status IN ('delivered', 'paid_but_not_delivered', 'refunded', 'failed')),
+  verification_decision TEXT NOT NULL CHECK (verification_decision IN ('allow', 'block')),
+  verification_result_json TEXT NOT NULL,
+  dual_receipt_json TEXT NOT NULL,
+  evidence_mode TEXT NOT NULL CHECK (evidence_mode IN ('live', 'fallback', 'mock')),
+  created_at INTEGER NOT NULL,
+  UNIQUE (payment_context_hash, delivery_receipt_hash)
 );
 
 CREATE TABLE IF NOT EXISTS guard_events (
@@ -153,5 +179,7 @@ CREATE TABLE IF NOT EXISTS mission_timeline_events (
 CREATE INDEX IF NOT EXISTS idx_missions_status ON missions(status);
 CREATE INDEX IF NOT EXISTS idx_guard_events_mission_id ON guard_events(mission_id);
 CREATE INDEX IF NOT EXISTS idx_receipts_mission_id ON receipts(mission_id);
+CREATE INDEX IF NOT EXISTS idx_dual_receipts_mission_id ON dual_receipts(mission_id);
+CREATE INDEX IF NOT EXISTS idx_dual_receipts_receipt_id ON dual_receipts(receipt_id);
 CREATE INDEX IF NOT EXISTS idx_mission_timeline_events_mission_id ON mission_timeline_events(mission_id, timeline_id);
 `;

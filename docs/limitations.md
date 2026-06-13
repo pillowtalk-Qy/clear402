@@ -4,12 +4,19 @@ This document records the Phase 21 demo boundaries. It is a claims-control docum
 
 ## Current Live Scope
 
-Clear402 has two recorded live CAW Sepolia facts:
+Clear402 has two recorded live CAW Sepolia execution facts:
 
 - one tiny `0.0001` SETH Sepolia testnet allow-path transfer in `docs/live_caw_testnet_smoke_report.md`;
 - one Sepolia testnet destination-allowlist policy denial in `docs/live_caw_policy_denial_report.md`.
 
-That live scope does not extend to ordinary dashboard payments, attack lab runs, provider/trust seed data, mainnet, production readiness, unrestricted CAW execution, or every CAW denial type.
+Clear402 also has official CAW CLI verification evidence for narrower non-execution paths:
+
+- the official x402 Express example from `x402-foundation/x402` commit `b32a702` returned a real HTTP 402 challenge, and `caw fetch --dry-run` parsed it without calling the payment API;
+- the official x402 execute path reached CAW but stopped with `INSUFFICIENT_PERMISSION` / `can_transfer` because a fresh approved active pact for that x402 asset/operation was required;
+- a `message_sign` pact was submitted and remains `pending_approval`; allow-shaped and deny-shaped PaymentContext signing probes both reached CAW but stopped with `INSUFFICIENT_PERMISSION` / `can_message_sign`;
+- `caw payment gateway` forward mode started, listened locally on `127.0.0.1:8404`, and forwarded the official x402 request, but the forwarded payment still stopped with `INSUFFICIENT_PERMISSION` / `can_transfer`.
+
+That live scope does not extend to ordinary dashboard payments, attack lab runs, provider/trust seed data, mainnet, production readiness, unrestricted CAW execution, approved live message signing, production gateway settlement, or every CAW denial type. Having a wallet balance or testnet asset is not enough to claim execution: CAW still requires the right approved pact and operation permission.
 
 ## Explicit Non-Claims
 
@@ -17,11 +24,16 @@ That live scope does not extend to ordinary dashboard payments, attack lab runs,
 |---|---|
 | No mainnet | No mainnet CAW execution is claimed or documented. |
 | No production readiness | The branch is demo-gate ready, not production-ready. |
-| No unrestricted CAW execution | CAW use is limited to the recorded Sepolia allow-path transfer and recorded destination-allowlist denial. |
+| No unrestricted CAW execution | CAW use is limited to the recorded Sepolia allow-path transfer, recorded destination-allowlist denial, and official CLI dry-run/gateway startup checks. Asset availability alone does not make a payment executable. |
+| No successful official x402 execute | The official `caw fetch` execute attempt reached CAW but stopped on `INSUFFICIENT_PERMISSION` / `can_transfer`; it produced no paid retry, tx hash, or successful payment claim. |
+| No live CAW `message_sign` allow/deny evidence | The message-sign pact exists as `pending_approval`; allow-shaped and deny-shaped probes both stop at `can_message_sign`, so no approved live signing allow path or policy-denial path is claimed. |
+| No production gateway mode | The official gateway evidence proves local CLI startup/listening/forwarding only, not a production payment network gateway or settled payment. |
+| No deployed onchain ServiceEscrow evidence | `contracts/ServiceEscrow.sol`, ABI, deployment script, and runtime calldata generation are present, but no deployed Sepolia contract address, tx hash, or successful CAW `contract_call` is claimed in this repo. |
+| No verified Clear402 ERC-8004 provider identity | ERC-8004 live Identity truth must come from an Identity Registry agent token / `tokenURI` or a matching official indexer record. A 8004scan public search did not find a matching Clear402 provider identity, so Clear402 trust remains `needs_registration` unless a future live source verifies it. |
 | Only one recorded CAW denial type | The only live denial type recorded is destination outside the transfer allowlist. |
 | Ordinary dashboard/demo flow is fallback | The dashboard mission/payment/receipt/export path is fallback/demo unless explicitly backed by runtime evidence; ordinary payment has no live tx hash. |
 | Attack fixtures are mock inputs | The attack lab inputs are fixtures; the guard execution is real local code. |
-| Provider/trust/capability seed data is demo/mock | Demo provider registry, ERC-8004-style trust, capability records, wallet IDs, hashes, and sample references are not live registry truth. |
+| Provider/trust/capability seed data is demo/mock | Demo provider registry, `demo_erc8004` trust, capability records, wallet IDs, hashes, and sample references are not live registry truth. |
 | Browser E2E requires local Chrome/Chromium | `pnpm test:e2e` uses Playwright and needs a local Chromium-compatible browser installed and runnable in the operator environment; run `pnpm exec playwright install chromium` if needed. |
 
 ## Dashboard And Evidence Limits
@@ -29,6 +41,11 @@ That live scope does not extend to ordinary dashboard payments, attack lab runs,
 - Dashboard runtime/provider health can be live local service evidence.
 - Dashboard mission/payment/receipt/export actions remain fallback/demo state unless a runtime response explicitly backs them.
 - The ordinary dashboard payment path does not invoke the live CAW Sepolia smoke and must not display a live tx hash.
+- Official `caw fetch --dry-run` proves challenge parsing only; it does not execute a payment or produce a live tx hash.
+- The official `caw fetch` execute attempt is permission-boundary evidence for missing pact permission, not successful payment evidence.
+- Official `message_sign` evidence stops at pact submission / pending approval plus `can_message_sign` blocking until the CAW App owner approves a pact and a live sign allow or policy denial is captured.
+- Official `caw payment gateway` evidence proves the local CLI can start, listen, and forward a request; it does not prove payment execution or production settlement.
+- ERC-8004 live truth requires official live sources: Identity Registry ERC-721 `tokenURI`, Reputation Registry `getSummary` / `readAllFeedback`, Validation Registry `getValidationStatus` / `getSummary` / `getAgentValidations` / `getValidatorRequests`, or an official indexer/API such as 8004scan. Clear402 has no verified registered provider identity in those sources yet.
 - Evidence exports are read-only summaries. Exporting evidence does not execute CAW payments.
 - Sample evidence packs in `evidence/` are samples. They are not live CAW audit artifacts.
 - Raw CAW evidence refs, API keys, pairing tokens, wallet secrets, and environment values must stay out of committed docs and exported samples.
@@ -46,19 +63,19 @@ Phase 21 packaging does not finish the full P1 championship list. Current status
 
 | P1 Item | Status |
 |---|---|
-| ERC-8004 trust adapter demo or explicit limitation | Partially complete as an adapter over demo trust records; not live ERC-8004 network truth. |
-| ServiceEscrow fund/refund flow | Complete as a local protocol/state-machine layer; not an onchain escrow contract. |
-| `message_sign` PaymentContext support | Complete for local/runtime evidence and guard enforcement; not a live CAW message-sign API claim. |
+| ERC-8004 trust adapter live truth integration | Complete for source-aware enforcement: results now distinguish `live_erc8004`, `demo_erc8004`, and unavailable live source state; no verified Clear402 provider identity is present, so runtime evidence remains `needs_registration` / `fallback_required` unless a future live source verifies registration, reputation, and validation records. |
+| ServiceEscrow fund/refund flow | Onchain-ready native-value source, ABI, Sepolia deployment instructions, runtime `fund`/`refund` calldata generation, context-hash binding, and local state-machine tests are complete. No deployed Sepolia escrow, ERC-20 escrow custody, or successful live CAW `contract_call` evidence is claimed yet. |
+| `message_sign` PaymentContext support | Complete for local/runtime evidence and guard enforcement. Official CLI pact submission reached `pending_approval`; fresh allow-shaped and deny-shaped live probes stopped at `can_message_sign`, so no approved live CAW message-sign allow/deny evidence is claimed. |
 | `params_match` / `message_match` / `function_abis` support | Complete for local clear-sign policy enforcement. |
 | SSE timeline | Append-only local mission timeline complete at `/api/missions/:missionId/timeline.sse`, including event ids, event types, timestamps, mission ids, payloads, heartbeat comments, and `Last-Event-ID` replay; not production-scale realtime infrastructure. |
 | 20-request race regression | Partially complete in the attack fixture `concurrent_free_riding_20_requests`; not a broader production load/race suite. |
 | Signed ProviderQuote | Complete as a local signed quote protocol and verification layer; not a live provider attestation network. |
 | Dual Receipt model | Complete as a local payment/delivery dual-receipt protocol; not a chain-native or network-native settlement standard. |
 | Chaos / regression pack | Partially represented by unit, E2E, and 16 attack fixtures; not a complete chaos suite. |
-| Payment gateway mode | Complete as a local provider gateway route; not a production payment network gateway. |
+| Payment gateway mode | Complete as a local provider gateway route. Official `caw payment gateway` forward mode starts, listens locally, and forwards the official x402 request; not a production payment network gateway or settled payment proof. |
 | EvidenceBundle provenance fix | Closed in the current clean baseline by classifying evidence bundles by evidence mode; keep regression coverage when expanding evidence surfaces. |
 | Dashboard payment-state clarity | Closed for the ordinary demo payment label; keep the fallback/demo guard visible if new payment controls are added. |
 
 ## Safe Closeout Claim
 
-"This branch is final-demo packaged for the current Clear402 guard and evidence story. It shows live local services, real local guard execution, fallback-labeled ordinary dashboard payment, 16/16 mock attack fixtures blocked, one recorded CAW Sepolia tiny transfer, and one recorded CAW Sepolia destination-allowlist denial. It does not claim mainnet, production readiness, unrestricted CAW execution, full CAW denial coverage, live provider registry truth, or external attack traffic."
+"This branch is final-demo packaged for the current Clear402 guard and evidence story. It shows live local services, real local guard execution, fallback-labeled ordinary dashboard payment, 16/16 mock attack fixtures blocked, onchain-ready ServiceEscrow code/calldata generation, one recorded CAW Sepolia tiny transfer, one recorded CAW Sepolia destination-allowlist denial, official x402 HTTP 402 / dry-run parsing, and official CAW gateway startup/listening/forwarding evidence. It does not claim mainnet, production readiness, unrestricted CAW execution, deployed ServiceEscrow, successful CAW contract_call escrow funding, successful official x402 execution beyond the recorded tiny transfer, live CAW message-sign allow/deny evidence, payment gateway settlement, full CAW denial coverage, live provider registry truth, or external attack traffic. Asset availability alone is not an execution claim."

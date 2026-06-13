@@ -1,0 +1,10 @@
+{
+  "command": "caw payment gateway --help",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "probe_payment_gateway_--help.stdout.txt",
+  "stderr": "probe_payment_gateway_--help.stderr.txt",
+  "stdoutSha256": "66d8db66a9bf04d4c65b6d8d453720eeed5102e93aa8d9d1c26537edf3428c59",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "collectedAt": "2026-06-13T20:57:14.728Z"
+}

@@ -1,0 +1,24 @@
+[
+  {
+    "chain_id": "SOLDEV_SOL",
+    "tokens": {
+      "SOLDEV_SOL": {
+        "daily_limit": "0.1",
+        "deposit_amount": "0.05"
+      },
+      "SOLDEV_SOL_USDC": {
+        "daily_limit": "0.02",
+        "deposit_amount": "0.01"
+      }
+    }
+  },
+  {
+    "chain_id": "SETH",
+    "tokens": {
+      "SETH": {
+        "daily_limit": "0.02",
+        "deposit_amount": "0.01"
+      }
+    }
+  }
+]

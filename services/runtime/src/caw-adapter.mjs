@@ -119,7 +119,11 @@ export function createCawAdapter({
           report,
           clock,
           requestIdFactory: () => input.requestId,
-          liveExecutor,
+          liveExecutor: enrichLiveExecutor(liveExecutor, {
+            contractAddress: input.contractAddress,
+            calldata: input.calldata,
+            amount: input.amount
+          }),
           attemptedOperation: "contract_call",
           ...options
         }),
@@ -159,6 +163,14 @@ export function createCawAdapter({
       );
     }
   };
+}
+
+function enrichLiveExecutor(liveExecutor, extra) {
+  if (typeof liveExecutor !== "function") {
+    return liveExecutor;
+  }
+
+  return (input) => liveExecutor({ ...input, ...extra });
 }
 
 function adaptIntentResult(result, fallbackRequestId) {

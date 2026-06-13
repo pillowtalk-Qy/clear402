@@ -1,0 +1,8 @@
+{
+  "command": "caw meta chains",
+  "exitCode": 0,
+  "signal": null,
+  "stdout": "meta_meta_chains.stdout.txt",
+  "stderr": "meta_meta_chains.stderr.txt",
+  "collectedAt": "2026-06-13T21:15:59.804Z"
+}

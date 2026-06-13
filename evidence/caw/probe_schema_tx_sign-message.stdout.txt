@@ -1,0 +1,57 @@
+{
+  "command": "caw tx sign-message",
+  "description": "Sign a message using a wallet address. --pact-id is the pact that scopes the signing key and wallet; obtain it from 'caw pact list' or a pact submit response.",
+  "usage": "caw tx sign-message [flags]",
+  "flags": [
+    {
+      "name": "chain-id",
+      "type": "string",
+      "required": true,
+      "description": "Chain ID, e.g. SETH, BASE_ETH (required). Use the List supported chains operation to retrieve all supported chain IDs"
+    },
+    {
+      "name": "context",
+      "type": "string",
+      "description": "Request context as JSON, saved with the response ID for tracking"
+    },
+    {
+      "name": "description",
+      "type": "string",
+      "description": "Human-readable description of what is being signed"
+    },
+    {
+      "name": "destination-type",
+      "type": "string",
+      "description": "Signing scheme, e.g. eip712 for EIP-712 typed data"
+    },
+    {
+      "name": "eip712-typed-data",
+      "type": "string",
+      "description": "EIP-712 typed data as a JSON object (required for eip712 destination type)"
+    },
+    {
+      "name": "pact-id",
+      "type": "string",
+      "required": true,
+      "description": "Pact UUID [required]"
+    },
+    {
+      "name": "request-id",
+      "type": "string",
+      "description": "Client-supplied idempotency key"
+    },
+    {
+      "name": "src-address",
+      "type": "string",
+      "description": "Address to sign with. If omitted, the server auto-selects the wallet address on this chain (explicit src-address takes precedence)"
+    }
+  ],
+  "exit_codes": {
+    "0": "success",
+    "1": "generic error",
+    "4": "authentication or permission failure",
+    "5": "policy denied",
+    "6": "insufficient balance",
+    "7": "network error (retryable)"
+  }
+}

@@ -38,6 +38,7 @@ export interface EvidenceExport {
   };
   mission: MissionFacts;
   providerChallenge: ProviderChallengeFacts;
+  erc8004Trust: ERC8004TrustFacts | MissingFacts;
   paymentContext: PaymentContextFacts | MissingFacts;
   guard: GuardFacts;
   cawCapabilitySummary: CawCapabilitySummary;
@@ -94,6 +95,27 @@ interface ProviderChallengeFacts {
     expiresAt?: number;
     evidenceMode: EvidenceMode;
   };
+  evidenceMode: EvidenceMode;
+}
+
+interface ERC8004TrustFacts {
+  status: "recorded";
+  agentId: string;
+  trustSource: "live_erc8004" | "demo_erc8004" | "unavailable";
+  registrationStatus: "registered" | "needs_registration" | "unavailable";
+  decision: string;
+  identityVerified: boolean;
+  endpointMatches: boolean;
+  payToMatches: boolean;
+  reputationScore: number;
+  demoFallbackUsed: boolean;
+  liveSource?: {
+    source?: string;
+    status?: string;
+    reference?: string;
+    checkedAt?: number;
+  };
+  reason?: string;
   evidenceMode: EvidenceMode;
 }
 
@@ -499,6 +521,7 @@ export function buildEvidenceExport(
     ? dualReceiptFromRow(dualReceiptRow)
     : eventDualReceipt ?? missingFacts("No dual receipt has been recorded for this mission.");
   const providerChallenge = providerChallengeFromRows(providerContext, parsedGuardEvents);
+  const erc8004Trust = erc8004TrustFromEvents(parsedGuardEvents);
   const paymentContext = providerContext
     ? paymentContextFromRow(providerContext)
     : paymentContextFromEvents(parsedGuardEvents) ??
@@ -516,6 +539,14 @@ export function buildEvidenceExport(
       component: "providerChallenge",
       evidenceMode: providerChallenge.evidenceMode,
       note: providerContext ? "Runtime database plus guard evidence." : "Derived from guard evidence."
+    },
+    {
+      component: "erc8004Trust",
+      evidenceMode: erc8004Trust.evidenceMode,
+      note:
+        erc8004Trust.status === "recorded"
+          ? `trustSource=${erc8004Trust.trustSource}; registrationStatus=${erc8004Trust.registrationStatus}`
+          : erc8004Trust.reason
     },
     {
       component: "paymentContext",
@@ -573,6 +604,7 @@ export function buildEvidenceExport(
       evidenceMode: "live"
     },
     providerChallenge,
+    erc8004Trust,
     paymentContext,
     guard,
     cawCapabilitySummary,
@@ -632,6 +664,10 @@ export function renderEvidenceExportMarkdown(evidenceExport: EvidenceExport): st
     `- Resource: \`${evidenceExport.providerChallenge.challenge.resourceUrl ?? "n/a"}\``,
     `- Amount: \`${evidenceExport.providerChallenge.challenge.amount ?? "n/a"}\``,
     `- Raw challenge hash: \`${evidenceExport.providerChallenge.challenge.rawChallengeHash ?? "n/a"}\``,
+    "",
+    "## ERC-8004 Trust",
+    "",
+    ...renderERC8004TrustMarkdown(evidenceExport.erc8004Trust),
     "",
     "## PaymentContext",
     "",
@@ -939,6 +975,52 @@ function providerChallengeFromRows(
     },
     evidenceMode: providerContext ? modeMax("live", challengeMode) : challengeMode
   };
+}
+
+function erc8004TrustFromEvents(
+  parsedGuardEvents: Array<{ event: GuardEventRow; evidence: Record<string, unknown> }>
+): ERC8004TrustFacts | MissingFacts {
+  for (const { evidence } of [...parsedGuardEvents].reverse()) {
+    const trustResult = nestedRecord(evidence, ["trustResult"]);
+    if (!trustResult) {
+      continue;
+    }
+
+    const liveSource = nestedRecord(trustResult, ["liveSource"]);
+    const checkedAt = numberValue(liveSource?.checkedAt);
+    const liveSourceName = stringValue(liveSource?.source);
+    const liveSourceStatus = stringValue(liveSource?.status);
+    const liveSourceReference = stringValue(liveSource?.reference);
+    const parsedLiveSource =
+      liveSource === undefined
+        ? undefined
+        : {
+            ...(liveSourceName !== undefined ? { source: liveSourceName } : {}),
+            ...(liveSourceStatus !== undefined ? { status: liveSourceStatus } : {}),
+            ...(liveSourceReference !== undefined ? { reference: liveSourceReference } : {}),
+            ...(checkedAt !== undefined ? { checkedAt } : {})
+          };
+    const trustSource = erc8004TrustSourceValue(trustResult.trustSource);
+    const reason = stringValue(trustResult.reason);
+
+    return {
+      status: "recorded",
+      agentId: stringValue(trustResult.agentId) ?? "unregistered",
+      trustSource,
+      registrationStatus: erc8004RegistrationStatusValue(trustResult.registrationStatus),
+      decision: stringValue(trustResult.decision) ?? "fallback_required",
+      identityVerified: booleanValue(trustResult.identityVerified) ?? false,
+      endpointMatches: booleanValue(trustResult.endpointMatches) ?? false,
+      payToMatches: booleanValue(trustResult.payToMatches) ?? false,
+      reputationScore: numberValue(trustResult.reputationScore) ?? 0,
+      demoFallbackUsed: booleanValue(trustResult.demoFallbackUsed) ?? trustSource === "demo_erc8004",
+      ...(parsedLiveSource !== undefined ? { liveSource: parsedLiveSource } : {}),
+      ...(reason !== undefined ? { reason } : {}),
+      evidenceMode: evidenceModeFromRecord(trustResult) ?? "fallback"
+    };
+  }
+
+  return missingFacts("No ERC-8004 trust result has been recorded; live ERC-8004 trust remains needs_registration.");
 }
 
 function paymentContextFromRow(row: ProviderContextRow): PaymentContextFacts {
@@ -1341,6 +1423,11 @@ function buildDemoEvidenceExport(
       note: "Demo provider and challenge facts."
     },
     {
+      component: "erc8004Trust",
+      evidenceMode: "mock" as EvidenceMode,
+      note: "Demo ERC-8004 trust fixture; live trust requires registration."
+    },
+    {
       component: "paymentContext",
       evidenceMode: "fallback" as EvidenceMode,
       note: "Demo PaymentContext fixture."
@@ -1419,6 +1506,20 @@ function buildDemoEvidenceExport(
         evidenceMode: "fallback"
       },
       evidenceMode: "fallback"
+    },
+    erc8004Trust: {
+      status: "recorded",
+      agentId: "erc8004:agent:clear402-demo",
+      trustSource: "demo_erc8004",
+      registrationStatus: "needs_registration",
+      decision: "require_approval",
+      identityVerified: true,
+      endpointMatches: true,
+      payToMatches: true,
+      reputationScore: 84,
+      demoFallbackUsed: true,
+      reason: "Demo ERC-8004 trust fixture; live trust remains needs_registration.",
+      evidenceMode: "mock"
     },
     paymentContext: {
       status: "recorded",
@@ -1500,12 +1601,14 @@ function buildLimitations() {
     notes: [
       "The export endpoint is read-only and does not execute CAW payments.",
       "Demo and attack lab evidence is explicitly labeled fallback or mock.",
+      "ERC-8004 demo trust is mock unless a live source verifies registration, reputation, and validation records.",
       "Raw CAW evidence refs, API keys, pairing tokens, wallet secrets, and environment values are omitted from exports."
     ],
     claimsAllowed: [
       "Clear402 may claim the mission facts in this export only with their displayed evidenceMode labels.",
       "Clear402 may claim one recorded live CAW Sepolia testnet tiny transfer documented in docs/live_caw_testnet_smoke_report.md.",
       "Clear402 may claim one recorded live CAW Sepolia destination-allowlist policy denial documented in docs/live_caw_policy_denial_report.md.",
+      "Clear402 may claim ERC-8004 trust as live only when the trustSource is live_erc8004 and the registrationStatus is registered.",
       "Clear402 may claim default dashboard demos and attack lab runs do not trigger real CAW payments."
     ],
     claimsForbidden: [
@@ -1513,6 +1616,7 @@ function buildLimitations() {
       "Do not claim production readiness.",
       "Do not claim unrestricted wallet access or unrestricted CAW execution.",
       "Do not claim successful live payment execution beyond the recorded Sepolia allow-path smoke.",
+      "Do not claim demo ERC-8004 trust as live trust.",
       "Do not claim coverage for every possible CAW policy-denial type."
     ]
   };
@@ -1567,6 +1671,7 @@ function inferEventEvidenceMode(evidence: Record<string, unknown>, decision: Gua
     evidenceModeFromRecord(nestedRecord(evidence, ["cawEvidence"])),
     evidenceModeFromRecord(nestedRecord(evidence, ["receipt"])),
     evidenceModeFromRecord(nestedRecord(evidence, ["receiptResult", "receipt"])),
+    evidenceModeFromRecord(nestedRecord(evidence, ["trustResult"])),
     evidenceModeFromRecord(nestedRecord(evidence, ["metadataFirewall"])),
     evidenceModeFromRecord(nestedRecord(evidence, ["challenge"]))
   ].filter((mode): mode is EvidenceMode => mode !== undefined);
@@ -1758,6 +1863,25 @@ function renderPaymentContextMarkdown(paymentContext: PaymentContextFacts | Miss
   ];
 }
 
+function renderERC8004TrustMarkdown(erc8004Trust: ERC8004TrustFacts | MissingFacts) {
+  if (erc8004Trust.status === "not_recorded") {
+    return [`- Status: \`not_recorded\``, `- Reason: ${erc8004Trust.reason}`];
+  }
+
+  return [
+    `- Agent ID: \`${erc8004Trust.agentId}\``,
+    `- Trust source: \`${erc8004Trust.trustSource}\``,
+    `- Registration status: \`${erc8004Trust.registrationStatus}\``,
+    `- Decision: \`${erc8004Trust.decision}\``,
+    `- Endpoint matches: \`${String(erc8004Trust.endpointMatches)}\``,
+    `- payTo matches: \`${String(erc8004Trust.payToMatches)}\``,
+    `- Demo fallback used: \`${String(erc8004Trust.demoFallbackUsed)}\``,
+    `- Live source: \`${erc8004Trust.liveSource?.source ?? "n/a"}:${erc8004Trust.liveSource?.status ?? "n/a"}\``,
+    `- Evidence mode: \`${erc8004Trust.evidenceMode}\``,
+    `- Reason: ${erc8004Trust.reason ?? "n/a"}`
+  ];
+}
+
 function renderReceiptMarkdown(serviceReceipt: ServiceReceiptFacts | MissingFacts) {
   if (serviceReceipt.status === "not_recorded") {
     return [`- Status: \`not_recorded\``, `- Reason: ${serviceReceipt.reason}`];
@@ -1802,12 +1926,30 @@ function stringValue(value: unknown): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
+function erc8004TrustSourceValue(value: unknown): ERC8004TrustFacts["trustSource"] {
+  return value === "live_erc8004" || value === "demo_erc8004" || value === "unavailable"
+    ? value
+    : "unavailable";
+}
+
+function erc8004RegistrationStatusValue(
+  value: unknown
+): ERC8004TrustFacts["registrationStatus"] {
+  return value === "registered" || value === "needs_registration" || value === "unavailable"
+    ? value
+    : "unavailable";
+}
+
 function requireString(value: unknown, fallback: string) {
   return stringValue(value) ?? fallback;
 }
 
 function numberValue(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function booleanValue(value: unknown): boolean | undefined {
+  return typeof value === "boolean" ? value : undefined;
 }
 
 function isString(value: unknown): value is string {

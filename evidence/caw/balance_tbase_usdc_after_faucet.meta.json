@@ -1,0 +1,11 @@
+{
+  "name": "balance_tbase_usdc_after_faucet",
+  "cmd": "caw wallet balance --chain-id TBASE_SETH --token-id TBASE_USDC",
+  "cwd": "/Users/qy/Documents/clear402",
+  "started_at": "2026-06-13T21:39:37.506Z",
+  "ended_at": "2026-06-13T21:39:40.151Z",
+  "exit_code": 0,
+  "signal": null,
+  "error": null,
+  "timed_out": false
+}

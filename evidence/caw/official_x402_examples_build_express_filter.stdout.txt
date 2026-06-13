@@ -1,0 +1,550 @@
+Scope: 8 of 53 workspace projects
+../../typescript/packages/core build$ tsup
+../../typescript/packages/core build: CLI Building entry: {"index":"src/index.ts","client/index":"src/client/index.ts","facilitator/index":"src/facilitator/index.ts","http/index":"src/http/index.ts","server/index":"src/server/index.ts","types/index":"src/types/index.ts","types/v1/index":"src/types/v1/index.ts","utils/index":"src/utils/index.ts","schemas/index":"src/schemas/index.ts"}
+../../typescript/packages/core build: CLI Using tsconfig: tsconfig.json
+../../typescript/packages/core build: CLI Building entry: {"index":"src/index.ts","client/index":"src/client/index.ts","facilitator/index":"src/facilitator/index.ts","http/index":"src/http/index.ts","server/index":"src/server/index.ts","types/index":"src/types/index.ts","types/v1/index":"src/types/v1/index.ts","utils/index":"src/utils/index.ts","schemas/index":"src/schemas/index.ts"}
+../../typescript/packages/core build: CLI Using tsconfig: tsconfig.json
+../../typescript/packages/core build: CLI tsup v8.5.0
+../../typescript/packages/core build: CLI Using tsup config: /private/tmp/x402-official/typescript/packages/core/tsup.config.ts
+../../typescript/packages/core build: CLI tsup v8.5.0
+../../typescript/packages/core build: CLI Using tsup config: /private/tmp/x402-official/typescript/packages/core/tsup.config.ts
+../../typescript/packages/core build: CLI Target: es2020
+../../typescript/packages/core build: CLI Target: es2020
+../../typescript/packages/core build: CJS Build start
+../../typescript/packages/core build: CLI Cleaning output folder
+../../typescript/packages/core build: ESM Build start
+../../typescript/packages/core build: ESM dist/esm/http/index.mjs            939.00 B
+../../typescript/packages/core build: ESM dist/esm/index.mjs                 145.00 B
+../../typescript/packages/core build: ESM dist/esm/chunk-YSNRPV3S.mjs        44.15 KB
+../../typescript/packages/core build: ESM dist/esm/server/index.mjs          47.57 KB
+../../typescript/packages/core build: ESM dist/esm/utils/index.mjs           629.00 B
+../../typescript/packages/core build: ESM dist/esm/types/index.mjs           295.00 B
+../../typescript/packages/core build: ESM dist/esm/chunk-AGOUMC4P.mjs        2.04 KB
+../../typescript/packages/core build: ESM dist/esm/chunk-VE37GDG2.mjs        107.00 B
+../../typescript/packages/core build: ESM dist/esm/types/v1/index.mjs        34.00 B
+../../typescript/packages/core build: ESM dist/esm/chunk-ABS7D6VX.mjs        4.98 KB
+../../typescript/packages/core build: ESM dist/esm/chunk-BJTO5JO5.mjs        433.00 B
+../../typescript/packages/core build: ESM dist/esm/chunk-FPXAE3OS.mjs        4.72 KB
+../../typescript/packages/core build: ESM dist/esm/facilitator/index.mjs     13.13 KB
+../../typescript/packages/core build: ESM dist/esm/client/index.mjs          18.34 KB
+../../typescript/packages/core build: ESM dist/esm/schemas/index.mjs         1.55 KB
+../../typescript/packages/core build: ESM dist/esm/http/index.mjs.map        71.00 B
+../../typescript/packages/core build: ESM dist/esm/index.mjs.map             71.00 B
+../../typescript/packages/core build: ESM dist/esm/server/index.mjs.map      93.20 KB
+../../typescript/packages/core build: ESM dist/esm/chunk-YSNRPV3S.mjs.map    92.52 KB
+../../typescript/packages/core build: ESM dist/esm/chunk-AGOUMC4P.mjs.map    5.04 KB
+../../typescript/packages/core build: ESM dist/esm/utils/index.mjs.map       71.00 B
+../../typescript/packages/core build: ESM dist/esm/types/v1/index.mjs.map    71.00 B
+../../typescript/packages/core build: ESM dist/esm/chunk-VE37GDG2.mjs.map    140.00 B
+../../typescript/packages/core build: ESM dist/esm/types/index.mjs.map       71.00 B
+../../typescript/packages/core build: ESM dist/esm/chunk-ABS7D6VX.mjs.map    11.61 KB
+../../typescript/packages/core build: ESM dist/esm/chunk-BJTO5JO5.mjs.map    71.00 B
+../../typescript/packages/core build: ESM dist/esm/chunk-FPXAE3OS.mjs.map    15.29 KB
+../../typescript/packages/core build: ESM dist/esm/facilitator/index.mjs.map 24.67 KB
+../../typescript/packages/core build: ESM dist/esm/client/index.mjs.map      35.24 KB
+../../typescript/packages/core build: ESM dist/esm/schemas/index.mjs.map     71.00 B
+../../typescript/packages/core build: ESM ⚡️ Build success in 20ms
+../../typescript/packages/core build: CJS dist/cjs/index.js                 1.08 KB
+../../typescript/packages/core build: CJS dist/cjs/http/index.js            51.42 KB
+../../typescript/packages/core build: CJS dist/cjs/schemas/index.js         7.63 KB
+../../typescript/packages/core build: CJS dist/cjs/utils/index.js           6.47 KB
+../../typescript/packages/core build: CJS dist/cjs/server/index.js          92.47 KB
+../../typescript/packages/core build: CJS dist/cjs/types/v1/index.js        794.00 B
+../../typescript/packages/core build: CJS dist/cjs/facilitator/index.js     14.41 KB
+../../typescript/packages/core build: CJS dist/cjs/client/index.js          33.58 KB
+../../typescript/packages/core build: CJS dist/cjs/types/index.js           3.20 KB
+../../typescript/packages/core build: CJS dist/cjs/index.js.map             184.00 B
+../../typescript/packages/core build: CJS dist/cjs/schemas/index.js.map     15.49 KB
+../../typescript/packages/core build: CJS dist/cjs/utils/index.js.map       11.71 KB
+../../typescript/packages/core build: CJS dist/cjs/http/index.js.map        120.58 KB
+../../typescript/packages/core build: CJS dist/cjs/types/v1/index.js.map    1.46 KB
+../../typescript/packages/core build: CJS dist/cjs/facilitator/index.js.map 33.24 KB
+../../typescript/packages/core build: CJS dist/cjs/server/index.js.map      203.25 KB
+../../typescript/packages/core build: CJS dist/cjs/client/index.js.map      93.59 KB
+../../typescript/packages/core build: CJS dist/cjs/types/index.js.map       6.61 KB
+../../typescript/packages/core build: CJS ⚡️ Build success in 21ms
+../../typescript/packages/core build: DTS Build start
+../../typescript/packages/core build: DTS Build start
+../../typescript/packages/core build: DTS ⚡️ Build success in 2112ms
+../../typescript/packages/core build: DTS dist/cjs/index.d.ts               56.00 B
+../../typescript/packages/core build: DTS dist/cjs/facilitator/index.d.ts   8.72 KB
+../../typescript/packages/core build: DTS dist/cjs/http/index.d.ts          3.14 KB
+../../typescript/packages/core build: DTS dist/cjs/server/index.d.ts        5.97 KB
+../../typescript/packages/core build: DTS dist/cjs/utils/index.d.ts         3.19 KB
+../../typescript/packages/core build: DTS dist/cjs/schemas/index.d.ts       29.86 KB
+../../typescript/packages/core build: DTS dist/cjs/client/index.d.ts        6.57 KB
+../../typescript/packages/core build: DTS dist/cjs/types/v1/index.d.ts      222.00 B
+../../typescript/packages/core build: DTS dist/cjs/types/index.d.ts         1.20 KB
+../../typescript/packages/core build: DTS dist/cjs/x402Client-TQHctrG7.d.ts 71.99 KB
+../../typescript/packages/core build: DTS ⚡️ Build success in 2119ms
+../../typescript/packages/core build: DTS dist/esm/index.d.mts               56.00 B
+../../typescript/packages/core build: DTS dist/esm/facilitator/index.d.mts   8.72 KB
+../../typescript/packages/core build: DTS dist/esm/http/index.d.mts          3.14 KB
+../../typescript/packages/core build: DTS dist/esm/server/index.d.mts        5.97 KB
+../../typescript/packages/core build: DTS dist/esm/utils/index.d.mts         3.19 KB
+../../typescript/packages/core build: DTS dist/esm/schemas/index.d.mts       29.86 KB
+../../typescript/packages/core build: DTS dist/esm/client/index.d.mts        6.58 KB
+../../typescript/packages/core build: DTS dist/esm/types/v1/index.d.mts      223.00 B
+../../typescript/packages/core build: DTS dist/esm/types/index.d.mts         1.20 KB
+../../typescript/packages/core build: DTS dist/esm/x402Client-TQHctrG7.d.mts 71.99 KB
+../../typescript/packages/core build: Done
+../../typescript/packages/mechanisms/evm build$ tsup
+../../typescript/packages/mechanisms/svm build$ tsup
+../../typescript/packages/extensions build$ tsup
+../../typescript/packages/mechanisms/avm build$ tsup
+../../typescript/packages/mechanisms/svm build: CLI Building entry: {"index":"src/index.ts","v1/index":"src/v1/index.ts","exact/client/index":"src/exact/client/index.ts","exact/server/index":"src/exact/server/index.ts","exact/facilitator/index":"src/exact/facilitator/index.ts","exact/v1/client/index":"src/exact/v1/client/index.ts","exact/v1/facilitator/index":"src/exact/v1/facilitator/index.ts"}
+../../typescript/packages/mechanisms/svm build: CLI Using tsconfig: tsconfig.json
+../../typescript/packages/mechanisms/svm build: CLI Building entry: {"index":"src/index.ts","v1/index":"src/v1/index.ts","exact/client/index":"src/exact/client/index.ts","exact/server/index":"src/exact/server/index.ts","exact/facilitator/index":"src/exact/facilitator/index.ts","exact/v1/client/index":"src/exact/v1/client/index.ts","exact/v1/facilitator/index":"src/exact/v1/facilitator/index.ts"}
+../../typescript/packages/mechanisms/svm build: CLI Using tsconfig: tsconfig.json
+../../typescript/packages/mechanisms/svm build: CLI tsup v8.5.0
+../../typescript/packages/mechanisms/svm build: CLI Using tsup config: /private/tmp/x402-official/typescript/packages/mechanisms/svm/tsup.config.ts
+../../typescript/packages/mechanisms/svm build: CLI tsup v8.5.0
+../../typescript/packages/mechanisms/svm build: CLI Using tsup config: /private/tmp/x402-official/typescript/packages/mechanisms/svm/tsup.config.ts
+../../typescript/packages/mechanisms/svm build: CLI Target: es2020
+../../typescript/packages/mechanisms/svm build: CLI Target: es2020
+../../typescript/packages/mechanisms/svm build: CJS Build start
+../../typescript/packages/mechanisms/svm build: CLI Cleaning output folder
+../../typescript/packages/mechanisms/svm build: ESM Build start
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/index.mjs                          9.37 KB
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/chunk-AE7AI5WP.mjs                 4.39 KB
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/chunk-WWACQNRQ.mjs                 148.00 B
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/chunk-YP5337XM.mjs                 13.80 KB
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/chunk-FO6XNIY2.mjs                 4.45 KB
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/chunk-7XUBVWNH.mjs                 12.88 KB
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/chunk-TVOTRXZH.mjs                 1.08 KB
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/chunk-GHP74CT3.mjs                 5.74 KB
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/v1/index.mjs                       285.00 B
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/exact/v1/client/index.mjs          169.00 B
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/exact/client/index.mjs             956.00 B
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/exact/facilitator/index.mjs        20.56 KB
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/exact/server/index.mjs             4.03 KB
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/exact/v1/facilitator/index.mjs     207.00 B
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/chunk-AE7AI5WP.mjs.map             7.43 KB
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/chunk-WWACQNRQ.mjs.map             325.00 B
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/index.mjs.map                      25.86 KB
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/chunk-YP5337XM.mjs.map             31.22 KB
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/chunk-FO6XNIY2.mjs.map             7.71 KB
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/chunk-7XUBVWNH.mjs.map             23.27 KB
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/v1/index.mjs.map                   71.00 B
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/chunk-GHP74CT3.mjs.map             12.10 KB
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/chunk-TVOTRXZH.mjs.map             2.01 KB
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/exact/client/index.mjs.map         2.31 KB
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/exact/facilitator/index.mjs.map    42.18 KB
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/exact/server/index.mjs.map         7.46 KB
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/exact/v1/client/index.mjs.map      71.00 B
+../../typescript/packages/mechanisms/svm build: ESM dist/esm/exact/v1/facilitator/index.mjs.map 71.00 B
+../../typescript/packages/mechanisms/svm build: ESM ⚡️ Build success in 18ms
+../../typescript/packages/mechanisms/svm build: CJS dist/cjs/index.js                          35.71 KB
+../../typescript/packages/mechanisms/svm build: CJS dist/cjs/exact/server/index.js             6.78 KB
+../../typescript/packages/mechanisms/svm build: CJS dist/cjs/v1/index.js                       7.70 KB
+../../typescript/packages/mechanisms/svm build: CJS dist/cjs/exact/client/index.js             12.38 KB
+../../typescript/packages/mechanisms/svm build: CJS dist/cjs/exact/facilitator/index.js        50.73 KB
+../../typescript/packages/mechanisms/svm build: CJS dist/cjs/exact/v1/client/index.js          7.34 KB
+../../typescript/packages/mechanisms/svm build: CJS dist/cjs/exact/v1/facilitator/index.js     16.55 KB
+../../typescript/packages/mechanisms/svm build: CJS dist/cjs/index.js.map                      79.67 KB
+../../typescript/packages/mechanisms/svm build: CJS dist/cjs/exact/server/index.js.map         18.02 KB
+../../typescript/packages/mechanisms/svm build: CJS dist/cjs/v1/index.js.map                   35.76 KB
+../../typescript/packages/mechanisms/svm build: CJS dist/cjs/exact/client/index.js.map         45.50 KB
+../../typescript/packages/mechanisms/svm build: CJS dist/cjs/exact/facilitator/index.js.map    115.20 KB
+../../typescript/packages/mechanisms/svm build: CJS dist/cjs/exact/v1/facilitator/index.js.map 35.87 KB
+../../typescript/packages/mechanisms/svm build: CJS dist/cjs/exact/v1/client/index.js.map      18.34 KB
+../../typescript/packages/mechanisms/svm build: CJS ⚡️ Build success in 19ms
+../../typescript/packages/mechanisms/svm build: DTS Build start
+../../typescript/packages/mechanisms/svm build: DTS Build start
+../../typescript/packages/mechanisms/avm build: CLI Building entry: {"index":"src/index.ts","exact/client/index":"src/exact/client/index.ts","exact/server/index":"src/exact/server/index.ts","exact/facilitator/index":"src/exact/facilitator/index.ts"}
+../../typescript/packages/mechanisms/avm build: CLI Using tsconfig: tsconfig.json
+../../typescript/packages/mechanisms/avm build: CLI Building entry: {"index":"src/index.ts","exact/client/index":"src/exact/client/index.ts","exact/server/index":"src/exact/server/index.ts","exact/facilitator/index":"src/exact/facilitator/index.ts"}
+../../typescript/packages/mechanisms/avm build: CLI Using tsconfig: tsconfig.json
+../../typescript/packages/mechanisms/avm build: CLI tsup v8.5.0
+../../typescript/packages/mechanisms/avm build: CLI Using tsup config: /private/tmp/x402-official/typescript/packages/mechanisms/avm/tsup.config.ts
+../../typescript/packages/mechanisms/avm build: CLI tsup v8.5.0
+../../typescript/packages/mechanisms/avm build: CLI Using tsup config: /private/tmp/x402-official/typescript/packages/mechanisms/avm/tsup.config.ts
+../../typescript/packages/mechanisms/avm build: CLI Target: es2020
+../../typescript/packages/mechanisms/avm build: CLI Target: es2020
+../../typescript/packages/mechanisms/avm build: CJS Build start
+../../typescript/packages/mechanisms/avm build: CLI Cleaning output folder
+../../typescript/packages/mechanisms/avm build: ESM Build start
+../../typescript/packages/mechanisms/avm build: ESM dist/esm/index.mjs                       5.88 KB
+../../typescript/packages/mechanisms/avm build: ESM dist/esm/chunk-AY5WYLS5.mjs              397.00 B
+../../typescript/packages/mechanisms/avm build: ESM dist/esm/chunk-QEY4CIDB.mjs              3.51 KB
+../../typescript/packages/mechanisms/avm build: ESM dist/esm/chunk-OMKK3QVS.mjs              4.95 KB
+../../typescript/packages/mechanisms/avm build: ESM dist/esm/chunk-MWOLCZUZ.mjs              1.38 KB
+../../typescript/packages/mechanisms/avm build: ESM dist/esm/exact/client/index.mjs          194.00 B
+../../typescript/packages/mechanisms/avm build: ESM dist/esm/exact/server/index.mjs          4.75 KB
+../../typescript/packages/mechanisms/avm build: ESM dist/esm/exact/facilitator/index.mjs     19.60 KB
+../../typescript/packages/mechanisms/avm build: ESM dist/esm/index.mjs.map                   18.43 KB
+../../typescript/packages/mechanisms/avm build: ESM dist/esm/chunk-AY5WYLS5.mjs.map          2.12 KB
+../../typescript/packages/mechanisms/avm build: ESM dist/esm/chunk-QEY4CIDB.mjs.map          8.53 KB
+../../typescript/packages/mechanisms/avm build: ESM dist/esm/chunk-OMKK3QVS.mjs.map          10.23 KB
+../../typescript/packages/mechanisms/avm build: ESM dist/esm/chunk-MWOLCZUZ.mjs.map          4.38 KB
+../../typescript/packages/mechanisms/avm build: ESM dist/esm/exact/facilitator/index.mjs.map 32.82 KB
+../../typescript/packages/mechanisms/avm build: ESM dist/esm/exact/server/index.mjs.map      7.91 KB
+../../typescript/packages/mechanisms/avm build: ESM dist/esm/exact/client/index.mjs.map      71.00 B
+../../typescript/packages/mechanisms/avm build: ESM ⚡️ Build success in 13ms
+../../typescript/packages/mechanisms/avm build: CJS dist/cjs/index.js                       17.17 KB
+../../typescript/packages/mechanisms/avm build: CJS dist/cjs/exact/client/index.js          6.99 KB
+../../typescript/packages/mechanisms/avm build: CJS dist/cjs/exact/server/index.js          6.26 KB
+../../typescript/packages/mechanisms/avm build: CJS dist/cjs/exact/facilitator/index.js     22.12 KB
+../../typescript/packages/mechanisms/avm build: CJS dist/cjs/index.js.map                   43.61 KB
+../../typescript/packages/mechanisms/avm build: CJS dist/cjs/exact/client/index.js.map      21.28 KB
+../../typescript/packages/mechanisms/avm build: CJS dist/cjs/exact/server/index.js.map      12.20 KB
+../../typescript/packages/mechanisms/avm build: CJS dist/cjs/exact/facilitator/index.js.map 46.18 KB
+../../typescript/packages/mechanisms/avm build: CJS ⚡️ Build success in 15ms
+../../typescript/packages/mechanisms/avm build: DTS Build start
+../../typescript/packages/mechanisms/avm build: DTS Build start
+../../typescript/packages/extensions build: CLI Building entry: {"index":"src/index.ts","bazaar/index":"src/bazaar/index.ts","sign-in-with-x/index":"src/sign-in-with-x/index.ts","offer-receipt/index":"src/offer-receipt/index.ts","payment-identifier/index":"src/payment-identifier/index.ts","builder-code/index":"src/builder-code/index.ts"}
+../../typescript/packages/extensions build: CLI Using tsconfig: tsconfig.json
+../../typescript/packages/extensions build: CLI Building entry: {"index":"src/index.ts","bazaar/index":"src/bazaar/index.ts","sign-in-with-x/index":"src/sign-in-with-x/index.ts","offer-receipt/index":"src/offer-receipt/index.ts","payment-identifier/index":"src/payment-identifier/index.ts","builder-code/index":"src/builder-code/index.ts"}
+../../typescript/packages/extensions build: CLI Using tsconfig: tsconfig.json
+../../typescript/packages/extensions build: CLI tsup v8.5.0
+../../typescript/packages/extensions build: CLI Using tsup config: /private/tmp/x402-official/typescript/packages/extensions/tsup.config.ts
+../../typescript/packages/extensions build: CLI tsup v8.5.0
+../../typescript/packages/extensions build: CLI Using tsup config: /private/tmp/x402-official/typescript/packages/extensions/tsup.config.ts
+../../typescript/packages/extensions build: CLI Target: es2020
+../../typescript/packages/extensions build: CLI Target: es2020
+../../typescript/packages/extensions build: CJS Build start
+../../typescript/packages/extensions build: CLI Cleaning output folder
+../../typescript/packages/extensions build: ESM Build start
+../../typescript/packages/extensions build: ESM dist/esm/payment-identifier/index.mjs     1.07 KB
+../../typescript/packages/extensions build: ESM dist/esm/index.mjs                        12.22 KB
+../../typescript/packages/extensions build: ESM dist/esm/sign-in-with-x/index.mjs         1.50 KB
+../../typescript/packages/extensions build: ESM dist/esm/chunk-KWWPC3G7.mjs               23.64 KB
+../../typescript/packages/extensions build: ESM dist/esm/offer-receipt/index.mjs          2.23 KB
+../../typescript/packages/extensions build: ESM dist/esm/builder-code/index.mjs           677.00 B
+../../typescript/packages/extensions build: ESM dist/esm/chunk-TYR4QHVX.mjs               25.99 KB
+../../typescript/packages/extensions build: ESM dist/esm/chunk-73HCOE6N.mjs               6.45 KB
+../../typescript/packages/extensions build: ESM dist/esm/chunk-KKZBRP7D.mjs               30.88 KB
+../../typescript/packages/extensions build: ESM dist/esm/chunk-26YBCURG.mjs               10.28 KB
+../../typescript/packages/extensions build: ESM dist/esm/bazaar/index.mjs                 1.21 KB
+../../typescript/packages/extensions build: ESM dist/esm/payment-identifier/index.mjs.map 71.00 B
+../../typescript/packages/extensions build: ESM dist/esm/sign-in-with-x/index.mjs.map     71.00 B
+../../typescript/packages/extensions build: ESM dist/esm/offer-receipt/index.mjs.map      71.00 B
+../../typescript/packages/extensions build: ESM dist/esm/builder-code/index.mjs.map       71.00 B
+../../typescript/packages/extensions build: ESM dist/esm/chunk-KWWPC3G7.mjs.map           80.05 KB
+../../typescript/packages/extensions build: ESM dist/esm/index.mjs.map                    23.56 KB
+../../typescript/packages/extensions build: ESM dist/esm/chunk-TYR4QHVX.mjs.map           76.96 KB
+../../typescript/packages/extensions build: ESM dist/esm/chunk-73HCOE6N.mjs.map           22.39 KB
+../../typescript/packages/extensions build: ESM dist/esm/chunk-KKZBRP7D.mjs.map           102.17 KB
+../../typescript/packages/extensions build: ESM dist/esm/chunk-26YBCURG.mjs.map           26.12 KB
+../../typescript/packages/extensions build: ESM dist/esm/bazaar/index.mjs.map             71.00 B
+../../typescript/packages/extensions build: ESM ⚡️ Build success in 33ms
+../../typescript/packages/extensions build: CJS dist/cjs/index.js                        112.48 KB
+../../typescript/packages/extensions build: CJS dist/cjs/payment-identifier/index.js     9.13 KB
+../../typescript/packages/extensions build: CJS dist/cjs/bazaar/index.js                 33.71 KB
+../../typescript/packages/extensions build: CJS dist/cjs/sign-in-with-x/index.js         27.09 KB
+../../typescript/packages/extensions build: CJS dist/cjs/offer-receipt/index.js          30.00 KB
+../../typescript/packages/extensions build: CJS dist/cjs/builder-code/index.js           11.89 KB
+../../typescript/packages/extensions build: CJS dist/cjs/index.js.map                    332.39 KB
+../../typescript/packages/extensions build: CJS dist/cjs/payment-identifier/index.js.map 25.51 KB
+../../typescript/packages/extensions build: CJS dist/cjs/bazaar/index.js.map             106.58 KB
+../../typescript/packages/extensions build: CJS dist/cjs/sign-in-with-x/index.js.map     82.71 KB
+../../typescript/packages/extensions build: CJS dist/cjs/offer-receipt/index.js.map      79.42 KB
+../../typescript/packages/extensions build: CJS dist/cjs/builder-code/index.js.map       28.20 KB
+../../typescript/packages/extensions build: CJS ⚡️ Build success in 34ms
+../../typescript/packages/extensions build: DTS Build start
+../../typescript/packages/extensions build: DTS Build start
+../../typescript/packages/mechanisms/evm build: CLI Building entry: {"index":"src/index.ts","v1/index":"src/v1/index.ts","exact/client/index":"src/exact/client/index.ts","exact/server/index":"src/exact/server/index.ts","exact/facilitator/index":"src/exact/facilitator/index.ts","exact/v1/client/index":"src/exact/v1/client/index.ts","exact/v1/facilitator/index":"src/exact/v1/facilitator/index.ts","upto/client/index":"src/upto/client/index.ts","upto/server/index":"src/upto/server/index.ts","upto/facilitator/index":"src/upto/facilitator/index.ts","batch-settlement/client/index":"src/batch-settlement/client/index.ts","batch-settlement/client/file-storage":"src/batch-settlement/client/fileStorage.ts","batch-settlement/server/index":"src/batch-settlement/server/index.ts","batch-settlement/server/file-storage":"src/batch-settlement/server/fileStorage.ts","batch-settlement/server/redis-storage":"src/batch-settlement/server/redisStorage.ts","batch-settlement/facilitator/index":"src/batch-settlement/facilitator/index.ts","auth-capture/client/index":"src/auth-capture/client/index.ts"}
+../../typescript/packages/mechanisms/evm build: CLI Using tsconfig: tsconfig.json
+../../typescript/packages/mechanisms/evm build: CLI Building entry: {"index":"src/index.ts","v1/index":"src/v1/index.ts","exact/client/index":"src/exact/client/index.ts","exact/server/index":"src/exact/server/index.ts","exact/facilitator/index":"src/exact/facilitator/index.ts","exact/v1/client/index":"src/exact/v1/client/index.ts","exact/v1/facilitator/index":"src/exact/v1/facilitator/index.ts","upto/client/index":"src/upto/client/index.ts","upto/server/index":"src/upto/server/index.ts","upto/facilitator/index":"src/upto/facilitator/index.ts","batch-settlement/client/index":"src/batch-settlement/client/index.ts","batch-settlement/client/file-storage":"src/batch-settlement/client/fileStorage.ts","batch-settlement/server/index":"src/batch-settlement/server/index.ts","batch-settlement/server/file-storage":"src/batch-settlement/server/fileStorage.ts","batch-settlement/server/redis-storage":"src/batch-settlement/server/redisStorage.ts","batch-settlement/facilitator/index":"src/batch-settlement/facilitator/index.ts","auth-capture/client/index":"src/auth-capture/client/index.ts"}
+../../typescript/packages/mechanisms/evm build: CLI Using tsconfig: tsconfig.json
+../../typescript/packages/mechanisms/evm build: CLI tsup v8.5.0
+../../typescript/packages/mechanisms/evm build: CLI Using tsup config: /private/tmp/x402-official/typescript/packages/mechanisms/evm/tsup.config.ts
+../../typescript/packages/mechanisms/evm build: CLI tsup v8.5.0
+../../typescript/packages/mechanisms/evm build: CLI Using tsup config: /private/tmp/x402-official/typescript/packages/mechanisms/evm/tsup.config.ts
+../../typescript/packages/mechanisms/evm build: CLI Target: es2020
+../../typescript/packages/mechanisms/evm build: CJS Build start
+../../typescript/packages/mechanisms/evm build: CLI Target: es2020
+../../typescript/packages/mechanisms/evm build: CLI Cleaning output folder
+../../typescript/packages/mechanisms/evm build: ESM Build start
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/v1/index.mjs                                  424.00 B
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-2EUQTNJO.mjs                            1.03 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/index.mjs                                     5.17 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-IN5YIT5C.mjs                            5.19 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-EXF5MSQO.mjs                            31.17 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-W6ON4LG2.mjs                            1.28 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-LZBYVN3C.mjs                            4.86 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-HYABYUBD.mjs                            14.29 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-7KTOBWB2.mjs                            9.29 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-U4HCGTLU.mjs                            1.63 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-JK7SLLF7.mjs                            1.21 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-VQXOENVL.mjs                            3.80 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-P3QOX3QZ.mjs                            5.19 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-XYM7YNDI.mjs                            18.90 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-DR77D5IU.mjs                            3.85 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-MACPBXCT.mjs                            12.80 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-VS3RYAYE.mjs                            2.00 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/exact/v1/facilitator/index.mjs                321.00 B
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-TW7Z65AO.mjs                            920.00 B
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-27MWX225.mjs                            10.88 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-CE5P6FKO.mjs                            15.56 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-GJOZC3AC.mjs                            1.19 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/upto/server/index.mjs                         3.96 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/batch-settlement/client/index.mjs             1.51 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/auth-capture/client/index.mjs                 171.00 B
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/batch-settlement/server/index.mjs             53.60 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/exact/client/index.mjs                        634.00 B
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/batch-settlement/facilitator/index.mjs        40.44 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/exact/server/index.mjs                        5.21 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/upto/client/index.mjs                         545.00 B
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/exact/facilitator/index.mjs                   20.90 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/upto/facilitator/index.mjs                    15.23 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/batch-settlement/client/file-storage.mjs      1.59 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/batch-settlement/server/file-storage.mjs      3.88 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/batch-settlement/server/redis-storage.mjs     5.16 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/exact/v1/client/index.mjs                     342.00 B
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/v1/index.mjs.map                              71.00 B
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/index.mjs.map                                 15.47 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-LZBYVN3C.mjs.map                        11.64 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-2EUQTNJO.mjs.map                        2.82 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-W6ON4LG2.mjs.map                        4.31 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-IN5YIT5C.mjs.map                        13.11 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-EXF5MSQO.mjs.map                        73.84 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-HYABYUBD.mjs.map                        24.33 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-VQXOENVL.mjs.map                        7.74 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-7KTOBWB2.mjs.map                        20.66 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-P3QOX3QZ.mjs.map                        5.70 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-U4HCGTLU.mjs.map                        8.73 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-JK7SLLF7.mjs.map                        6.27 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-XYM7YNDI.mjs.map                        37.06 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-MACPBXCT.mjs.map                        25.57 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-VS3RYAYE.mjs.map                        5.65 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-DR77D5IU.mjs.map                        7.57 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/exact/v1/facilitator/index.mjs.map            71.00 B
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-TW7Z65AO.mjs.map                        2.25 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-27MWX225.mjs.map                        29.94 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-CE5P6FKO.mjs.map                        39.95 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/chunk-GJOZC3AC.mjs.map                        3.82 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/upto/server/index.mjs.map                     6.42 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/auth-capture/client/index.mjs.map             71.00 B
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/batch-settlement/client/index.mjs.map         71.00 B
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/batch-settlement/server/index.mjs.map         107.65 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/exact/client/index.mjs.map                    71.00 B
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/upto/client/index.mjs.map                     71.00 B
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/exact/facilitator/index.mjs.map               47.75 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/exact/server/index.mjs.map                    9.73 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/batch-settlement/facilitator/index.mjs.map    86.55 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/upto/facilitator/index.mjs.map                31.69 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/batch-settlement/client/file-storage.mjs.map  3.00 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/batch-settlement/server/file-storage.mjs.map  6.95 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/batch-settlement/server/redis-storage.mjs.map 10.00 KB
+../../typescript/packages/mechanisms/evm build: ESM dist/esm/exact/v1/client/index.mjs.map                 71.00 B
+../../typescript/packages/mechanisms/evm build: ESM ⚡️ Build success in 73ms
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/index.js                                     93.61 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/exact/client/index.js                        22.13 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/batch-settlement/client/index.js             51.31 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/auth-capture/client/index.js                 10.43 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/upto/server/index.js                         8.68 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/v1/index.js                                  5.62 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/exact/facilitator/index.js                   64.12 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/upto/client/index.js                         15.52 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/upto/facilitator/index.js                    42.99 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/batch-settlement/server/index.js             65.21 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/batch-settlement/facilitator/index.js        71.53 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/exact/server/index.js                        9.97 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/batch-settlement/server/redis-storage.js     6.19 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/batch-settlement/client/file-storage.js      3.71 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/batch-settlement/server/file-storage.js      6.19 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/exact/v1/facilitator/index.js                22.40 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/index.js.map                                 300.61 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/exact/v1/client/index.js                     5.46 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/exact/client/index.js.map                    125.02 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/batch-settlement/client/index.js.map         154.78 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/auth-capture/client/index.js.map             37.34 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/upto/server/index.js.map                     14.37 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/v1/index.js.map                              66.56 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/exact/facilitator/index.js.map               188.00 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/upto/client/index.js.map                     91.04 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/upto/facilitator/index.js.map                136.58 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/batch-settlement/server/index.js.map         154.59 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/exact/server/index.js.map                    17.64 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/batch-settlement/facilitator/index.js.map    224.14 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/batch-settlement/client/file-storage.js.map  5.81 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/batch-settlement/server/redis-storage.js.map 10.05 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/batch-settlement/server/file-storage.js.map  9.74 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/exact/v1/facilitator/index.js.map            84.42 KB
+../../typescript/packages/mechanisms/evm build: CJS dist/cjs/exact/v1/client/index.js.map                 66.71 KB
+../../typescript/packages/mechanisms/evm build: CJS ⚡️ Build success in 77ms
+../../typescript/packages/mechanisms/evm build: DTS Build start
+../../typescript/packages/mechanisms/evm build: DTS Build start
+../../typescript/packages/mechanisms/avm build: DTS ⚡️ Build success in 1239ms
+../../typescript/packages/mechanisms/avm build: DTS dist/esm/exact/server/index.d.mts      3.69 KB
+../../typescript/packages/mechanisms/avm build: DTS dist/esm/exact/facilitator/index.d.mts 9.15 KB
+../../typescript/packages/mechanisms/avm build: DTS dist/esm/index.d.mts                   9.09 KB
+../../typescript/packages/mechanisms/avm build: DTS dist/esm/exact/client/index.d.mts      2.58 KB
+../../typescript/packages/mechanisms/avm build: DTS dist/esm/signer-63-Rw31u.d.mts         7.47 KB
+../../typescript/packages/mechanisms/avm build: DTS ⚡️ Build success in 1245ms
+../../typescript/packages/mechanisms/avm build: DTS dist/cjs/exact/server/index.d.ts      3.69 KB
+../../typescript/packages/mechanisms/avm build: DTS dist/cjs/exact/facilitator/index.d.ts 9.14 KB
+../../typescript/packages/mechanisms/avm build: DTS dist/cjs/index.d.ts                   9.09 KB
+../../typescript/packages/mechanisms/avm build: DTS dist/cjs/exact/client/index.d.ts      2.58 KB
+../../typescript/packages/mechanisms/avm build: DTS dist/cjs/signer-63-Rw31u.d.ts         7.47 KB
+../../typescript/packages/mechanisms/avm build: Done
+../../typescript/packages/extensions build: DTS ⚡️ Build success in 2562ms
+../../typescript/packages/extensions build: DTS dist/cjs/index.d.ts                    19.58 KB
+../../typescript/packages/extensions build: DTS dist/cjs/sign-in-with-x/index.d.ts     35.92 KB
+../../typescript/packages/extensions build: DTS dist/cjs/offer-receipt/index.d.ts      24.99 KB
+../../typescript/packages/extensions build: DTS dist/cjs/payment-identifier/index.d.ts 11.59 KB
+../../typescript/packages/extensions build: DTS dist/cjs/builder-code/index.d.ts       8.22 KB
+../../typescript/packages/extensions build: DTS dist/cjs/bazaar/index.d.ts             1.48 KB
+../../typescript/packages/extensions build: DTS dist/cjs/index-CarYqId7.d.ts           33.12 KB
+../../typescript/packages/extensions build: DTS ⚡️ Build success in 2611ms
+../../typescript/packages/extensions build: DTS dist/esm/index.d.mts                    19.58 KB
+../../typescript/packages/extensions build: DTS dist/esm/sign-in-with-x/index.d.mts     35.92 KB
+../../typescript/packages/extensions build: DTS dist/esm/offer-receipt/index.d.mts      24.99 KB
+../../typescript/packages/extensions build: DTS dist/esm/payment-identifier/index.d.mts 11.59 KB
+../../typescript/packages/extensions build: DTS dist/esm/builder-code/index.d.mts       8.22 KB
+../../typescript/packages/extensions build: DTS dist/esm/bazaar/index.d.mts             1.48 KB
+../../typescript/packages/extensions build: DTS dist/esm/index-CarYqId7.d.mts           33.12 KB
+../../typescript/packages/extensions build: Done
+../../typescript/packages/mechanisms/svm build: DTS ⚡️ Build success in 4491ms
+../../typescript/packages/mechanisms/svm build: DTS dist/esm/v1/index.d.mts                   249.00 B
+../../typescript/packages/mechanisms/svm build: DTS dist/esm/exact/client/index.d.mts         1.20 KB
+../../typescript/packages/mechanisms/svm build: DTS dist/esm/exact/facilitator/index.d.mts    1.64 KB
+../../typescript/packages/mechanisms/svm build: DTS dist/esm/exact/v1/facilitator/index.d.mts 2.92 KB
+../../typescript/packages/mechanisms/svm build: DTS dist/esm/exact/server/index.d.mts         3.53 KB
+../../typescript/packages/mechanisms/svm build: DTS dist/esm/index.d.mts                      12.17 KB
+../../typescript/packages/mechanisms/svm build: DTS dist/esm/exact/v1/client/index.d.mts      1.22 KB
+../../typescript/packages/mechanisms/svm build: DTS dist/esm/scheme-DydbzoMD.d.mts            1.12 KB
+../../typescript/packages/mechanisms/svm build: DTS dist/esm/scheme-ChP-I06Z.d.mts            6.13 KB
+../../typescript/packages/mechanisms/svm build: DTS dist/esm/settlement-cache-D9gb94wH.d.mts  1.03 KB
+../../typescript/packages/mechanisms/svm build: DTS dist/esm/signer-BfMPtOJn.d.mts            8.15 KB
+../../typescript/packages/mechanisms/svm build: DTS ⚡️ Build success in 4565ms
+../../typescript/packages/mechanisms/svm build: DTS dist/cjs/v1/index.d.ts                   247.00 B
+../../typescript/packages/mechanisms/svm build: DTS dist/cjs/exact/client/index.d.ts         1.19 KB
+../../typescript/packages/mechanisms/svm build: DTS dist/cjs/exact/facilitator/index.d.ts    1.64 KB
+../../typescript/packages/mechanisms/svm build: DTS dist/cjs/exact/v1/facilitator/index.d.ts 2.92 KB
+../../typescript/packages/mechanisms/svm build: DTS dist/cjs/exact/server/index.d.ts         3.53 KB
+../../typescript/packages/mechanisms/svm build: DTS dist/cjs/index.d.ts                      12.17 KB
+../../typescript/packages/mechanisms/svm build: DTS dist/cjs/exact/v1/client/index.d.ts      1.22 KB
+../../typescript/packages/mechanisms/svm build: DTS dist/cjs/scheme-CS603Zb-.d.ts            1.11 KB
+../../typescript/packages/mechanisms/svm build: DTS dist/cjs/scheme-dr9IzaJ1.d.ts            6.13 KB
+../../typescript/packages/mechanisms/svm build: DTS dist/cjs/settlement-cache-D9gb94wH.d.ts  1.03 KB
+../../typescript/packages/mechanisms/svm build: DTS dist/cjs/signer-BfMPtOJn.d.ts            8.15 KB
+../../typescript/packages/mechanisms/svm build: Done
+../../typescript/packages/mechanisms/evm build: DTS ⚡️ Build success in 10261ms
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/v1/index.d.mts                              1.27 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/exact/client/index.d.mts                    2.44 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/exact/v1/facilitator/index.d.mts            3.35 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/upto/server/index.d.mts                     2.83 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/upto/facilitator/index.d.mts                2.28 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/batch-settlement/client/file-storage.d.mts  1.70 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/batch-settlement/server/file-storage.d.mts  2.13 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/batch-settlement/server/redis-storage.d.mts 3.18 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/batch-settlement/facilitator/index.d.mts    3.44 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/exact/server/index.d.mts                    4.86 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/exact/facilitator/index.d.mts               5.41 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/batch-settlement/server/index.d.mts         19.24 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/batch-settlement/client/index.d.mts         7.00 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/index.d.mts                                 13.92 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/exact/v1/client/index.d.mts                 1.29 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/upto/client/index.d.mts                     1.62 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/auth-capture/client/index.d.mts             2.04 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/scheme-7LxdTccI.d.mts                       2.29 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/rpc-DULZzRne.d.mts                          648.00 B
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/storage-6W5MO46W.d.mts                      1.86 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/storage-BEzTEiUr.d.mts                      3.22 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/types-DIt9uAUy.d.mts                        6.79 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/signer-BFelv8DL.d.mts                       5.77 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/permit2-DhJRUcgY.d.mts                      22.67 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/esm/scheme-BINVFRCa.d.mts                       14.09 KB
+../../typescript/packages/mechanisms/evm build: DTS ⚡️ Build success in 10377ms
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/v1/index.d.ts                              1.27 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/exact/client/index.d.ts                    2.44 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/exact/v1/facilitator/index.d.ts            3.35 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/upto/server/index.d.ts                     2.83 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/upto/facilitator/index.d.ts                2.27 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/batch-settlement/client/file-storage.d.ts  1.70 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/batch-settlement/server/file-storage.d.ts  2.13 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/batch-settlement/server/redis-storage.d.ts 3.17 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/batch-settlement/facilitator/index.d.ts    3.43 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/exact/server/index.d.ts                    4.86 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/exact/facilitator/index.d.ts               5.41 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/batch-settlement/server/index.d.ts         19.24 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/batch-settlement/client/index.d.ts         6.99 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/index.d.ts                                 13.91 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/exact/v1/client/index.d.ts                 1.28 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/upto/client/index.d.ts                     1.62 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/auth-capture/client/index.d.ts             2.04 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/scheme-Bhe6yUTU.d.ts                       2.29 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/rpc-DULZzRne.d.ts                          648.00 B
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/storage-6W5MO46W.d.ts                      1.86 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/storage-DjCv5IPh.d.ts                      3.22 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/types-DIt9uAUy.d.ts                        6.79 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/signer-BFelv8DL.d.ts                       5.77 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/permit2-DhJRUcgY.d.ts                      22.67 KB
+../../typescript/packages/mechanisms/evm build: DTS dist/cjs/scheme-CnuUbjbg.d.ts                       14.09 KB
+../../typescript/packages/mechanisms/evm build: Done
+../../typescript/packages/http/paywall build$ tsup
+../../typescript/packages/http/paywall build: CLI Building entry: {"index":"src/index.ts","evm/index":"src/evm/index.ts","svm/index":"src/svm/index.ts","avm/index":"src/avm/index.ts"}
+../../typescript/packages/http/paywall build: CLI Using tsconfig: tsconfig.json
+../../typescript/packages/http/paywall build: CLI Building entry: {"index":"src/index.ts","evm/index":"src/evm/index.ts","svm/index":"src/svm/index.ts","avm/index":"src/avm/index.ts"}
+../../typescript/packages/http/paywall build: CLI Using tsconfig: tsconfig.json
+../../typescript/packages/http/paywall build: CLI tsup v8.5.0
+../../typescript/packages/http/paywall build: CLI Using tsup config: /private/tmp/x402-official/typescript/packages/http/paywall/tsup.config.ts
+../../typescript/packages/http/paywall build: CLI tsup v8.5.0
+../../typescript/packages/http/paywall build: CLI Using tsup config: /private/tmp/x402-official/typescript/packages/http/paywall/tsup.config.ts
+../../typescript/packages/http/paywall build: CLI Target: es2020
+../../typescript/packages/http/paywall build: CLI Target: es2020
+../../typescript/packages/http/paywall build: CJS Build start
+../../typescript/packages/http/paywall build: CLI Cleaning output folder
+../../typescript/packages/http/paywall build: ESM Build start
+../../typescript/packages/http/paywall build: DTS Build start
+../../typescript/packages/http/paywall build: DTS Build start
+../../typescript/packages/http/paywall build: ESM dist/esm/svm/index.js     1.15 MB
+../../typescript/packages/http/paywall build: ESM dist/esm/evm/index.js     2.23 MB
+../../typescript/packages/http/paywall build: ESM dist/esm/avm/index.js     3.05 MB
+../../typescript/packages/http/paywall build: ESM dist/esm/svm/index.js.map 1.19 MB
+../../typescript/packages/http/paywall build: ESM dist/esm/index.js         6.43 MB
+../../typescript/packages/http/paywall build: ESM dist/esm/evm/index.js.map 2.29 MB
+../../typescript/packages/http/paywall build: ESM dist/esm/avm/index.js.map 3.14 MB
+../../typescript/packages/http/paywall build: ESM dist/esm/index.js.map     6.62 MB
+../../typescript/packages/http/paywall build: ESM ⚡️ Build success in 558ms
+../../typescript/packages/http/paywall build: CJS dist/cjs/svm/index.cjs     1.15 MB
+../../typescript/packages/http/paywall build: CJS dist/cjs/evm/index.cjs     2.23 MB
+../../typescript/packages/http/paywall build: CJS dist/cjs/avm/index.cjs     3.05 MB
+../../typescript/packages/http/paywall build: CJS dist/cjs/svm/index.cjs.map 1.19 MB
+../../typescript/packages/http/paywall build: CJS dist/cjs/evm/index.cjs.map 2.29 MB
+../../typescript/packages/http/paywall build: CJS dist/cjs/index.cjs         6.43 MB
+../../typescript/packages/http/paywall build: CJS dist/cjs/avm/index.cjs.map 3.14 MB
+../../typescript/packages/http/paywall build: CJS dist/cjs/index.cjs.map     6.62 MB
+../../typescript/packages/http/paywall build: CJS ⚡️ Build success in 558ms
+../../typescript/packages/http/paywall build: DTS ⚡️ Build success in 1046ms
+../../typescript/packages/http/paywall build: DTS dist/cjs/index.d.cts          1.27 KB
+../../typescript/packages/http/paywall build: DTS dist/cjs/evm/index.d.cts      986.00 B
+../../typescript/packages/http/paywall build: DTS dist/cjs/svm/index.d.cts      230.00 B
+../../typescript/packages/http/paywall build: DTS dist/cjs/avm/index.d.cts      232.00 B
+../../typescript/packages/http/paywall build: DTS dist/cjs/types-BFnmfUja.d.cts 2.56 KB
+../../typescript/packages/http/paywall build: DTS ⚡️ Build success in 1050ms
+../../typescript/packages/http/paywall build: DTS dist/esm/index.d.ts          1.26 KB
+../../typescript/packages/http/paywall build: DTS dist/esm/evm/index.d.ts      985.00 B
+../../typescript/packages/http/paywall build: DTS dist/esm/svm/index.d.ts      229.00 B
+../../typescript/packages/http/paywall build: DTS dist/esm/avm/index.d.ts      231.00 B
+../../typescript/packages/http/paywall build: DTS dist/esm/types-BFnmfUja.d.ts 2.56 KB
+../../typescript/packages/http/paywall build: Done
+../../typescript/packages/http/express build$ tsup
+../../typescript/packages/http/express build: CLI Building entry: {"index":"src/index.ts"}
+../../typescript/packages/http/express build: CLI Using tsconfig: tsconfig.json
+../../typescript/packages/http/express build: CLI Building entry: {"index":"src/index.ts"}
+../../typescript/packages/http/express build: CLI Using tsconfig: tsconfig.json
+../../typescript/packages/http/express build: CLI tsup v8.5.0
+../../typescript/packages/http/express build: CLI Using tsup config: /private/tmp/x402-official/typescript/packages/http/express/tsup.config.ts
+../../typescript/packages/http/express build: CLI tsup v8.5.0
+../../typescript/packages/http/express build: CLI Using tsup config: /private/tmp/x402-official/typescript/packages/http/express/tsup.config.ts
+../../typescript/packages/http/express build: CLI Target: node16
+../../typescript/packages/http/express build: CLI Target: node16
+../../typescript/packages/http/express build: CJS Build start
+../../typescript/packages/http/express build: CLI Cleaning output folder
+../../typescript/packages/http/express build: ESM Build start
+../../typescript/packages/http/express build: ESM dist/esm/index.mjs     11.06 KB
+../../typescript/packages/http/express build: ESM dist/esm/index.mjs.map 25.50 KB
+../../typescript/packages/http/express build: ESM ⚡️ Build success in 7ms
+../../typescript/packages/http/express build: CJS dist/cjs/index.js     12.91 KB
+../../typescript/packages/http/express build: CJS dist/cjs/index.js.map 25.44 KB
+../../typescript/packages/http/express build: CJS ⚡️ Build success in 7ms
+../../typescript/packages/http/express build: DTS Build start
+../../typescript/packages/http/express build: DTS Build start
+../../typescript/packages/http/express build: DTS ⚡️ Build success in 282ms
+../../typescript/packages/http/express build: DTS dist/cjs/index.d.ts 6.93 KB
+../../typescript/packages/http/express build: DTS ⚡️ Build success in 290ms
+../../typescript/packages/http/express build: DTS dist/esm/index.d.mts 6.93 KB
+../../typescript/packages/http/express build: Done

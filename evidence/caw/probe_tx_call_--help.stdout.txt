@@ -1,0 +1,33 @@
+Submit a smart contract call from a wallet.
+
+For EVM chains (e.g. SETH, BASE_ETH), provide --contract and --calldata.
+EVM addresses must be exactly 42 characters (0x + 40 hex digits).
+For Solana (SOL), provide --instructions as a JSON array of SolInstruction
+objects and optionally --address-lookup-tables.
+Solana addresses must be 43–44 characters (Base58).
+
+The call is evaluated against active policies before submission.
+
+Usage:
+  caw tx call [flags]
+
+Flags:
+      --address-lookup-tables string   Solana address lookup table accounts as a JSON array
+      --calldata string                EVM calldata as a hex-encoded string (0x-prefixed)
+      --chain-id string                Chain ID, e.g. SETH, BASE_ETH, SOL. Defaults to ETH. Use the List supported chains operation to retrieve all supported chain IDs (default "ETH")
+      --context string                 Request context as JSON, saved with the response ID for tracking
+      --contract string                EVM contract address to call
+      --description string             Optional description for this transaction
+      --fee string                     Custom fee parameters as a JSON object (EIP-1559 or SOL). If omitted, the network default is used
+  -h, --help                           help for call
+      --instructions string            Solana instructions as a JSON array of SolInstruction objects
+      --pact-id string                 Pact UUID [required]
+      --request-id string              Client-supplied idempotency key. If a call with the same request-id already exists, the existing record is returned
+      --src-address string             Source address to call from. If omitted, the server auto-selects the wallet address on this chain with the highest available native token [REDACTED] (explicit src-address takes precedence)
+      --value string                   Native token [REDACTED] to send with the call as a decimal string, e.g. 0.01 (default "0")
+
+Global Flags:
+      --api-key [REDACTED]   API key for authentication
+      --api-url string   API base URL to target a specific environment (env: AGENT_WALLET_API_URL)
+      --timeout float    HTTP timeout in seconds (default 30)
+  -v, --verbose          Enable debug logging

@@ -1,73 +1,31 @@
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { pathToFileURL } from "node:url";
+import { createServer, type ServerResponse } from "node:http";
 
 import {
   healthResponseSchema,
-  problemJsonSchema,
-  type HealthResponse,
-  type ProblemJSON
+  type HealthResponse
 } from "../../../packages/shared/src/index.js";
+import { createProviderHttpHandler, createProviderState } from "./http.mjs";
 
-const providerVersion = "0.1.0";
 const providerServiceName = "provider-x402";
+const providerVersion = "0.1.0";
 const providerPort = Number.parseInt(process.env.PROVIDER_X402_PORT ?? "4010", 10);
 const providerHost = process.env.PROVIDER_X402_HOST ?? "127.0.0.1";
-
-function jsonResponse(
-  response: ServerResponse,
-  statusCode: number,
-  payload: HealthResponse | ProblemJSON
-) {
-  const body = JSON.stringify(payload);
-  response.statusCode = statusCode;
-  response.setHeader("content-type", "application/json; charset=utf-8");
-  response.setHeader("cache-control", "no-store");
-  response.end(body);
-}
-
-function buildProviderHealth(): HealthResponse {
-  return healthResponseSchema.parse({
-    service: providerServiceName,
-    status: "ok",
-    evidenceMode: "live",
-    timestamp: new Date().toISOString(),
-    version: providerVersion,
-    details: {
-      protocol: "x402",
-      challengeMode: "foundation"
-    }
-  });
-}
-
-function buildProblem(code: string, message: string, details?: Record<string, unknown>) {
-  return problemJsonSchema.parse({
-    code,
-    message,
-    details
-  });
-}
-
-function handleRequest(request: IncomingMessage, response: ServerResponse) {
-  const url = new URL(request.url ?? "/", `http://${request.headers.host ?? "localhost"}`);
-
-  if (request.method === "GET" && url.pathname === "/health") {
-    jsonResponse(response, 200, buildProviderHealth());
-    return;
-  }
-
-  jsonResponse(
-    response,
-    404,
-    buildProblem("NOT_FOUND", "Route not found", { path: url.pathname })
-  );
-}
 
 export function startProviderServer(options: { host?: string; port?: number } = {}) {
   const host = options.host ?? providerHost;
   const port = options.port ?? providerPort;
+  const state = createProviderState();
+  const providerHandler = createProviderHttpHandler({ state });
 
   const server = createServer((request, response) => {
-    handleRequest(request, response);
+    const url = new URL(request.url ?? "/", `http://${request.headers.host ?? "localhost"}`);
+
+    if (request.method === "GET" && url.pathname === "/health") {
+      return sendJson(response, 200, buildProviderHealth());
+    }
+
+    return providerHandler(request, response);
   });
 
   return new Promise<{
@@ -86,7 +44,7 @@ export function startProviderServer(options: { host?: string; port?: number } = 
         port: actualPort,
         close: async () => {
           await new Promise<void>((closeResolve, closeReject) => {
-            server.close((error) => {
+            server.close((error: unknown) => {
               if (error) {
                 closeReject(error);
                 return;
@@ -99,6 +57,27 @@ export function startProviderServer(options: { host?: string; port?: number } = 
       });
     });
   });
+}
+
+function buildProviderHealth(): HealthResponse {
+  return healthResponseSchema.parse({
+    service: providerServiceName,
+    status: "ok",
+    evidenceMode: "live",
+    timestamp: new Date().toISOString(),
+    version: providerVersion,
+    details: {
+      protocol: "x402",
+      challengeMode: "foundation"
+    }
+  });
+}
+
+function sendJson(response: ServerResponse, statusCode: number, body: unknown) {
+  response.statusCode = statusCode;
+  response.setHeader("content-type", "application/json; charset=utf-8");
+  response.setHeader("cache-control", "no-store");
+  response.end(JSON.stringify(body));
 }
 
 const mainPath = process.argv[1] ? pathToFileURL(process.argv[1]).href : null;

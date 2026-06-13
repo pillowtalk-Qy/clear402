@@ -178,7 +178,7 @@ For dashboard evidence:
 - review the JSON and Markdown panels,
 - verify the `liveFallbackMockLabels` block before using the bundle in a demo.
 
-Current limitation: the dashboard export is an in-app JSON/Markdown bundle. It is not a server-side runtime export endpoint.
+Current behavior: the dashboard export prefers the server-side runtime JSON/Markdown endpoints and falls back to the in-app bundle if they are unavailable.
 
 ## 10. Troubleshooting
 

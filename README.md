@@ -156,7 +156,7 @@ See [Security Boundaries](./docs/security_boundaries.md) and [Limitations](./doc
 
 ## Team Link
 
-- [Team Template](./docs/team.md) - Fill before final submission.
+- [OriginShift Team](./docs/team.md) - fill wallet addresses and contact details before final portal submission if required.
 
 ## Additional Docs
 

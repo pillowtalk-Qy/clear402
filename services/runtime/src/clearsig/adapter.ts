@@ -14,6 +14,16 @@ export interface ClearSignInput {
     allowedSelectors: string[];
     paymentContextHash?: string;
     allowedSpenders?: string[];
+    functionAbis?: Array<{
+      selector: string;
+      signature: string;
+    }>;
+    paramsMatch?: Record<string, string | number | boolean>;
+    messageMatch?: {
+      requiredFields?: string[];
+      contains?: Record<string, string | number | boolean>;
+      paymentContextHash?: string;
+    };
   };
 }
 
@@ -164,6 +174,9 @@ function decisionFromTags(riskTags: string[]): ClearSignResult["decision"] {
         "recipient_mismatch",
         "amount_mismatch",
         "context_hash_mismatch",
+        "function_abi_mismatch",
+        "params_match_failed",
+        "message_match_failed",
         "multicall_hidden_selector"
       ].includes(tag)
     )
@@ -203,6 +216,7 @@ export function clearSign(input: ClearSignInput): ClearSignResult {
     ) {
       riskTags.push("context_hash_mismatch");
     }
+    applyMessageMatchPolicy(input.typedData, input.expected.messageMatch, riskTags);
   }
 
   if (input.calldata === undefined) {
@@ -212,7 +226,10 @@ export function clearSign(input: ClearSignInput): ClearSignResult {
 
     result.decision = decisionFromTags(riskTags);
     if (result.decision !== "allow") {
-      result.reason = "No calldata or typed data was available for semantic review";
+      result.reason =
+        riskTags.length > 0
+          ? `clearsig blocked typed data: ${riskTags.join(", ")}`
+          : "No calldata or typed data was available for semantic review";
     }
 
     return result;
@@ -246,6 +263,18 @@ export function clearSign(input: ClearSignInput): ClearSignResult {
 
   if (!allowedSelectors.includes(selector)) {
     riskTags.push(decoded.functionSignature === undefined ? "unknown_selector" : "selector_not_allowed");
+  }
+
+  if (
+    input.expected.functionAbis !== undefined &&
+    input.expected.functionAbis.length > 0 &&
+    !input.expected.functionAbis.some(
+      (abi) =>
+        abi.selector.toLowerCase() === selector &&
+        decoded.functionSignature === abi.signature
+    )
+  ) {
+    riskTags.push("function_abi_mismatch");
   }
 
   if (decoded.functionSignature === "approve(address,uint256)") {
@@ -292,10 +321,102 @@ export function clearSign(input: ClearSignInput): ClearSignResult {
     }
   }
 
+  applyParamsMatchPolicy(decoded.decodedParams, input.expected.paramsMatch, riskTags);
+
   result.decision = decisionFromTags(riskTags);
   if (result.decision === "block") {
     result.reason = `clearsig blocked calldata: ${riskTags.join(", ")}`;
   }
 
   return result;
+}
+
+function applyParamsMatchPolicy(
+  decodedParams: Record<string, unknown> | undefined,
+  paramsMatch: Record<string, string | number | boolean> | undefined,
+  riskTags: string[]
+): void {
+  if (paramsMatch === undefined) {
+    return;
+  }
+
+  if (decodedParams === undefined) {
+    riskTags.push("params_match_failed");
+    return;
+  }
+
+  for (const [key, expected] of Object.entries(paramsMatch)) {
+    const actual = decodedParams[key];
+    const actualText = normalizeComparable(actual);
+    const expectedText = normalizeComparable(expected);
+    if (actualText !== expectedText) {
+      riskTags.push("params_match_failed");
+      return;
+    }
+  }
+}
+
+function applyMessageMatchPolicy(
+  typedData: unknown,
+  messageMatch: ClearSignInput["expected"]["messageMatch"],
+  riskTags: string[]
+): void {
+  if (messageMatch === undefined) {
+    return;
+  }
+
+  const flattened = flattenForMatch(typedData);
+  for (const field of messageMatch.requiredFields ?? []) {
+    if (!flattened.has(field.toLowerCase())) {
+      riskTags.push("message_match_failed");
+      return;
+    }
+  }
+
+  for (const [field, expected] of Object.entries(messageMatch.contains ?? {})) {
+    const actual = flattened.get(field.toLowerCase());
+    if (actual === undefined || normalizeComparable(actual) !== normalizeComparable(expected)) {
+      riskTags.push("message_match_failed");
+      return;
+    }
+  }
+
+  if (
+    messageMatch.paymentContextHash !== undefined &&
+    !JSON.stringify(typedData).toLowerCase().includes(messageMatch.paymentContextHash.toLowerCase())
+  ) {
+    riskTags.push("message_match_failed");
+  }
+}
+
+function normalizeComparable(value: unknown): string {
+  if (typeof value === "string") {
+    return value.toLowerCase();
+  }
+
+  return String(value).toLowerCase();
+}
+
+function flattenForMatch(value: unknown, prefix = "", output = new Map<string, unknown>()): Map<string, unknown> {
+  if (Array.isArray(value)) {
+    value.forEach((entry, index) => {
+      flattenForMatch(entry, prefix.length > 0 ? `${prefix}.${index}` : String(index), output);
+    });
+    return output;
+  }
+
+  if (value && typeof value === "object") {
+    for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
+      const path = prefix.length > 0 ? `${prefix}.${key}` : key;
+      output.set(path.toLowerCase(), entry);
+      flattenForMatch(entry, path, output);
+    }
+    return output;
+  }
+
+  if (prefix.length > 0) {
+    output.set(prefix.toLowerCase(), value);
+  }
+
+  return output;
 }

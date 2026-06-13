@@ -75,6 +75,48 @@ export interface CawAdapterInstance {
     decision?: "allow" | "block" | "require_approval" | "fallback_required";
     denial?: CawPolicyDenialEvidence;
   }>;
+  contractCall(input: {
+    requestId: string;
+    missionId: string;
+    providerId: string;
+    chainId: string;
+    contractAddress: string;
+    calldata: string;
+    amount: string;
+    pactId: string;
+    paymentContextHash: string;
+    paymentContext: PaymentContext;
+  }): Promise<{
+    evidenceMode: EvidenceMode;
+    requestId: string;
+    txHash?: string;
+    coboTransactionId?: string;
+    walletAddress?: string;
+    auditLogId?: string;
+    rawEvidenceRef?: string;
+    decision?: "allow" | "block" | "require_approval" | "fallback_required";
+    denial?: CawPolicyDenialEvidence;
+  }>;
+  signMessage(input: {
+    requestId: string;
+    missionId: string;
+    providerId: string;
+    chainId: string;
+    messageDigest: string;
+    pactId: string;
+    paymentContextHash: string;
+    paymentContext: PaymentContext;
+  }): Promise<{
+    evidenceMode: EvidenceMode;
+    requestId: string;
+    txHash?: string;
+    coboTransactionId?: string;
+    walletAddress?: string;
+    auditLogId?: string;
+    rawEvidenceRef?: string;
+    decision?: "allow" | "block" | "require_approval" | "fallback_required";
+    denial?: CawPolicyDenialEvidence;
+  }>;
 }
 
 export declare function createCawAdapter(options?: {

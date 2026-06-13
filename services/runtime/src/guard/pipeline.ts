@@ -8,9 +8,11 @@ import type {
   GuardDecision,
   GuardEvent,
   MetadataFirewallResult,
+  PaymentOperation,
   PaymentContext,
   ProviderRegistryEntry,
   ServiceReceipt,
+  SignedProviderQuote,
   X402Quote
 } from "../../../../packages/shared/src/index.mjs";
 import { compareDecimalStrings, subtractDecimalStrings } from "./amount.ts";
@@ -35,6 +37,10 @@ import {
 import { hashObject, sha256Hex } from "./hash.ts";
 import { recordGuardEvent, listGuardEvents } from "./events.ts";
 import { verifyServiceReceipt, type VerifyServiceReceiptInput } from "../receipt/receipt_verifier.ts";
+import {
+  verifySignedProviderQuote,
+  type ProviderQuoteVerificationResult
+} from "../x402/provider_quote.ts";
 
 export interface CawAdapterLike {
   transferTokens(input: {
@@ -67,6 +73,26 @@ export interface CawAdapterLike {
     contractAddress: string;
     calldata: string;
     amount: string;
+    pactId: string;
+    paymentContextHash: string;
+    paymentContext: PaymentContext;
+  }): Promise<{
+    evidenceMode: "live" | "fallback" | "mock";
+    requestId: string;
+    txHash?: string;
+    coboTransactionId?: string;
+    walletAddress: string;
+    auditLogId?: string;
+    rawEvidenceRef?: string;
+    decision?: "allow" | "block" | "require_approval" | "fallback_required";
+    denial?: CawPolicyDenialEvidence;
+  }>;
+  signMessage?(input: {
+    requestId: string;
+    missionId: string;
+    providerId: string;
+    chainId: string;
+    messageDigest: string;
     pactId: string;
     paymentContextHash: string;
     paymentContext: PaymentContext;
@@ -116,6 +142,10 @@ export interface GuardPipelineInput {
   amountDecimals: number;
   cawPactId: string;
   serviceMode: "caw-fetch" | "direct-transfer" | "escrowed-delivery";
+  paymentOperation?: PaymentOperation;
+  providerQuote?: SignedProviderQuote;
+  policyBindings?: ClearSignInput["expected"];
+  messageToSign?: unknown;
   cawAdapter: CawAdapterLike;
   evidenceMode?: EvidenceMode;
   now?: number;
@@ -151,6 +181,7 @@ export interface GuardPipelineResult {
     reservedBudget: string;
   };
   clearsig?: ClearSignResult;
+  providerQuoteResult?: ProviderQuoteVerificationResult;
   cawEvidence?: {
     evidenceMode: "live" | "fallback" | "mock";
     requestId: string;
@@ -415,6 +446,122 @@ function hasCompleteLiveCawEvidence(cawEvidence: {
       cawEvidence.auditLogId &&
       cawEvidence.rawEvidenceRef
   );
+}
+
+async function executeCawOperation(input: {
+  cawAdapter: CawAdapterLike;
+  operation: PaymentOperation;
+  builtContext: BuiltPaymentContext;
+  missionId: string;
+  providerEntry: ProviderRegistryEntry;
+  challenge: NormalizedX402Challenge;
+  cawPactId: string;
+  providerCalldata?: string;
+}): Promise<Awaited<ReturnType<CawAdapterLike["transferTokens"]>>> {
+  const base = {
+    requestId: input.builtContext.cawRequestId,
+    missionId: input.missionId,
+    providerId: input.providerEntry.providerId,
+    chainId: input.providerEntry.chainId,
+    pactId: input.cawPactId,
+    paymentContextHash: input.builtContext.paymentContextHash,
+    paymentContext: input.builtContext.context
+  };
+
+  if (input.operation === "transfer") {
+    return input.cawAdapter.transferTokens({
+      ...base,
+      tokenId: input.providerEntry.tokenId,
+      dstAddr: input.providerEntry.merchantAddress,
+      amount: input.challenge.amount
+    });
+  }
+
+  if (input.operation === "contract_call") {
+    if (input.providerCalldata === undefined) {
+      return localCawOperationFailure({
+        base,
+        attemptedOperation: "contract_call",
+        code: "CONTRACT_CALLDATA_REQUIRED",
+        reason: "contract_call PaymentContext requires provider calldata for CAW execution.",
+        decision: "block"
+      });
+    }
+
+    if (input.cawAdapter.contractCall === undefined) {
+      return localCawOperationFailure({
+        base,
+        attemptedOperation: "contract_call",
+        code: "CAW_CONTRACT_CALL_NOT_CONFIGURED",
+        reason: "CawAdapter has no contract_call executor configured.",
+        decision: "fallback_required"
+      });
+    }
+
+    return input.cawAdapter.contractCall({
+      ...base,
+      contractAddress: input.providerEntry.merchantAddress,
+      calldata: input.providerCalldata,
+      amount: input.challenge.amount
+    });
+  }
+
+  if (input.builtContext.context.messageSignDigest === undefined) {
+    return localCawOperationFailure({
+      base,
+      attemptedOperation: "message_sign",
+      code: "MESSAGE_SIGN_DIGEST_REQUIRED",
+      reason: "message_sign PaymentContext requires a messageSignDigest.",
+      decision: "block"
+    });
+  }
+
+  if (input.cawAdapter.signMessage === undefined) {
+    return localCawOperationFailure({
+      base,
+      attemptedOperation: "message_sign",
+      code: "CAW_MESSAGE_SIGN_NOT_CONFIGURED",
+      reason: "CawAdapter has no message_sign executor configured.",
+      decision: "fallback_required"
+    });
+  }
+
+  return input.cawAdapter.signMessage({
+    ...base,
+    messageDigest: input.builtContext.context.messageSignDigest
+  });
+}
+
+function localCawOperationFailure(input: {
+  base: {
+    requestId: string;
+    paymentContextHash: string;
+    paymentContext: PaymentContext;
+  };
+  attemptedOperation: PaymentOperation;
+  code: string;
+  reason: string;
+  decision: "block" | "fallback_required";
+}): Awaited<ReturnType<CawAdapterLike["transferTokens"]>> {
+  return {
+    evidenceMode: "fallback",
+    requestId: input.base.requestId,
+    walletAddress: "unavailable",
+    decision: input.decision,
+    denial: {
+      code: input.code,
+      reason: input.reason,
+      details: {
+        cawPactId: input.base.paymentContext.cawPactId,
+        serviceMode: input.base.paymentContext.serviceMode
+      },
+      attemptedOperation: input.attemptedOperation,
+      paymentContextHash: input.base.paymentContextHash,
+      cawRequestId: input.base.requestId,
+      auditLogId: `local-denial:${input.base.paymentContextHash.slice(0, 16)}`,
+      evidenceMode: "fallback"
+    }
+  };
 }
 
 export async function runGuardPipeline(
@@ -709,6 +856,45 @@ export async function runGuardPipeline(
     };
   }
 
+  let providerQuoteResult: ProviderQuoteVerificationResult | undefined;
+  if (input.providerQuote !== undefined) {
+    providerQuoteResult = verifySignedProviderQuote({
+      quote: input.providerQuote,
+      challenge,
+      providerPublicKey: providerEntry.publicKey,
+      now
+    });
+
+    if (providerQuoteResult.decision === "block") {
+      const event = createFailure(database, {
+        missionId: input.missionId,
+        layer: "provider_quote",
+        reason: providerQuoteResult.reason ?? "Signed ProviderQuote verification failed",
+        decision: "block",
+        evidence: {
+          challenge,
+          registryResult,
+          trustResult,
+          metadataFirewall,
+          providerQuote: input.providerQuote,
+          providerQuoteResult
+        }
+      });
+
+      return {
+        decision: "block",
+        status: "blocked",
+        ...(providerQuoteResult.reason !== undefined ? { reason: providerQuoteResult.reason } : {}),
+        guardEventId: event.id,
+        providerRegistryResult: registryResult,
+        trustResult,
+        metadataFirewall,
+        providerQuoteResult,
+        evidenceBundle: evidenceBundleForMission(database, input.missionId)
+      };
+    }
+  }
+
   const builtContext = buildPaymentContext({
     missionId: input.missionId,
     providerId: providerEntry.providerId,
@@ -724,8 +910,48 @@ export async function runGuardPipeline(
     issuedAt: now,
     cawPactId: input.cawPactId,
     serviceMode: input.serviceMode,
+    ...(input.paymentOperation !== undefined ? { operation: input.paymentOperation } : {}),
+    ...(input.messageToSign !== undefined ? { messageToSign: input.messageToSign } : {}),
+    ...(input.providerQuote !== undefined ? { providerQuote: input.providerQuote } : {}),
+    ...(input.policyBindings !== undefined ? { policyBindings: input.policyBindings } : {}),
     body: input.request.body
   });
+
+  if (
+    input.providerQuote?.paymentContextHash !== undefined &&
+    input.providerQuote.paymentContextHash !== builtContext.paymentContextHash
+  ) {
+    const event = createFailure(database, {
+      missionId: input.missionId,
+      layer: "provider_quote",
+      reason: "Signed ProviderQuote paymentContextHash does not match the built PaymentContext",
+      decision: "block",
+      evidence: {
+        challenge,
+        registryResult,
+        trustResult,
+        metadataFirewall,
+        paymentContext: builtContext.context,
+        providerQuote: input.providerQuote,
+        ...(providerQuoteResult !== undefined ? { providerQuoteResult } : {})
+      }
+    });
+
+    return {
+      decision: "block",
+      status: "blocked",
+      reason: "Signed ProviderQuote paymentContextHash does not match the built PaymentContext",
+      guardEventId: event.id,
+      providerRegistryResult: registryResult,
+      trustResult,
+      metadataFirewall,
+      paymentContext: builtContext.context,
+      paymentContextHash: builtContext.paymentContextHash,
+      cawRequestId: builtContext.cawRequestId,
+      ...(providerQuoteResult !== undefined ? { providerQuoteResult } : {}),
+      evidenceBundle: evidenceBundleForMission(database, input.missionId)
+    };
+  }
 
   const reservationResult = reserveQuoteAndBudget(database, {
     missionId: input.missionId,
@@ -808,10 +1034,17 @@ export async function runGuardPipeline(
     chainId: providerEntry.chainId,
     to: providerEntry.merchantAddress,
     expected: {
+      ...(input.policyBindings ?? {}),
       merchantAddress: providerEntry.merchantAddress,
       amount: challenge.amount,
       tokenId: providerEntry.tokenId,
-      allowedSelectors: ["0xa9059cbb", "0x095ea7b3", "0x23b872dd", "0xac9650d8"],
+      allowedSelectors:
+        input.policyBindings?.allowedSelectors ?? [
+          "0xa9059cbb",
+          "0x095ea7b3",
+          "0x23b872dd",
+          "0xac9650d8"
+        ],
       paymentContextHash: builtContext.paymentContextHash
     },
     ...(input.providerChallenge?.providerCalldata !== undefined
@@ -864,17 +1097,17 @@ export async function runGuardPipeline(
     };
   }
 
-  const cawEvidence = await input.cawAdapter.transferTokens({
-    requestId: builtContext.cawRequestId,
+  const cawEvidence = await executeCawOperation({
+    cawAdapter: input.cawAdapter,
+    operation: input.paymentOperation ?? "transfer",
+    builtContext,
     missionId: input.missionId,
-    providerId: providerEntry.providerId,
-    chainId: providerEntry.chainId,
-    tokenId: providerEntry.tokenId,
-    dstAddr: providerEntry.merchantAddress,
-    amount: challenge.amount,
-    pactId: input.cawPactId,
-    paymentContextHash: builtContext.paymentContextHash,
-    paymentContext: builtContext.context
+    providerEntry,
+    challenge,
+    cawPactId: input.cawPactId,
+    ...(input.providerChallenge?.providerCalldata !== undefined
+      ? { providerCalldata: input.providerChallenge.providerCalldata }
+      : {})
   });
 
   if (cawEvidence.decision === "require_approval") {

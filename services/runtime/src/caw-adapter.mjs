@@ -93,7 +93,96 @@ export function createCawAdapter({
         decision: result.decision,
         denial: result.denial
       };
+    },
+    async contractCall(input, options = {}) {
+      if (!input?.paymentContext) {
+        const requestId = input?.requestId ?? requestIdFactory();
+        return {
+          evidenceMode: "fallback",
+          requestId,
+          decision: "fallback_required",
+          denial: createCawPolicyDenialEvidence({
+            code: "PAYMENT_CONTEXT_REQUIRED",
+            reason: "CawAdapter.contractCall requires the guarded PaymentContext.",
+            details: {
+              required: "paymentContext"
+            },
+            attemptedOperation: "contract_call",
+            cawRequestId: requestId,
+            evidenceMode: "fallback"
+          })
+        };
+      }
+
+      return adaptIntentResult(
+        await executePaymentIntent(input.paymentContext, {
+          report,
+          clock,
+          requestIdFactory: () => input.requestId,
+          liveExecutor,
+          attemptedOperation: "contract_call",
+          ...options
+        }),
+        input.requestId
+      );
+    },
+    async signMessage(input, options = {}) {
+      if (!input?.paymentContext) {
+        const requestId = input?.requestId ?? requestIdFactory();
+        return {
+          evidenceMode: "fallback",
+          requestId,
+          decision: "fallback_required",
+          denial: createCawPolicyDenialEvidence({
+            code: "PAYMENT_CONTEXT_REQUIRED",
+            reason: "CawAdapter.signMessage requires the guarded PaymentContext.",
+            details: {
+              required: "paymentContext"
+            },
+            attemptedOperation: "message_sign",
+            cawRequestId: requestId,
+            evidenceMode: "fallback"
+          })
+        };
+      }
+
+      return adaptIntentResult(
+        await executePaymentIntent(input.paymentContext, {
+          report,
+          clock,
+          requestIdFactory: () => input.requestId,
+          liveExecutor,
+          attemptedOperation: "message_sign",
+          ...options
+        }),
+        input.requestId
+      );
     }
+  };
+}
+
+function adaptIntentResult(result, fallbackRequestId) {
+  if (result.ok) {
+    return {
+      evidenceMode: result.evidenceMode,
+      requestId: result.cawRequestId,
+      walletAddress: result.walletAddress,
+      txHash: result.txHash,
+      coboTransactionId: result.coboTransactionId,
+      auditLogId: result.auditLogId,
+      rawEvidenceRef: result.rawEvidenceRef,
+      decision: "allow"
+    };
+  }
+
+  return {
+    evidenceMode: result.evidenceMode,
+    requestId: result.denial?.cawRequestId ?? fallbackRequestId,
+    walletAddress: result.walletAddress,
+    auditLogId: result.denial?.auditLogId,
+    rawEvidenceRef: result.rawEvidenceRef,
+    decision: result.decision,
+    denial: result.denial
   };
 }
 
@@ -295,11 +384,28 @@ export function validatePaymentContext(paymentContext) {
     "bodyHash",
     "sanitizedResourceHash",
     "quoteTermsHash",
-    "piiPolicyHash"
+    "piiPolicyHash",
+    "messageSignDigest",
+    "providerQuoteHash",
+    "policyBindingsHash"
   ]) {
-    if (!/^[a-f0-9]{64}$/.test(paymentContext[hashField] ?? "")) {
+    if (
+      paymentContext[hashField] !== undefined &&
+      !/^(?:0x)?[a-f0-9]{64}$/.test(paymentContext[hashField] ?? "")
+    ) {
       failures.push(`${hashField} must be a sha256 hex digest`);
     }
+  }
+
+  if (paymentContext.operation === "message_sign" && typeof paymentContext.messageSignDigest !== "string") {
+    failures.push("messageSignDigest must be present for message_sign operations");
+  }
+
+  if (
+    paymentContext.providerQuoteHash !== undefined &&
+    typeof paymentContext.providerQuoteSignature !== "string"
+  ) {
+    failures.push("providerQuoteSignature must be present when providerQuoteHash is set");
   }
 
   return {

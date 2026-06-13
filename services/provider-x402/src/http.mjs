@@ -4,7 +4,7 @@ import { createAttackFixture } from "./attack-fixtures.mjs";
 import { createDebugChallenge, createProviderChallenge, requestResourceUrl } from "./challenge.mjs";
 import { DEFAULT_PROVIDER_CONFIG } from "./config.mjs";
 import { createDebugPaymentHeader, decodePaymentHeader, verifyPaymentProof } from "./payment-proof.mjs";
-import { createPaidReport, createServiceReceipt } from "./receipt.mjs";
+import { createPaidReport, createServiceReceipt, createSignedProviderQuote } from "./receipt.mjs";
 
 export function createProviderState() {
   return {
@@ -85,6 +85,20 @@ export function createProviderHttpHandler({
         });
       }
 
+      if (request.method === "POST" && url.pathname === "/gateway/payment") {
+        const body = await readJsonBody(request);
+
+        return handleGatewayPayment({
+          request,
+          response,
+          body,
+          requestId,
+          config,
+          state,
+          clock
+        });
+      }
+
       if (request.method === "GET" && url.pathname.startsWith("/attack-fixtures/")) {
         const name = decodeURIComponent(url.pathname.slice("/attack-fixtures/".length));
         const fixture = createAttackFixture(name, {
@@ -116,6 +130,61 @@ export function createProviderHttpHandler({
 
 export function createProviderServer(options = {}) {
   return createServer(createProviderHttpHandler(options));
+}
+
+function handleGatewayPayment({ request, response, body, requestId, config, state, clock }) {
+  const paymentHeader = paymentHeaderFromRequest(request, body);
+  const decoded = decodePaymentHeader(paymentHeader);
+  const challenge = decoded.ok
+    ? resolveChallengeForVerification({ body, proof: decoded.proof, request, config, state })
+    : undefined;
+  const verification = challenge
+    ? verifyPaymentProof(paymentHeader, challenge, { config, now: clock() })
+    : {
+        ok: false,
+        reason: decoded.reason ?? "unknown_challenge",
+        ...(decoded.proof?.challengeHash ? { challengeHash: decoded.proof.challengeHash } : {})
+      };
+
+  if (!verification.ok) {
+    return sendJson(response, 402, {
+      ok: false,
+      decision: "block",
+      providerId: config.providerId,
+      verification,
+      evidenceMode: "fallback",
+      requestId
+    });
+  }
+
+  const signedQuote = createSignedProviderQuote({
+    challenge,
+    config,
+    issuedAt: clock(),
+    paymentContextHash: body?.paymentContextHash
+  });
+  const gatewayResponse = {
+    ok: true,
+    gateway: "clear402.local.payment_gateway.v1",
+    providerId: config.providerId,
+    challengeHash: challenge.normalized.rawChallengeHash,
+    verification,
+    signedQuote,
+    evidenceMode: verification.evidenceMode,
+    requestId
+  };
+  const receipt = createServiceReceipt({
+    challenge,
+    verification,
+    providerResponse: gatewayResponse,
+    config,
+    deliveredAt: clock()
+  });
+
+  return sendJson(response, 200, {
+    ...gatewayResponse,
+    receipt
+  });
 }
 
 function handleVerifyPayment({ request, response, body, requestId, config, state, clock }) {

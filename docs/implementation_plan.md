@@ -202,18 +202,20 @@ P0 is not complete if:
 
 P1 adds competitive depth without changing the P0 truth source.
 
-Championship features:
+Championship feature status:
 
-- ERC-8004 trust adapter demo or explicit limitation,
-- ServiceEscrow fund/refund flow,
-- `message_sign` PaymentContext support,
-- `params_match` / `message_match` / `function_abis` if the environment supports them,
-- SSE timeline,
-- 20-request race regression,
-- Signed ProviderQuote,
-- Dual Receipt model,
-- Chaos / regression pack,
-- and payment gateway mode if it is stable enough.
+| Feature | Current status |
+|---|---|
+| ERC-8004 trust adapter demo or explicit limitation | Demo adapter complete; live network truth remains an explicit limitation. |
+| ServiceEscrow fund/refund flow | Local protocol/state-machine layer complete. |
+| `message_sign` PaymentContext support | Local/runtime PaymentContext and guard support complete. |
+| `params_match` / `message_match` / `function_abis` | Local clearsig policy enforcement complete. |
+| SSE timeline | Basic runtime SSE snapshot endpoint complete. |
+| 20-request race regression | Covered by the attack fixture gate, not a broad load suite. |
+| Signed ProviderQuote | Local signed quote protocol and verification complete. |
+| Dual Receipt model | Local payment/delivery dual-receipt protocol complete. |
+| Chaos / regression pack | Partially covered by unit, E2E, and 16 attack fixtures. |
+| Payment gateway mode | Local provider gateway route complete. |
 
 P1 must be feature-flagged and must not weaken P0.
 

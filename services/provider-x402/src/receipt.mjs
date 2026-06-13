@@ -1,4 +1,4 @@
-import { createHmac } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 import { canonicalJson, hashObject, sha256Hex } from "../../../packages/shared/src/index.mjs";
 import { DEBUG_PAYMENT_KEY, DEFAULT_PROVIDER_CONFIG } from "./config.mjs";
 
@@ -69,6 +69,70 @@ export function createServiceReceipt({
   };
 }
 
+export function createSignedProviderQuote({
+  challenge,
+  config = DEFAULT_PROVIDER_CONFIG,
+  issuedAt = Date.now(),
+  paymentContextHash
+}) {
+  const normalized = challenge.normalized ?? challenge;
+  const facilitatorUrlHash =
+    normalized.facilitatorUrl === undefined ? undefined : runtimeSha256Hex(canonicalizeUrl(normalized.facilitatorUrl));
+  const quoteWithoutSignature = {
+    version: "clear402.provider-quote.v1",
+    quoteId: `quote_${normalized.rawChallengeHash.slice(0, 16)}`,
+    providerId: normalized.providerId,
+    resource: normalized.resource,
+    scheme: normalized.scheme,
+    network: normalized.network,
+    asset: normalized.asset,
+    amount: normalized.amount,
+    payTo: normalized.payTo,
+    chainId: config.chainId,
+    tokenId: config.tokenId,
+    expiresAt: normalized.expiresAt,
+    issuedAt,
+    quoteTermsHash: runtimeHashObject({
+      scheme: normalized.scheme,
+      network: normalized.network,
+      asset: normalized.asset,
+      amount: normalized.amount,
+      payTo: normalized.payTo,
+      facilitatorUrlHash,
+      expiresAt: normalized.expiresAt
+    }),
+    ...(paymentContextHash ? { paymentContextHash } : {}),
+    signer: config.providerPublicKey,
+    signatureScheme: "debug-hmac-sha256",
+    evidenceMode: normalized.evidenceMode
+  };
+
+  return {
+    ...quoteWithoutSignature,
+    signature: signProviderQuote(config.providerPublicKey, quoteWithoutSignature)
+  };
+}
+
 function signReceipt(receipt) {
   return createHmac("sha256", DEBUG_PAYMENT_KEY).update(canonicalJson(receipt)).digest("base64url");
+}
+
+function signProviderQuote(secret, quote) {
+  return `hmac-sha256:${createHmac("sha256", secret).update(canonicalJson(quote)).digest("hex")}`;
+}
+
+function runtimeHashObject(value) {
+  return runtimeSha256Hex(canonicalJson(value));
+}
+
+function runtimeSha256Hex(value) {
+  return `0x${createHash("sha256").update(String(value)).digest("hex")}`;
+}
+
+function canonicalizeUrl(value) {
+  const url = new URL(value);
+  url.protocol = url.protocol.toLowerCase();
+  url.hostname = url.hostname.toLowerCase();
+  url.hash = "";
+  return url.toString();
 }

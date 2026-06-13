@@ -61,6 +61,25 @@ export function createCawLiveExecutor({
       return cache.get(requestId);
     }
 
+    if (attemptedOperation !== "transfer") {
+      const unsupported = createBlockedExecution({
+        code: "CAW_UNSUPPORTED_OPERATION",
+        reason: `The configured CAW live executor only supports transfer; ${attemptedOperation} requires a dedicated live CAW API path.`,
+        details: {
+          attemptedOperation,
+          supportedOperations: ["transfer"]
+        },
+        suggestion: "Wire and verify the official CAW API for this operation before claiming live evidence.",
+        attemptedOperation,
+        paymentContextHash,
+        cawRequestId: requestId,
+        evidenceMode: "fallback",
+        decision: "fallback_required"
+      });
+      cache.set(requestId, unsupported);
+      return unsupported;
+    }
+
     const sdk = await sdkLoader();
     const configuration = new sdk.Configuration({
       apiKey: env.CLEAR402_CAW_API_KEY,

@@ -151,7 +151,7 @@ See [Security Boundaries](./docs/security_boundaries.md) and [Limitations](./doc
 - The project does not claim mainnet readiness or unrestricted CAW execution.
 - The recorded CAW allow path covers one tiny Sepolia transfer only.
 - The recorded CAW denial covers one destination-allowlist rejection only.
-- Provider registry, ERC-8004-style trust, and capability seed data are demo records.
+- Provider registry, ERC-8004-style trust, and capability seed data are demo records; live ERC-8004 network truth is still not claimed here.
 - Browser/E2E artifacts are local run evidence and are not committed.
 
 ## Third-Party APIs / SDKs / AI Tools
@@ -161,6 +161,7 @@ See [Security Boundaries](./docs/security_boundaries.md) and [Limitations](./doc
 - x402-style local provider flow: implemented in `services/provider-x402`
 - Next.js, React, Framer Motion, and Lucide React for the dashboard
 - Zod for shared contracts
+- Local signed provider quote, ServiceEscrow, dual-receipt, and clear-sign policy helpers in runtime/provider code
 - TypeScript, tsup, Vitest, and Playwright for build/test gates
 - SQLite-backed runtime schema
 - AI-assisted development/review tools were used during project packaging; no AI provider API key is committed.

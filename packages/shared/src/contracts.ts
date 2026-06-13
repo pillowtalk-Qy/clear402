@@ -63,6 +63,12 @@ export const serviceModeSchema = z.enum([
   "escrowed-delivery"
 ]);
 
+export const paymentOperationSchema = z.enum([
+  "transfer",
+  "contract_call",
+  "message_sign"
+]);
+
 export const problemJsonSchema = z.object({
   code: z.string().min(1),
   message: z.string().min(1),
@@ -130,6 +136,7 @@ export const paymentContextSchema = z.object({
   missionId: z.string().min(1),
   providerId: z.string().min(1),
   quoteId: z.string().min(1),
+  operation: paymentOperationSchema.optional(),
   method: z.enum(["GET", "POST"]),
   origin: z.string().min(1),
   resourcePath: z.string().min(1),
@@ -148,8 +155,34 @@ export const paymentContextSchema = z.object({
   quoteTermsHash: z.string().min(1),
   piiPolicyHash: z.string().min(1),
   clearSignDigest: z.string().min(1).optional(),
+  messageSignDigest: z.string().min(1).optional(),
+  providerQuoteHash: z.string().min(1).optional(),
+  providerQuoteSignature: z.string().min(1).optional(),
+  policyBindingsHash: z.string().min(1).optional(),
   cawPactId: z.string().min(1),
   serviceMode: serviceModeSchema
+});
+
+export const signedProviderQuoteSchema = z.object({
+  version: z.literal("clear402.provider-quote.v1"),
+  quoteId: z.string().min(1),
+  providerId: z.string().min(1),
+  resource: z.string().url(),
+  scheme: z.string().min(1),
+  network: z.string().min(1),
+  asset: z.string().min(1),
+  amount: z.string().min(1),
+  payTo: z.string().min(1),
+  chainId: z.string().min(1),
+  tokenId: z.string().min(1),
+  expiresAt: z.number().int().nonnegative(),
+  issuedAt: z.number().int().nonnegative(),
+  quoteTermsHash: z.string().min(1),
+  paymentContextHash: z.string().min(1).optional(),
+  signer: z.string().min(1),
+  signatureScheme: z.enum(["debug-hmac-sha256", "eip712", "jws"]),
+  signature: z.string().min(1),
+  evidenceMode: evidenceModeSchema
 });
 
 export const quoteReservationSchema = z.object({
@@ -257,6 +290,7 @@ export const apiContracts = {
   providerRegistryEntry: providerRegistryEntrySchema,
   x402Quote: x402QuoteSchema,
   paymentContext: paymentContextSchema,
+  signedProviderQuote: signedProviderQuoteSchema,
   quoteReservation: quoteReservationSchema,
   guardEvent: guardEventSchema,
   serviceReceipt: serviceReceiptSchema,
@@ -273,6 +307,7 @@ export type QuoteStatus = z.infer<typeof quoteStatusSchema>;
 export type ReservationStatus = z.infer<typeof reservationStatusSchema>;
 export type GuardDecision = z.infer<typeof guardDecisionSchema>;
 export type ServiceMode = z.infer<typeof serviceModeSchema>;
+export type PaymentOperation = z.infer<typeof paymentOperationSchema>;
 export type ProblemJSON = z.infer<typeof problemJsonSchema>;
 export type HealthResponse = z.infer<typeof healthResponseSchema>;
 export type MissionCreateRequest = z.infer<typeof missionCreateRequestSchema>;
@@ -280,6 +315,7 @@ export type Mission = z.infer<typeof missionSchema>;
 export type ProviderRegistryEntry = z.infer<typeof providerRegistryEntrySchema>;
 export type X402Quote = z.infer<typeof x402QuoteSchema>;
 export type PaymentContext = z.infer<typeof paymentContextSchema>;
+export type SignedProviderQuote = z.infer<typeof signedProviderQuoteSchema>;
 export type QuoteReservation = z.infer<typeof quoteReservationSchema>;
 export type GuardEvent = z.infer<typeof guardEventSchema>;
 export type CawCapabilityRecord = z.infer<typeof cawCapabilityRecordSchema>;

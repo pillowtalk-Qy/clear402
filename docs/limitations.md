@@ -47,15 +47,15 @@ Phase 21 packaging does not finish the full P1 championship list. Current status
 | P1 Item | Status |
 |---|---|
 | ERC-8004 trust adapter demo or explicit limitation | Partially complete as an adapter over demo trust records; not live ERC-8004 network truth. |
-| ServiceEscrow fund/refund flow | Not complete. |
-| `message_sign` PaymentContext support | Not complete. |
-| `params_match` / `message_match` / `function_abis` support | Not complete. |
+| ServiceEscrow fund/refund flow | Complete as a local protocol/state-machine layer; not an onchain escrow contract. |
+| `message_sign` PaymentContext support | Complete for local/runtime evidence and guard enforcement; not a live CAW message-sign API claim. |
+| `params_match` / `message_match` / `function_abis` support | Complete for local clear-sign policy enforcement. |
 | SSE timeline | Basic runtime SSE snapshot endpoint complete at `/api/missions/:missionId/timeline.sse`; not a full production push/subscribe system. |
 | 20-request race regression | Partially complete in the attack fixture `concurrent_free_riding_20_requests`; not a broader production load/race suite. |
-| Signed ProviderQuote | Not complete. |
-| Dual Receipt model | Partially represented by payment and delivery receipt fields; not a full production dual-receipt protocol. |
+| Signed ProviderQuote | Complete as a local signed quote protocol and verification layer; not a live provider attestation network. |
+| Dual Receipt model | Complete as a local payment/delivery dual-receipt protocol; not a chain-native or network-native settlement standard. |
 | Chaos / regression pack | Partially represented by unit, E2E, and 16 attack fixtures; not a complete chaos suite. |
-| Payment gateway mode | Not complete. |
+| Payment gateway mode | Complete as a local provider gateway route; not a production payment network gateway. |
 | EvidenceBundle provenance fix | Closed in the current clean baseline by classifying evidence bundles by evidence mode; keep regression coverage when expanding evidence surfaces. |
 | Dashboard payment-state clarity | Closed for the ordinary demo payment label; keep the fallback/demo guard visible if new payment controls are added. |
 

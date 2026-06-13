@@ -33,6 +33,11 @@ export type ServiceMode =
   | "direct-transfer"
   | "escrowed-delivery";
 
+export type PaymentOperation =
+  | "transfer"
+  | "contract_call"
+  | "message_sign";
+
 export interface Mission {
   id: string;
   userPrompt: string;
@@ -110,6 +115,7 @@ export interface PaymentContext {
   missionId: string;
   providerId: string;
   quoteId: string;
+  operation?: PaymentOperation;
   method: "GET" | "POST";
   origin: string;
   resourcePath: string;
@@ -128,8 +134,34 @@ export interface PaymentContext {
   quoteTermsHash: string;
   piiPolicyHash: string;
   clearSignDigest?: string;
+  messageSignDigest?: string;
+  providerQuoteHash?: string;
+  providerQuoteSignature?: string;
+  policyBindingsHash?: string;
   cawPactId: string;
   serviceMode: ServiceMode;
+}
+
+export interface SignedProviderQuote {
+  version: "clear402.provider-quote.v1";
+  quoteId: string;
+  providerId: string;
+  resource: string;
+  scheme: string;
+  network: string;
+  asset: string;
+  amount: string;
+  payTo: string;
+  chainId: string;
+  tokenId: string;
+  expiresAt: number;
+  issuedAt: number;
+  quoteTermsHash: string;
+  paymentContextHash?: string;
+  signer: string;
+  signatureScheme: "debug-hmac-sha256" | "eip712" | "jws";
+  signature: string;
+  evidenceMode: EvidenceMode;
 }
 
 export interface QuoteReservation {

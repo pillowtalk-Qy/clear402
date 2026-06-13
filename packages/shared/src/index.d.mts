@@ -11,6 +11,7 @@ export type {
   Mission,
   MissionCreateRequest,
   MissionStatus,
+  PaymentOperation,
   PaymentContext,
   ProblemJSON,
   ProviderRegistryEntry,
@@ -20,6 +21,7 @@ export type {
   ReservationStatus,
   ServiceMode,
   ServiceReceipt,
+  SignedProviderQuote,
   X402Quote
 } from "./contracts.js";
 export type {

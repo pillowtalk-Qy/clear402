@@ -239,6 +239,26 @@ describe("CawAdapter", () => {
     assert.equal(result.denial.code, "CAW_POLICY_DENIED");
     assert.equal(result.denial.auditLogId, "audit-denied");
   });
+
+  it("returns message_sign fallback denial through the adapter boundary", async () => {
+    const adapter = createCawAdapter({
+      capabilities: fallbackCapabilityReport(),
+      clock: () => 1_800_000_000_000,
+      requestIdFactory: () => "caw_message_sign"
+    });
+
+    const result = await adapter.signMessage({
+      requestId: "caw_message_sign",
+      paymentContext: paymentContext({
+        operation: "message_sign",
+        messageSignDigest: sha256Hex("message")
+      })
+    });
+
+    assert.equal(result.decision, "fallback_required");
+    assert.equal(result.denial.attemptedOperation, "message_sign");
+    assert.equal(result.denial.code, "CAW_CAPABILITY_UNVERIFIED");
+  });
 });
 
 describe("CAW live executor", () => {
@@ -384,6 +404,33 @@ describe("CAW live executor", () => {
     assert.equal(result.denial.code, "policy_violation");
     assert.equal(result.denial.auditLogId, "audit-denial");
     assert.equal(result.denial.details.cawResponse.error.details.api_key, "[REDACTED]");
+  });
+
+  it("does not route unsupported live CAW operations through transferTokens", async () => {
+    const calls = [];
+    const executor = createCawLiveExecutor({
+      env: cawEnv(),
+      sdkLoader: async () => fakeCawSdk({ calls })
+    });
+
+    const result = await executor({
+      paymentContext: paymentContext({
+        cawPactId: "pact_test",
+        chainId: "BASE_SEPOLIA",
+        tokenId: "BASE_SEPOLIA_USDC",
+        operation: "message_sign",
+        messageSignDigest: sha256Hex("message")
+      }),
+      paymentContextHash: "0x" + "f".repeat(64),
+      attemptedOperation: "message_sign",
+      requestId: "clear402:message-sign"
+    });
+
+    assert.equal(result.ok, false);
+    assert.equal(result.decision, "fallback_required");
+    assert.equal(result.denial.code, "CAW_UNSUPPORTED_OPERATION");
+    assert.equal(result.denial.attemptedOperation, "message_sign");
+    assert.equal(calls.filter((call) => call.method === "transferTokens").length, 0);
   });
 
   it("reuses the stable request_id result for idempotency", async () => {

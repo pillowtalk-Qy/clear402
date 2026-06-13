@@ -1,7 +1,9 @@
 import type {
   MetadataFirewallResult,
   PaymentContext,
-  ServiceMode
+  PaymentOperation,
+  ServiceMode,
+  SignedProviderQuote
 } from "../../../../packages/shared/src/index.mjs";
 import type { NormalizedX402Challenge } from "../x402/challenge_normalizer.ts";
 import { canonicalJson, hashObject, sha256Hex } from "./hash.ts";
@@ -39,7 +41,11 @@ export interface BuildPaymentContextInput {
   issuedAt?: number;
   cawPactId: string;
   serviceMode: ServiceMode;
+  operation?: PaymentOperation;
   clearSignDigest?: string;
+  messageToSign?: unknown;
+  providerQuote?: SignedProviderQuote;
+  policyBindings?: unknown;
   body?: unknown;
 }
 
@@ -181,12 +187,29 @@ export function buildPaymentContext(input: BuildPaymentContextInput): BuiltPayme
     serviceMode: input.serviceMode
   };
 
+  if (input.operation !== undefined) {
+    context.operation = input.operation;
+  }
+
   if (facilitatorUrlHash !== undefined) {
     context.facilitatorUrlHash = facilitatorUrlHash;
   }
 
   if (input.clearSignDigest !== undefined) {
     context.clearSignDigest = input.clearSignDigest;
+  }
+
+  if (input.messageToSign !== undefined) {
+    context.messageSignDigest = hashObject(input.messageToSign);
+  }
+
+  if (input.providerQuote !== undefined) {
+    context.providerQuoteHash = hashObject(input.providerQuote);
+    context.providerQuoteSignature = input.providerQuote.signature;
+  }
+
+  if (input.policyBindings !== undefined) {
+    context.policyBindingsHash = hashObject(input.policyBindings);
   }
 
   const paymentContextHash = hashObject(context);

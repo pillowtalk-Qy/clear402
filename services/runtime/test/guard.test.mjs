@@ -4,12 +4,20 @@ import { describe, it } from "node:test";
 import {
   buildPaymentContext,
   clearSign,
+  createDualReceipt,
+  createServiceEscrow,
+  createSignedProviderQuote,
+  fundServiceEscrow,
+  markServiceEscrowDelivered,
   normalizeX402Challenge,
+  refundServiceEscrow,
   runGuardPipeline,
   scanMetadata,
   signReceiptForDemo,
+  verifyDualReceipt,
   validateERC8004Trust,
   validateProviderRegistry,
+  verifySignedProviderQuote,
   verifyServiceReceipt
 } from "../src/index.mjs";
 import { sha256Hex as guardSha256Hex } from "../src/guard/hash.ts";
@@ -209,6 +217,211 @@ describe("guard primitives", () => {
     assert.match(result.reason ?? "", /selector_not_allowed/);
   });
 
+  it("enforces function_abis and params_match policies", () => {
+    const allowed = clearSign({
+      chainId: providerEntry.chainId,
+      to: providerEntry.merchantAddress,
+      calldata: encodeTransferCalldata(providerEntry.merchantAddress, "5"),
+      expected: {
+        merchantAddress: providerEntry.merchantAddress,
+        amount: "5",
+        tokenId: providerEntry.tokenId,
+        allowedSelectors: ["0xa9059cbb"],
+        functionAbis: [
+          {
+            selector: "0xa9059cbb",
+            signature: "transfer(address,uint256)"
+          }
+        ],
+        paramsMatch: {
+          recipient: providerEntry.merchantAddress,
+          amount: "5"
+        }
+      }
+    });
+    const blocked = clearSign({
+      chainId: providerEntry.chainId,
+      to: providerEntry.merchantAddress,
+      calldata: encodeTransferCalldata(providerEntry.merchantAddress, "6"),
+      expected: {
+        merchantAddress: providerEntry.merchantAddress,
+        amount: "6",
+        tokenId: providerEntry.tokenId,
+        allowedSelectors: ["0xa9059cbb"],
+        functionAbis: [
+          {
+            selector: "0xa9059cbb",
+            signature: "transfer(address,uint256)"
+          }
+        ],
+        paramsMatch: {
+          recipient: providerEntry.merchantAddress,
+          amount: "5"
+        }
+      }
+    });
+
+    assert.equal(allowed.decision, "allow");
+    assert.equal(blocked.decision, "block");
+    assert.match(blocked.reason ?? "", /params_match_failed/);
+  });
+
+  it("enforces message_match policies for message_sign typed data", () => {
+    const typedData = {
+      domain: { name: "Clear402" },
+      message: {
+        paymentContextHash: "0x" + "a".repeat(64),
+        intent: "pay_for_report"
+      }
+    };
+    const allowed = clearSign({
+      chainId: providerEntry.chainId,
+      to: providerEntry.merchantAddress,
+      typedData,
+      expected: {
+        allowedSelectors: [],
+        paymentContextHash: typedData.message.paymentContextHash,
+        messageMatch: {
+          requiredFields: ["message.paymentContextHash", "message.intent"],
+          contains: {
+            "message.intent": "pay_for_report"
+          },
+          paymentContextHash: typedData.message.paymentContextHash
+        }
+      }
+    });
+    const blocked = clearSign({
+      chainId: providerEntry.chainId,
+      to: providerEntry.merchantAddress,
+      typedData: {
+        domain: { name: "Clear402" },
+        message: {
+          paymentContextHash: "0x" + "b".repeat(64),
+          intent: "sign_unbounded_session"
+        }
+      },
+      expected: {
+        allowedSelectors: [],
+        paymentContextHash: typedData.message.paymentContextHash,
+        messageMatch: {
+          requiredFields: ["message.paymentContextHash", "message.intent"],
+          contains: {
+            "message.intent": "pay_for_report"
+          },
+          paymentContextHash: typedData.message.paymentContextHash
+        }
+      }
+    });
+
+    assert.equal(allowed.decision, "allow");
+    assert.equal(blocked.decision, "block");
+    assert.match(blocked.reason ?? "", /message_match_failed|context_hash_mismatch/);
+  });
+
+  it("builds message_sign PaymentContext evidence and blocks unsigned ProviderQuote tampering", () => {
+    const challenge = makeChallenge(providerEntry, 1_800_000_000_000).normalized;
+    const metadata = scanMetadata({
+      resourceUrl: "https://provider.example/paid/report",
+      description: "ok",
+      reason: "MARKET_DATA_REQUEST"
+    });
+    const messageToSign = {
+      paymentContextHash: "pending",
+      intent: "pay_for_report"
+    };
+    const quote = createSignedProviderQuote({
+      quoteId: "quote-message-sign",
+      providerId: providerEntry.providerId,
+      challenge,
+      chainId: providerEntry.chainId,
+      tokenId: providerEntry.tokenId,
+      signer: providerEntry.publicKey,
+      secret: providerEntry.publicKey,
+      issuedAt: 1_800_000_000_000,
+      evidenceMode: "fallback"
+    });
+    const built = buildPaymentContext({
+      missionId: "mission-message-sign",
+      providerId: providerEntry.providerId,
+      quoteId: "quote-message-sign",
+      method: "POST",
+      challenge,
+      metadata,
+      merchantAddress: providerEntry.merchantAddress,
+      chainId: providerEntry.chainId,
+      tokenId: providerEntry.tokenId,
+      amountDecimals: 6,
+      nonce: "nonce-message-sign",
+      issuedAt: 1_800_000_000_000,
+      cawPactId: "pact-1",
+      serviceMode: "caw-fetch",
+      operation: "message_sign",
+      messageToSign,
+      providerQuote: quote,
+      policyBindings: {
+        allowedSelectors: [],
+        messageMatch: {
+          requiredFields: ["message.paymentContextHash"]
+        }
+      }
+    });
+    const tampered = {
+      ...quote,
+      amount: "6"
+    };
+
+    const quoteResult = verifySignedProviderQuote({
+      quote,
+      challenge,
+      providerPublicKey: providerEntry.publicKey,
+      now: 1_800_000_000_000
+    });
+    const tamperedResult = verifySignedProviderQuote({
+      quote: tampered,
+      challenge,
+      providerPublicKey: providerEntry.publicKey,
+      now: 1_800_000_000_000
+    });
+
+    assert.equal(built.context.operation, "message_sign");
+    assert.match(built.context.messageSignDigest, /^0x[a-f0-9]{64}$/);
+    assert.match(built.context.providerQuoteHash, /^0x[a-f0-9]{64}$/);
+    assert.match(built.context.providerQuoteSignature ?? "", /^hmac-sha256:/);
+    assert.match(built.context.policyBindingsHash, /^0x[a-f0-9]{64}$/);
+    assert.equal(quoteResult.decision, "allow");
+    assert.equal(tamperedResult.decision, "block");
+  });
+
+  it("tracks ServiceEscrow fund, delivery, and refund state transitions", () => {
+    const escrow = createServiceEscrow({
+      paymentContextHash: "0x" + "e".repeat(64),
+      payer: "0xCAW0000000000000000000000000000000000001",
+      provider: providerEntry.merchantAddress,
+      amount: "5"
+    });
+    const funded = fundServiceEscrow(escrow, { now: 1_800_000_000_000 });
+    const refunded = refundServiceEscrow(funded.account, {
+      reason: "paid-but-not-delivered",
+      now: 1_800_000_010_000
+    });
+    const delivered = markServiceEscrowDelivered(funded.account, {
+      now: 1_800_000_020_000
+    });
+    const refundDelivered = refundServiceEscrow(delivered.account, {
+      reason: "too late",
+      now: 1_800_000_030_000
+    });
+
+    assert.equal(funded.decision, "allow");
+    assert.equal(funded.account.state, "funded");
+    assert.equal(refunded.decision, "allow");
+    assert.equal(refunded.account.state, "refunded");
+    assert.equal(delivered.decision, "allow");
+    assert.equal(delivered.account.state, "delivered");
+    assert.equal(refundDelivered.decision, "block");
+    assert.match(refundDelivered.reason ?? "", /cannot refund from delivered/);
+  });
+
   it("blocks tampered service receipts", () => {
     const challenge = makeChallenge(providerEntry, 1_800_000_000_000).normalized;
     const metadata = scanMetadata({
@@ -275,6 +488,59 @@ describe("guard primitives", () => {
 
     assert.equal(result.decision, "block");
     assert.match(result.reason ?? "", /responseHash/);
+  });
+
+  it("creates and verifies production-shaped dual receipts", () => {
+    const serviceReceipt = {
+      receiptId: "receipt-dual-1",
+      paymentContextHash: "0x" + "d".repeat(64),
+      cawRequestId: "clear402:dual",
+      cawWalletAddress: "0xCAW0000000000000000000000000000000000001",
+      pactId: "pact-1",
+      providerAddress: providerEntry.merchantAddress,
+      txHash: "0x" + "1".repeat(64),
+      chainId: providerEntry.chainId,
+      tokenId: providerEntry.tokenId,
+      amount: "5",
+      providerResponseHash: guardSha256Hex(JSON.stringify({ ok: true })),
+      providerSignature: "hmac-sha256:delivery",
+      responseSchemaHash: guardSha256Hex("schema-v1"),
+      deliveryTimestamp: 1_800_000_000_000,
+      status: "delivered",
+      auditLogIds: ["audit-1"],
+      evidenceMode: "live"
+    };
+    const dualReceipt = createDualReceipt({ serviceReceipt });
+    const verified = verifyDualReceipt({
+      dualReceipt,
+      expectedPaymentContextHash: serviceReceipt.paymentContextHash,
+      expectedPactId: "pact-1",
+      expectedProviderAddress: providerEntry.merchantAddress,
+      expectedAmount: "5",
+      expectedChainId: providerEntry.chainId,
+      expectedTokenId: providerEntry.tokenId
+    });
+    const tampered = verifyDualReceipt({
+      dualReceipt: {
+        ...dualReceipt,
+        paymentReceipt: {
+          ...dualReceipt.paymentReceipt,
+          amount: "6"
+        }
+      },
+      expectedPaymentContextHash: serviceReceipt.paymentContextHash,
+      expectedPactId: "pact-1",
+      expectedProviderAddress: providerEntry.merchantAddress,
+      expectedAmount: "5",
+      expectedChainId: providerEntry.chainId,
+      expectedTokenId: providerEntry.tokenId
+    });
+
+    assert.equal(dualReceipt.finalStatus, "delivered");
+    assert.match(dualReceipt.dualReceiptHash, /^0x[a-f0-9]{64}$/);
+    assert.equal(verified.decision, "allow");
+    assert.equal(tampered.decision, "block");
+    assert.match(tampered.reason ?? "", /amount|dualReceiptHash/);
   });
 });
 

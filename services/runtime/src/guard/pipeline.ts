@@ -203,22 +203,82 @@ function extractChallengeResource(rawChallenge: unknown): string | undefined {
 }
 
 function evidenceBundleForMission(database: DatabaseSync, missionId: string): EvidenceBundle {
-  const live = listGuardEvents(database, missionId).filter((event) => event.decision === "allow");
-  const fallback = listGuardEvents(database, missionId).filter(
-    (event) => event.decision === "require_approval"
-  );
-  const mock = listGuardEvents(database, missionId).filter(
-    (event) => event.decision === "fallback_required"
-  );
+  const classifiedEvents = listGuardEvents(database, missionId).map((event) => ({
+    event,
+    evidenceMode: inferEventEvidenceMode(event.evidenceJson, event.decision)
+  }));
 
   return {
     missionId,
-    live,
-    fallback,
-    mock,
+    live: classifiedEvents
+      .filter((entry) => entry.evidenceMode === "live")
+      .map((entry) => entry.event),
+    fallback: classifiedEvents
+      .filter((entry) => entry.evidenceMode === "fallback")
+      .map((entry) => entry.event),
+    mock: classifiedEvents
+      .filter((entry) => entry.evidenceMode === "mock")
+      .map((entry) => entry.event),
     redactions: [],
     createdAt: Date.now()
   };
+}
+
+function inferEventEvidenceMode(evidence: Record<string, unknown>, decision: GuardDecision): EvidenceMode {
+  const nestedModes = [
+    evidenceModeFromRecord(evidence),
+    evidenceModeFromRecord(nestedRecord(evidence, ["cawEvidence"])),
+    evidenceModeFromRecord(nestedRecord(evidence, ["receipt"])),
+    evidenceModeFromRecord(nestedRecord(evidence, ["receiptResult", "receipt"])),
+    evidenceModeFromRecord(nestedRecord(evidence, ["metadataFirewall"])),
+    evidenceModeFromRecord(nestedRecord(evidence, ["challenge"]))
+  ].filter((mode): mode is EvidenceMode => mode !== undefined);
+
+  if (nestedModes.length > 0) {
+    return nestedModes.reduce(modeMax, "live");
+  }
+
+  if (decision === "fallback_required" || decision === "require_approval") {
+    return "fallback";
+  }
+
+  return "live";
+}
+
+function nestedRecord(
+  record: Record<string, unknown>,
+  path: string[]
+): Record<string, unknown> | undefined {
+  let current: unknown = record;
+
+  for (const segment of path) {
+    if (!isRecord(current)) {
+      return undefined;
+    }
+
+    current = current[segment];
+  }
+
+  return isRecord(current) ? current : undefined;
+}
+
+function evidenceModeFromRecord(record: Record<string, unknown> | undefined): EvidenceMode | undefined {
+  const value = record?.evidenceMode;
+  return value === "live" || value === "fallback" || value === "mock" ? value : undefined;
+}
+
+function modeMax(left: EvidenceMode, right: EvidenceMode): EvidenceMode {
+  const rank: Record<EvidenceMode, number> = {
+    live: 0,
+    fallback: 1,
+    mock: 2
+  };
+
+  return rank[right] > rank[left] ? right : left;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
 function getProviderRegistryEntry(
@@ -1130,7 +1190,6 @@ export async function runGuardPipeline(
     };
   }
 
-  const evidenceBundle = evidenceBundleForMission(database, input.missionId);
   const successEvent = recordGuardEvent(database, {
     missionId: input.missionId,
     layer: "guard_pipeline",
@@ -1148,6 +1207,7 @@ export async function runGuardPipeline(
     },
     createdAt: now
   });
+  const evidenceBundle = evidenceBundleForMission(database, input.missionId);
 
   return {
     decision: "allow",

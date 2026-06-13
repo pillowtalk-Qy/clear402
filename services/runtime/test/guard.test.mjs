@@ -287,6 +287,13 @@ describe("guard pipeline", () => {
     assert.equal(result.decision, "allow");
     assert.equal(result.status, "completed");
     assert.equal(result.receipt?.status, "delivered");
+    assert.ok(
+      [
+        ...result.evidenceBundle.live,
+        ...result.evidenceBundle.fallback,
+        ...result.evidenceBundle.mock
+      ].some((event) => event.id === result.guardEventId)
+    );
   });
 
   it("blocks metadata resource overrides before PaymentContext creation", async () => {
@@ -309,6 +316,25 @@ describe("guard pipeline", () => {
     assert.equal(result.paymentContext, undefined);
     assert.equal(result.paymentContextHash, undefined);
     assert.equal(cawCalls, 0);
+  });
+
+  it("classifies allow events by nested CAW evidence mode instead of decision", async () => {
+    for (const evidenceMode of ["fallback", "mock"]) {
+      const db = makeDb();
+      const scenario = makePipelineScenario(`mission-allow-${evidenceMode}`, "100");
+      scenario.input.cawAdapter = makePassingCawAdapter({
+        evidenceMode,
+        requestId: `request-${evidenceMode}`,
+        txHash: `0x${evidenceMode === "fallback" ? "2" : "3".repeat(64)}`
+      });
+
+      const result = await runGuardPipeline(db, scenario.input);
+
+      assert.equal(result.decision, "allow");
+      const bucket = evidenceMode === "mock" ? result.evidenceBundle.mock : result.evidenceBundle.fallback;
+      assert.ok(bucket.some((event) => event.id === result.guardEventId));
+      assert.equal(result.evidenceBundle.live.some((event) => event.id === result.guardEventId), false);
+    }
   });
 
   it("blocks replay on the second identical guarded payment", async () => {
@@ -732,4 +758,18 @@ function encodeTransferCalldata(to, amount) {
   const address = to.toLowerCase().replace(/^0x/, "").padStart(64, "0");
   const value = BigInt(amount).toString(16).padStart(64, "0");
   return `0xa9059cbb${address}${value}`;
+}
+
+function makePassingCawAdapter({ evidenceMode, requestId, txHash }) {
+  return {
+    transferTokens: async () => ({
+      evidenceMode,
+      requestId,
+      walletAddress: "0xCAW0000000000000000000000000000000000001",
+      txHash,
+      auditLogId: `audit-${requestId}`,
+      rawEvidenceRef: `caw-${evidenceMode}:${requestId}`,
+      decision: "allow"
+    })
+  };
 }

@@ -104,11 +104,11 @@ pnpm exec playwright install chromium
 - [Demo Operator Runbook](./docs/demo_operator_runbook.md)
 - [Submission Package](./submission/README.md)
 - [Demo Video Recording Script](./submission/demo-video/recording-script.md)
-- [Demo Video - simulation/rehearsal MP4](./submission/demo-video/clear402-demo-simulation-rehearsal.mp4)
-- [Presentation Deck - simulation/rehearsal version](./submission/ppt/clear402-hackathon-deck.pptx)
+- [Demo Video Short Preview MP4](./submission/demo-video/clear402-demo-preview.mp4)
+- [Presentation Deck](./submission/ppt/clear402-hackathon-deck.pptx)
 - [Final Submit Checklist](./submission/final-submit-checklist.md)
 
-The current PPT and video materials are simulation/rehearsal materials. The formal PPT/video versions are being urgently polished. The final submitted video should be 3-5 minutes and show the dashboard flow, live/fallback/mock labels, evidence export, and 16/16 attack-lab result.
+The repository includes the presentation deck, recording script, and a short demo preview. The hackathon portal upload should use the final 3-5 minute demo video link or file, showing the dashboard flow, live/fallback/mock labels, evidence export, and 16/16 attack-lab result.
 
 ## Proposal Link
 
@@ -193,13 +193,13 @@ See [Security Boundaries](./docs/security_boundaries.md) and [Limitations](./doc
 
 ## Team Link
 
-- [OriginShift Team](./docs/team.md) - fill wallet addresses and contact details before final portal submission if required.
+- [OriginShift Team](./docs/team.md) - public repo-safe team profile; wallet/contact details are supplied in the hackathon portal if required.
 
 ## Project Assets
 
 - [Clear402 Logo](./docs/assets/project/clear402-logo.png)
-- [Demo Video - simulation/rehearsal MP4](./submission/demo-video/clear402-demo-simulation-rehearsal.mp4)
-- [Presentation Deck - simulation/rehearsal version](./submission/ppt/clear402-hackathon-deck.pptx)
+- [Demo Video Short Preview MP4](./submission/demo-video/clear402-demo-preview.mp4)
+- [Presentation Deck](./submission/ppt/clear402-hackathon-deck.pptx)
 - [Submission Package](./submission/README.md)
 
 ## Additional Docs

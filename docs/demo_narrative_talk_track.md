@@ -30,7 +30,7 @@ This is the safe demo script for the current Clear402 demo branch. It is written
 
 ### 2:45-3:00 - CAW Boundary
 
-"This branch records one CAW Sepolia testnet tiny transfer. The request ID, pact ID, tx hash, and pact completion are in `docs/live_caw_testnet_smoke_report.md`. It also records one Sepolia testnet CAW policy denial for a non-allowlisted destination in `docs/live_caw_policy_denial_report.md`. That is not mainnet, not production-ready, not unrestricted CAW execution, and not coverage for every policy-denial type."
+"This branch records four live CAW facts: one CAW Sepolia testnet tiny transfer, one Sepolia testnet CAW destination-allowlist denial, one live `message_sign` EIP-712 authorization verification for Base Sepolia USDC, and one exact Base Sepolia USDC EIP-3009 transfer executed through CAW-approved `message_sign` + `contract_call`. That is not mainnet, not production-ready, not unrestricted CAW execution, and not coverage for every policy-denial type."
 
 ## 8-Minute Version
 
@@ -46,7 +46,7 @@ This is the safe demo script for the current Clear402 demo branch. It is written
 
 "Live means the code path or service actually executed. Fallback means the intended live capability is unavailable and the substitute is visible. Mock means fixture or seed data."
 
-"In this branch, local runtime/provider health is live. Guard pipeline execution is live when the tests and attack lab run it. CAW payment execution is live only for the one recorded Sepolia testnet smoke, and CAW policy-denial evidence is live only for the one recorded destination-allowlist rejection. Ordinary dashboard demos and attack lab runs do not trigger real CAW payments. Attack inputs and provider/trust seed records are mock."
+"In this branch, local runtime/provider health is live. Guard pipeline execution is live when the tests and attack lab run it. CAW payment execution is live only for the four recorded CAW facts, and ordinary dashboard demos and attack lab runs do not trigger real CAW payments. Attack inputs and provider/trust seed records are mock."
 
 ### 2:00-3:10 - Dashboard Walkthrough
 
@@ -72,7 +72,7 @@ This is the safe demo script for the current Clear402 demo branch. It is written
 
 ### 5:30-6:30 - Evidence Export
 
-"The dashboard can render a JSON and Markdown evidence bundle for the current state. The CLI attack lab can also be captured as a log artifact. Before using any evidence, we check the labels: runtime/provider are live, the recorded CAW smoke and recorded policy denial are Sepolia-testnet-only, and attack inputs plus seed data are mock."
+"The dashboard can render a JSON and Markdown evidence bundle for the current state. The CLI attack lab can also be captured as a log artifact. Before using any evidence, we check the labels: runtime/provider are live, the recorded CAW smoke, recorded denial, recorded message-sign authorization verification, and recorded Base Sepolia transfer are Sepolia/Base-Sepolia-only, and attack inputs plus seed data are mock."
 
 "That prevents the evidence story from outrunning the implementation."
 
@@ -80,19 +80,19 @@ This is the safe demo script for the current Clear402 demo branch. It is written
 
 "CAW is deliberately outside Clear402's policy logic. Clear402 prepares and checks the payment context, then the CawAdapter is the only boundary to CAW."
 
-"The capability report now records one live CAW Sepolia testnet tiny transfer and one live Sepolia testnet destination-allowlist policy denial. The smoke report includes the CAW request ID, pact ID, transaction hash, and pact completion. The denial report includes the CAW request ID, pact ID, rejected transaction record, denial reason, and absence of a transaction hash. This does not prove mainnet readiness, production readiness, unrestricted execution, or coverage for every CAW policy-denial type."
+"The capability report now records one live CAW Sepolia testnet tiny transfer, one live Sepolia testnet destination-allowlist policy denial, one live `message_sign` EIP-712 authorization verification for Base Sepolia USDC, and one exact Base Sepolia USDC EIP-3009 transfer executed through CAW-approved `contract_call`. The smoke report includes the CAW request ID, pact ID, transaction hash, and pact completion. The denial report includes the CAW request ID, pact ID, rejected transaction record, denial reason, and absence of a transaction hash. This does not prove mainnet readiness, production readiness, unrestricted execution, or coverage for every CAW policy-denial type."
 
 ### 7:30-8:00 - Close
 
-"So the demo claim is narrow and strong: live local services, real guard pipeline execution, 16/16 fixture attacks blocked, P0 resource override closed, one recorded CAW Sepolia testnet tiny transfer, and one recorded CAW Sepolia testnet destination-allowlist denial. The ordinary demo path still avoids real CAW payment execution."
+"So the demo claim is narrow and strong: live local services, real guard pipeline execution, 16/16 fixture attacks blocked, P0 resource override closed, one recorded CAW Sepolia testnet tiny transfer, one recorded CAW Sepolia testnet destination-allowlist denial, one live `message_sign` EIP-712 authorization verification, and one exact Base Sepolia EIP-3009 USDC transfer through CAW-approved `contract_call`. The ordinary demo path still avoids real CAW payment execution."
 
-"The next rehearsal should focus on timing, evidence labels, and making sure nobody generalizes the Sepolia reports into mainnet, production, unrestricted CAW execution, or full policy-denial coverage."
+"The next run-through should focus on timing, evidence labels, and making sure nobody generalizes the Sepolia and Base Sepolia reports into mainnet, production, unrestricted CAW execution, or full policy-denial coverage."
 
 ## Risk Statement
 
 Use this wording when asked about production readiness:
 
-"This branch is demo-gate ready for the guard pipeline and evidence story, and it records one tiny CAW Sepolia testnet transfer plus one CAW Sepolia testnet destination-allowlist denial. Those reports are not mainnet, not production-ready, not unrestricted CAW execution, and not coverage for every CAW policy-denial type. Attack lab inputs are fixtures, provider/trust records are demo seed data, and the ordinary demo does not trigger a real CAW payment."
+"This branch is demo-gate ready for the guard pipeline and evidence story, and it records one tiny CAW Sepolia testnet transfer, one CAW Sepolia testnet destination-allowlist denial, one live `message_sign` EIP-712 authorization verification, and one exact Base Sepolia USDC EIP-3009 transfer through CAW-approved `contract_call`. Those reports are not mainnet, not production-ready, not unrestricted CAW execution, and not coverage for every CAW policy-denial type. Attack lab inputs are fixtures, provider/trust records are demo seed data, and the ordinary demo does not trigger a real CAW payment."
 
 ## Things Not To Say
 
@@ -121,4 +121,4 @@ Use this wording when asked about production readiness:
 
 ## Final Demo Claim
 
-"Clear402 can truthfully demonstrate the x402 guard and evidence pipeline today: runtime/provider health is live, the guard pipeline really executes, the 16-scenario attack lab is blocked end to end, the P0 metadata override is closed, one CAW Sepolia testnet tiny transfer is recorded with request ID, pact ID, tx hash, and pact completion, and one CAW Sepolia testnet destination-allowlist denial is recorded with request ID, pact ID, rejected transaction record, denial reason, and no transaction hash. That does not claim mainnet readiness, production readiness, unrestricted CAW execution, or coverage for every CAW policy-denial type."
+"Clear402 can truthfully demonstrate the x402 guard and evidence pipeline today: runtime/provider health is live, the guard pipeline really executes, the 16-scenario attack lab is blocked end to end, the P0 metadata override is closed, one CAW Sepolia testnet tiny transfer is recorded with request ID, pact ID, tx hash, and pact completion, one CAW Sepolia testnet destination-allowlist denial is recorded with request ID, pact ID, rejected transaction record, denial reason, and no transaction hash, one live `message_sign` EIP-712 authorization verification is recorded, and one exact Base Sepolia USDC EIP-3009 transfer through CAW-approved `contract_call` is recorded. That does not claim mainnet readiness, production readiness, unrestricted CAW execution, or coverage for every CAW policy-denial type."

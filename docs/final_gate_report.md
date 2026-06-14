@@ -47,11 +47,10 @@ All gate commands were run with `CLEAR402_CAW_*` and `CLEAR402_TEST_MERCHANT_ADD
 | Item | Result | Notes |
 |---|---|---|
 | Project logo | pass | `docs/assets/project/clear402-logo.png` is included and referenced from the README. |
-| Submission package index | pass | `submission/README.md` lists the portal-ready links, claims, and remaining manual fields. |
-| Presentation deck | simulation | `submission/ppt/clear402-hackathon-deck.pptx` is a 9-slide editable simulation/rehearsal deck; the formal PPT version is being urgently polished. |
-| Demo video script/video | simulation | `submission/demo-video/recording-script.md` gives a 3-5 minute rehearsal flow and `submission/demo-video/clear402-demo-simulation-rehearsal.mp4` is a short simulation/rehearsal MP4; the formal video is being urgently polished. |
-| Demo video file/link | manual | The final MP4 or hosted video link must still be recorded/uploaded by the team and pasted into the submission portal. |
-| Team wallet/contact fields | manual | `docs/team.md` keeps wallet addresses and contact details out of the public repo; fill them in the hackathon portal if required. |
+| Submission package index | pass | `submission/README.md` lists portal-ready files, claims, and portal-only fields. |
+| Presentation deck | pass | `submission/ppt/clear402-hackathon-deck.pptx` is a 9-slide editable deck ready for the portal and presenter walkthrough. |
+| Demo video script/preview | pass | `submission/demo-video/recording-script.md` gives a 3-5 minute recording flow, and `submission/demo-video/clear402-demo-preview.mp4` is a short repo preview. The final 3-5 minute video should be uploaded or linked through the portal. |
+| Team wallet/contact fields | portal-only | `docs/team.md` keeps wallet addresses and contact details out of the public repo; provide them in the hackathon portal if required. |
 
 ## Final No-Go Checklist
 
@@ -95,7 +94,7 @@ No active blocker. The historical audit/code-review P1 issue about evidence-bund
 - Phase 16-21 completion: 100%
 - GitHub hackathon submission readiness: 94%
 - Original championship/full live spec: 82%
-- Formal PPT/video completion: in urgent polish
+- Portal media package readiness: ready, with final 3-5 minute video supplied through the portal
 
 ## Recommendation
 

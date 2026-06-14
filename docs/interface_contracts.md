@@ -9,7 +9,7 @@ This document freezes the integration interface surface for the Clear402 monorep
 3. Environment-dependent responses carry `evidenceMode`.
 4. Errors use Problem JSON.
 5. Dashboard renders runtime truth when a runtime API exists and labels fallback/mock demo state when it does not.
-6. Guard Pipeline and Attack Lab contracts are in scope for the current integration branch; CAW payment evidence is limited to one recorded Sepolia testnet tiny transfer in `docs/live_caw_testnet_smoke_report.md` and one recorded Sepolia testnet destination-allowlist denial in `docs/live_caw_policy_denial_report.md`. Default dashboard demos and attack lab runs must not trigger real CAW payments. Do not describe this branch as mainnet, production-ready, unrestricted CAW execution, or coverage for every possible CAW policy-denial type.
+6. Guard Pipeline and Attack Lab contracts are in scope for the current integration branch; CAW payment evidence is limited to one recorded Sepolia testnet tiny transfer in `docs/live_caw_testnet_smoke_report.md`, one recorded Sepolia testnet destination-allowlist denial in `docs/live_caw_policy_denial_report.md`, one live `message_sign` EIP-712 authorization verification, and one exact Base Sepolia USDC EIP-3009 transfer. Default dashboard demos and attack lab runs must not trigger real CAW payments. Do not describe this branch as mainnet, production-ready, unrestricted CAW execution, or coverage for every possible CAW policy-denial type.
 
 ## 2. Shared Types
 
@@ -97,8 +97,9 @@ Implemented tables and views:
 
 The following are reserved for later phases and are not implemented here:
 
-- unrestricted CAW payment execution beyond the recorded Sepolia testnet tiny transfer
+- unrestricted CAW payment execution beyond the recorded Sepolia testnet tiny transfer and exact Base Sepolia USDC EIP-3009 transfer
 - CAW denial coverage beyond the recorded destination-allowlist rejection
+- successful official `caw fetch` x402 execute
 - live ERC-8004 network data
 - long-lived runtime mission/payment endpoints beyond health
 

@@ -6,7 +6,7 @@ Current deck:
 submission/ppt/clear402-hackathon-deck.pptx
 ```
 
-Status: simulation/rehearsal version. The formal PPT version is being urgently polished for final submission.
+Status: ready for hackathon submission and presenter walkthrough.
 
 Slide list:
 
@@ -26,4 +26,4 @@ The deck uses:
 - OriginShift team logo and member avatars from `docs/assets/team/`
 - Dashboard screenshot artifact from the latest Playwright E2E run
 
-Use this deck for rehearsal or as a speaking aid while the formal version is being polished.
+Use this deck for the hackathon portal and presenter walkthrough.

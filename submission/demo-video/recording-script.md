@@ -1,6 +1,6 @@
 # Clear402 3-5 Minute Demo Recording Script
 
-Status: simulation/rehearsal script. The formal demo video is being urgently polished for final submission.
+Status: final recording script for the 3-5 minute hackathon demo video.
 
 Target length: 3-5 minutes.
 
@@ -93,7 +93,7 @@ Show the CAW evidence docs.
 Say:
 
 ```text
-Clear402 does not claim mainnet or unrestricted CAW execution. The live CAW execution evidence is deliberately narrow: one recorded Sepolia tiny transfer and one recorded Sepolia destination-allowlist policy denial. The official CLI evidence also shows x402 dry-run parsing and local gateway startup, while execute and message signing still require the right approved pact. That gives reviewers real wallet evidence while keeping the demo boundary honest.
+Clear402 does not claim mainnet or unrestricted CAW execution. The live CAW execution evidence is deliberately narrow: one recorded Sepolia tiny transfer, one recorded Sepolia destination-allowlist policy denial, one live `message_sign` EIP-712 authorization verification for Base Sepolia USDC, and one exact Base Sepolia USDC EIP-3009 transfer executed through CAW-approved `message_sign` + `contract_call`. The official CLI evidence also shows x402 dry-run parsing and local gateway startup, but not a successful official `caw fetch` x402 execute path. That gives reviewers real wallet evidence while keeping the demo boundary honest.
 ```
 
 ### 3:40-4:20 - Submission Readiness

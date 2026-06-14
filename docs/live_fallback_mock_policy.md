@@ -52,7 +52,7 @@ Mock may help development, but it must never impersonate a live wallet, live den
 - `live` only after capability verification and raw evidence.
 - `fallback` when the official path is unavailable but a documented local substitute exists.
 - `mock` only for isolated fixtures or UI labs.
-- The current live CAW claim is limited to the recorded Sepolia testnet tiny transfer and one recorded Sepolia testnet destination-allowlist denial. It is not mainnet, production readiness, unrestricted CAW execution, or coverage for every possible CAW policy-denial type.
+- The current live CAW claim is limited to the recorded Sepolia testnet tiny transfer, the recorded Sepolia testnet destination-allowlist denial, the narrow `message_sign` EIP-712 authorization verification, and the exact Base Sepolia USDC EIP-3009 tx. It is not mainnet, production readiness, unrestricted CAW execution, or coverage for every possible CAW policy-denial type.
 
 ### 2.2 Provider
 
@@ -128,6 +128,8 @@ This section records the current Clear402 demo branch status for demo operators.
 - The P0 `metadata.resourceUrl` override defense: mismatched metadata is blocked before PaymentContext creation.
 - One CAW Sepolia testnet tiny transfer recorded in `docs/live_caw_testnet_smoke_report.md`, including request ID, pact ID, tx hash, pact completion, and balance evidence.
 - One CAW Sepolia testnet destination-allowlist denial recorded in `docs/live_caw_policy_denial_report.md`, including request ID, pact ID, rejected transaction record, denial reason, and no-success evidence.
+- One live `message_sign` EIP-712 authorization verification for Base Sepolia USDC recorded in `docs/caw_capability_report.md`.
+- One exact Base Sepolia USDC EIP-3009 transfer executed through CAW-approved `contract_call`, recorded in `docs/caw_capability_report.md`.
 
 These live claims describe code paths that actually execute. Some of those paths run over demo seed records; the seed data itself is not live external data.
 
@@ -147,7 +149,7 @@ These live claims describe code paths that actually execute. Some of those paths
 
 Say "16/16 attacks blocked" only as: 16 mock attack fixtures were executed through the real guard pipeline, and each returned a blocked decision with evidence. Do not say or imply that the attack lab moved CAW funds, that external attackers were tested, or that demo seed data is live registry data.
 
-Say "live CAW execution" only as: one Sepolia testnet tiny transfer was recorded in `docs/live_caw_testnet_smoke_report.md`, and one Sepolia testnet destination-allowlist policy denial was recorded in `docs/live_caw_policy_denial_report.md`. Do not generalize it to mainnet, production readiness, unrestricted CAW execution, or coverage for every possible CAW policy-denial type.
+Say "live CAW execution" only as: one Sepolia testnet tiny transfer was recorded in `docs/live_caw_testnet_smoke_report.md`, one Sepolia testnet destination-allowlist policy denial was recorded in `docs/live_caw_policy_denial_report.md`, one live `message_sign` EIP-712 authorization verification was recorded in `docs/caw_capability_report.md`, and one exact Base Sepolia USDC EIP-3009 transfer executed through CAW-approved `contract_call` was recorded in `docs/caw_capability_report.md`. Do not generalize it to mainnet, production readiness, unrestricted CAW execution, generalized arbitrary USDC transfer ability, or coverage for every possible CAW policy-denial type.
 
 ## 9. Safety Summary
 

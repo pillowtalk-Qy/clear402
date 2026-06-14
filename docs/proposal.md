@@ -35,22 +35,23 @@ The dashboard is an operator console for reviewing live, fallback, and mock evid
 - `packages/shared`: Zod contracts and shared domain types.
 - `tests/e2e`: Playwright dashboard flow for happy, denied, attack, and export paths.
 - `scripts/run_attack_lab.ts`: authoritative 16-scenario attack-lab runner.
-- CAW integration boundary: `@cobo/agentic-wallet` plus recorded CAW CLI evidence for Sepolia/testnet allow and denial paths.
+- CAW integration boundary: `@cobo/agentic-wallet` plus recorded CAW CLI evidence for Sepolia/testnet allow, denial, EIP-712 authorization, and exact Base Sepolia EIP-3009 execution paths.
 
 ## Current Completion
 
 - Dashboard, runtime, provider, shared contracts, E2E tests, and attack lab are implemented.
 - Final gate commands pass: `pnpm lint`, `pnpm test`, `pnpm build`, `pnpm test:e2e`, and `pnpm run attack:all`.
 - Attack lab passes with 16/16 blocked scenarios.
-- Recorded live CAW evidence exists for one Sepolia tiny transfer and one Sepolia destination-allowlist denial.
+- Recorded live CAW evidence exists for one Sepolia tiny transfer, one Sepolia destination-allowlist denial, one narrow EIP-712 authorization verification, and one exact Base Sepolia EIP-3009 USDC tx.
 - Ordinary dashboard payment remains fallback/demo state.
-- Simulation/rehearsal presentation deck exists at `submission/ppt/clear402-hackathon-deck.pptx`; formal PPT/video versions are being urgently polished.
-- Team wallet/contact details are intentionally left as a template in `docs/team.md` and must be filled before final submission if required by the portal.
+- Presentation deck exists at `submission/ppt/clear402-hackathon-deck.pptx`.
+- Recording script and short preview media exist under `submission/demo-video/`; the final 3-5 minute demo video is provided through the hackathon portal.
+- Team wallet/contact details are intentionally kept out of the public repo and supplied through the hackathon portal if required.
 
 ## Roadmap
 
-- Add the formal uploaded 3-5 minute demo video link to `submission/README.md`.
-- Replace the simulation/rehearsal PPT with the final polished PPT if required by the submission portal.
+- Keep the portal demo video link/upload aligned with the final 3-5 minute recording.
+- Keep public repo media and portal assets aligned as the submission package evolves.
 - Replace demo provider/trust seed data with live registry and attestation sources.
 - Expand CAW denial coverage beyond destination allowlist.
 - Add production deployment hardening, observability, and operator approval workflows.
@@ -62,7 +63,7 @@ Cobo Agent-Native Payments / 402
 
 ## Demo Boundary
 
-Live CAW evidence is limited to recorded Sepolia tiny transfer and recorded destination-allowlist denial.
+Live CAW evidence is limited to recorded Sepolia tiny transfer, recorded destination-allowlist denial, narrow EIP-712 authorization verification, and the exact Base Sepolia EIP-3009 USDC tx.
 
 Clear402 is a hackathon demo, not a mainnet production product. It does not commit private keys, API keys, seed phrases, pairing tokens, or wallet secrets.
 

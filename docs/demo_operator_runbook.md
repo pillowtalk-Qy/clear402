@@ -28,7 +28,7 @@ Expected result: install completes. Optional dependency build-script warnings fo
 
 ## 3. Run The Gate
 
-Run the same gate before rehearsal or recording:
+Run the same gate before recording:
 
 ```bash
 pnpm install
@@ -123,16 +123,17 @@ Short demo wording:
 
 Current CAW fact:
 
-- `docs/caw_capability_report.md` says `Live ready: true` only for the recorded Sepolia testnet allow-path tiny transfer and the recorded Sepolia testnet destination-allowlist denial.
+- `docs/caw_capability_report.md` marks live-ready CAW evidence for exactly four recorded facts: the Sepolia testnet allow-path tiny transfer, the Sepolia testnet destination-allowlist denial, the narrow `message_sign` EIP-712 authorization verification, and the exact Base Sepolia EIP-3009 USDC tx.
 - `docs/live_caw_testnet_smoke_report.md` records the request ID, pact ID, transaction hash, pact completion, and balance evidence.
 - `docs/live_caw_policy_denial_report.md` records the request ID, pact ID, rejected transaction record, denial reason, and no-success evidence.
+- `docs/caw_capability_report.md` and `docs/limitations.md` keep the live CAW claim narrow; they do not imply mainnet, unrestricted CAW execution, or a successful official `caw fetch` x402 execute path.
 - The transfer was `0.0001` SETH on Ethereum Sepolia testnet.
 - This is not mainnet, not production-ready, and not unrestricted CAW execution.
 - The recorded policy-denial evidence covers one destination allowlist rejection only; do not claim every CAW policy-denial type is covered.
 
 Short demo wording:
 
-"CAW is the spending authority. This branch records one tiny Sepolia testnet CAW transfer, with request ID, pact ID, tx hash, and pact completion in the live smoke report. It also records one Sepolia testnet CAW policy denial where a non-allowlisted destination was rejected without a transaction hash. The normal dashboard demo and attack lab do not move funds."
+"CAW is the spending authority. This branch records one tiny Sepolia testnet CAW transfer, one Sepolia testnet CAW policy denial, one live `message_sign` EIP-712 authorization verification for Base Sepolia USDC, and one exact Base Sepolia EIP-3009 USDC transfer through CAW-approved `message_sign` + `contract_call`. The normal dashboard demo and attack lab do not move funds."
 
 If the dashboard shows sample hashes or a transaction reference, call them sample/fallback evidence unless they are explicitly the Sepolia tx hash from `docs/live_caw_testnet_smoke_report.md`.
 

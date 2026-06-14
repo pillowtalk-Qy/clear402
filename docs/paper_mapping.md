@@ -2,14 +2,25 @@
 
 This mapping connects the four paper themes to Clear402 guard layers and attack-lab scenarios. The attack lab uses mock fixture inputs and real local guard execution. It must not be presented as external attack traffic or as CAW-funded live exploit traffic.
 
+## Paper Sources
+
+These papers are the research basis for the Clear402 guard design and attack-lab scenarios.
+
+| Theme in Clear402 | Paper | Source |
+|---|---|---|
+| x402 replay, weak binding, blind signing, discovery, header/cache/settlement confusion | Five Attacks on x402 Agentic Payment Protocol | [arXiv:2605.11781](https://arxiv.org/abs/2605.11781) |
+| x402 free-riding, state synchronization, dynamic price drift, concurrent access races | Free-Riding in the AI Economy: Demystifying Logic Flaws in x402-Enabled Payment Systems | [arXiv:2605.30998](https://arxiv.org/abs/2605.30998) |
+| PII-safe x402 metadata filtering and hidden signer intent | Hardening x402: PII-Safe Agentic Payments via Pre-Execution Metadata Filtering | [arXiv:2604.11430](https://arxiv.org/abs/2604.11430) |
+| Binding cryptocurrency payment to service execution and delivery evidence | A402: Binding Cryptocurrency Payments to Service Execution for Agentic Commerce | [arXiv:2603.01179](https://arxiv.org/abs/2603.01179) |
+
 ## Summary
 
 | Paper | Pain Point | Clear402 Protection | Attack Scenarios |
 |---|---|---|---|
-| Five Attacks on x402 Agentic Payment Protocol | Replay, weak binding, blind signing, malicious discovery, identity spoofing, header/cache/settlement confusion | PaymentContext binding, quote/nonce locks, provider registry, ERC-8004-style trust adapter over demo records, HTTP canonicalizer, cache policy checks, clearsig | `replay_same_proof`, `cross_resource_substitution`, `malicious_approve`, `discovery_poisoning`, `erc8004_identity_mismatch`, `header_confusion_duplicate_x_payment`, `cache_confusion`, `settlement_path_substitution` |
-| Free-Riding in the AI Economy | Unpaid reuse, dynamic price drift, low-trust providers, concurrent access races | Quote reservation, budget ledger, CAW policy boundary, reputation threshold, DB lock | `dynamic_price_overspend`, `low_reputation_provider`, `concurrent_free_riding_20_requests`, plus replay coverage from `replay_same_proof` |
-| Hardening x402: PII-Safe Agentic Payments | Metadata leakage and hidden signer intent | Metadata firewall, redaction hashes, receipt PII checks, multicall selector inspection | `pii_leakage`, `multicall_hidden_operation` |
-| A402: Binding Cryptocurrency Payments to Service Execution | Payment must be bound to service delivery, amount normalization, response shape | ServiceReceipt verifier, PaymentContext hash, provider response hash, response schema hash, clearsig amount decoder | `paid_but_denied`, `partial_payment_decimals_confusion`, `malformed_delivery` |
+| [Five Attacks on x402 Agentic Payment Protocol](https://arxiv.org/abs/2605.11781) | Replay, weak binding, blind signing, malicious discovery, identity spoofing, header/cache/settlement confusion | PaymentContext binding, quote/nonce locks, provider registry, ERC-8004-style trust adapter over demo records, HTTP canonicalizer, cache policy checks, clearsig | `replay_same_proof`, `cross_resource_substitution`, `malicious_approve`, `discovery_poisoning`, `erc8004_identity_mismatch`, `header_confusion_duplicate_x_payment`, `cache_confusion`, `settlement_path_substitution` |
+| [Free-Riding in the AI Economy](https://arxiv.org/abs/2605.30998) | Unpaid reuse, dynamic price drift, low-trust providers, concurrent access races | Quote reservation, budget ledger, CAW policy boundary, reputation threshold, DB lock | `dynamic_price_overspend`, `low_reputation_provider`, `concurrent_free_riding_20_requests`, plus replay coverage from `replay_same_proof` |
+| [Hardening x402: PII-Safe Agentic Payments](https://arxiv.org/abs/2604.11430) | Metadata leakage and hidden signer intent | Metadata firewall, redaction hashes, receipt PII checks, multicall selector inspection | `pii_leakage`, `multicall_hidden_operation` |
+| [A402: Binding Cryptocurrency Payments to Service Execution](https://arxiv.org/abs/2603.01179) | Payment must be bound to service delivery, amount normalization, response shape | ServiceReceipt verifier, PaymentContext hash, provider response hash, response schema hash, clearsig amount decoder | `paid_but_denied`, `partial_payment_decimals_confusion`, `malformed_delivery` |
 
 ## Five Attacks on x402 Agentic Payment Protocol
 
@@ -53,4 +64,3 @@ This mapping connects the four paper themes to Clear402 guard layers and attack-
 Use this wording when showing the mapping:
 
 "The papers define the failure modes. Clear402 maps each one to a guard layer and runs mock fixtures through the real local guard pipeline. The mapping proves coverage of the demo fixtures and guard decisions; it does not claim external attack traffic, production deployment, mainnet settlement, or new live CAW transfers."
-

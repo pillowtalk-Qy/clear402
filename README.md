@@ -16,6 +16,8 @@ HTTP 402 and x402 let services request payment inline, which is useful when auto
 
 Clear402 treats an x402 payment as an evidence workflow. The payment header is only one input; the guard also binds the paid resource, provider identity, quote terms, wallet policy, signing intent, service receipt, and exported evidence.
 
+The guard layers and attack-lab scenarios are mapped from four arXiv papers on x402 and agentic payment risks. See [Paper Mapping](./docs/paper_mapping.md) for the paper links, pain points, defenses, and 16 attack scenarios.
+
 ## What We Reuse From Cobo Agentic Wallet
 
 - Official CAW CLI / SDK boundary through `@cobo/agentic-wallet`.

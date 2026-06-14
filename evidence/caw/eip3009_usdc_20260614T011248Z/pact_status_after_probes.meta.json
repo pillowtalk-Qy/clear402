@@ -1,0 +1,20 @@
+{
+  "name": "pact_status_after_probes",
+  "cmd": "caw pact status --pact-id 4ae3f7a8-ee69-4174-83b5-1063548f9fe2",
+  "purpose": "pact status after probes",
+  "started_at": "2026-06-14T01:21:26.060Z",
+  "finished_at": "2026-06-14T01:21:28.356Z",
+  "exit_code": 0,
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T011248Z/pact_status_after_probes.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T011248Z/pact_status_after_probes.stderr.txt",
+  "redaction": {
+    "applied": true,
+    "patterns": [
+      "api keys",
+      "authorization header values",
+      "pairing tokens",
+      "private keys",
+      "seed phrases"
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "contract_implementation",
+  "cmd": "cast call 0x036CbD53842c5426634e7929541eC2318f3dCF7e implementation()(address) --rpc-url https://sepolia.base.org",
+  "purpose": "read Base Sepolia USDC proxy implementation address",
+  "started_at": "2026-06-14T01:23:36Z",
+  "finished_at": "2026-06-14T01:23:38Z",
+  "exit_code": 0,
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T011248Z/contract_implementation.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T011248Z/contract_implementation.stderr.txt",
+  "redaction": {
+    "applied": true,
+    "patterns": [
+      "api keys",
+      "authorization header values",
+      "pairing tokens",
+      "private keys",
+      "seed phrases"
+    ]
+  }
+}

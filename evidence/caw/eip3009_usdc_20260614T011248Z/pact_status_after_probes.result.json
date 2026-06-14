@@ -1,0 +1,143 @@
+{
+  "activated_at": "2026-06-14T01:16:12.976058Z",
+  "api_key": "[REDACTED]",
+  "approval_id": "f4df2da7-b071-4e38-9a50-38671e83ed80",
+  "created_at": "2026-06-14T01:13:21.179279Z",
+  "expires_at": "2026-06-14T01:46:12.976058Z",
+  "id": "4ae3f7a8-ee69-4174-83b5-1063548f9fe2",
+  "intent": "Verify Base Sepolia USDC EIP-3009 TransferWithAuthorization typed-data message_sign",
+  "is_default": false,
+  "name": "clear402 eip3009 usdc authorization probe",
+  "operator": {
+    "created_at": "2026-06-12T11:34:17.324291Z",
+    "external_id": "caw_agent_356d721dc93e6183",
+    "id": "e5a9a8ae-b267-41df-84a4-13584a466841",
+    "is_temporary": false,
+    "metadata": {
+      "source": "self_provision"
+    },
+    "name": "Provisioned Agent",
+    "owner_principal_id": "0b995cfb-85b2-4ed1-92fd-7023b7f235c5",
+    "type": "agent",
+    "updated_at": "2026-06-12T11:44:24.0958Z"
+  },
+  "operator_id": "e5a9a8ae-b267-41df-84a4-13584a466841",
+  "original_intent": "Clear402 CAW EIP-3009 USDC typed-data live authorization probe on Base Sepolia only",
+  "owner_id": "0b995cfb-85b2-4ed1-92fd-7023b7f235c5",
+  "progress_tx_count": 0,
+  "progress_usd_spent": "0",
+  "recent_txs": [
+    {
+      "created_at": "2026-06-14T01:21:23.222194Z",
+      "id": "131faf3e-3206-4a90-bd63-5be9d0085467",
+      "operation_type": "message_sign",
+      "request_id": "eip3009_usdc_20260614T011248Z_deny",
+      "status": "Rejected"
+    },
+    {
+      "created_at": "2026-06-14T01:21:06.816115Z",
+      "id": "c72dcaa3-a1fe-4a2e-b147-e21d070369a8",
+      "operation_type": "message_sign",
+      "request_id": "eip3009_usdc_20260614T011248Z_allow",
+      "status": "Success"
+    }
+  ],
+  "spec": {
+    "completion_conditions": [
+      {
+        "threshold": "1800",
+        "type": "time_elapsed"
+      }
+    ],
+    "execution_plan": "# Summary\nVerify one CAW EIP-712 EIP-3009 USDC transfer authorization signature on Base Sepolia.\n\n# Operations\n- Sign exactly one TransferWithAuthorization typed-data payload for Base Sepolia USDC 0x036CbD53842c5426634e7929541eC2318f3dCF7e.\n- The authorization is from 0xab42bb255c4660b0879f007ab3ed9ae049d85859 to Clear402 recipient 0xA882b939c4Ca15c904760b8c240124Cb68cc2A88 for 1 USDC base unit and expires at Unix 1781400468.\n- Attempt one deny-shaped typed-data payload with a mismatched recipient for CAW policy-denial evidence.\n\n# Risk Controls\n- message_sign only; no transfers or contract calls in this pact.\n- CAW chain is restricted to TBASE_SETH while EIP-712 domain.chainId is fixed at 84532.\n- Source address, primary type, USDC verifying contract, sender, recipient, value, expiry, and nonce are exact-match allowlist conditions.\n- Request-count limit is two signing requests per 24h window for this probe.",
+    "policies": [
+      {
+        "is_active": true,
+        "name": "clear402-eip3009-usdc-transfer-auth",
+        "priority": 0,
+        "rules": {
+          "deny_if": {
+            "usage_limits": {
+              "rolling_24h": {
+                "request_count_gt": 2
+              }
+            }
+          },
+          "effect": "allow",
+          "when": {
+            "chain_in": [
+              "TBASE_SETH"
+            ],
+            "domain_match": [
+              {
+                "op": "eq",
+                "param_name": "name",
+                "value": "USDC"
+              },
+              {
+                "op": "eq",
+                "param_name": "version",
+                "value": "2"
+              },
+              {
+                "op": "eq",
+                "param_name": "chainId",
+                "value": 84532
+              },
+              {
+                "op": "eq",
+                "param_name": "verifyingContract",
+                "value": "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+              }
+            ],
+            "message_match": [
+              {
+                "op": "eq",
+                "param_name": "from",
+                "value": "0xab42bb255c4660b0879f007ab3ed9ae049d85859"
+              },
+              {
+                "op": "eq",
+                "param_name": "to",
+                "value": "0xA882b939c4Ca15c904760b8c240124Cb68cc2A88"
+              },
+              {
+                "op": "eq",
+                "param_name": "value",
+                "value": "1"
+              },
+              {
+                "op": "eq",
+                "param_name": "validAfter",
+                "value": 1781399568
+              },
+              {
+                "op": "eq",
+                "param_name": "validBefore",
+                "value": 1781400468
+              },
+              {
+                "op": "eq",
+                "param_name": "nonce",
+                "value": "0xb8defc4b25de25dde915a9053e0c9f3e72499596ea3a4da98209296f52d75dd5"
+              }
+            ],
+            "primary_type_in": [
+              "TransferWithAuthorization"
+            ],
+            "source_address_in": [
+              {
+                "address": "0xab42bb255c4660b0879f007ab3ed9ae049d85859",
+                "chain_id": "TBASE_SETH"
+              }
+            ]
+          }
+        },
+        "type": "message_sign"
+      }
+    ]
+  },
+  "status": "active",
+  "updated_at": "2026-06-14T01:16:13.003034Z",
+  "wallet_id": "5751d798-605b-4723-acf4-e3a03f524511"
+}

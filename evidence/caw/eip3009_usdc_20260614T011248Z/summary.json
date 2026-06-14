@@ -1,0 +1,22 @@
+{
+  "run_id": "eip3009_usdc_20260614T011248Z",
+  "generated_at": "2026-06-14T01:21:30.817Z",
+  "pact_id": "4ae3f7a8-ee69-4174-83b5-1063548f9fe2",
+  "allow_request_id": "eip3009_usdc_20260614T011248Z_allow",
+  "deny_request_id": "eip3009_usdc_20260614T011248Z_deny",
+  "allow_sign_exit_code": 0,
+  "allow_tx_get_attempts": 3,
+  "allow_tx_get_status": "Success",
+  "allow_tx_get_sub_status": "completed",
+  "allow_signature_present": true,
+  "allow_signature": "0x8f7afd61b0f3bbca135920bc37162572e1b274db6b4b31f27fcda58f42ba3324188d1cd6a840a40c2d77bc84e6578a8018283f6c968d2abd782c475ae9e585ef1b",
+  "deny_sign_exit_code": 1,
+  "deny_error_code": "MESSAGE_SIGN_DENIED",
+  "pact_status_after_probes": "active",
+  "pact_events_after_probes": [
+    "submitted",
+    "activated"
+  ],
+  "no_chain_submission": true,
+  "claim_upgrade": true
+}

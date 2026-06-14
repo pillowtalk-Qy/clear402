@@ -1,0 +1,20 @@
+{
+  "name": "deny_probe",
+  "cmd": "caw tx sign-message --pact-id 4ae3f7a8-ee69-4174-83b5-1063548f9fe2 --chain-id TBASE_SETH --src-address 0xab42bb255c4660b0879f007ab3ed9ae049d85859 --destination-type eip712 --eip712-typed-data {\"types\":{\"EIP712Domain\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"TransferWithAuthorization\":[{\"name\":\"from\",\"type\":\"address\"},{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"validAfter\",\"type\":\"uint256\"},{\"name\":\"validBefore\",\"type\":\"uint256\"},{\"name\":\"nonce\",\"type\":\"bytes32\"}]},\"primaryType\":\"TransferWithAuthorization\",\"domain\":{\"name\":\"USDC\",\"version\":\"2\",\"chainId\":84532,\"verifyingContract\":\"0x036CbD53842c5426634e7929541eC2318f3dCF7e\"},\"message\":{\"from\":\"0xab42bb255c4660b0879f007ab3ed9ae049d85859\",\"to\":\"0x000000000000000000000000000000000000dEaD\",\"value\":\"1\",\"validAfter\":1781399568,\"validBefore\":1781400468,\"nonce\":\"0xb8defc4b25de25dde915a9053e0c9f3e72499596ea3a4da98209296f52d75dd5\"}} --request-id eip3009_usdc_20260614T011248Z_deny --description \"Clear402 deny-shaped TransferWithAuthorization typed-data signing probe\" --context \"{\\\"purpose\\\":\\\"clear402_eip3009_usdc_typed_data_probe\\\",\\\"runId\\\":\\\"eip3009_usdc_20260614T011248Z\\\",\\\"pactId\\\":\\\"4ae3f7a8-ee69-4174-83b5-1063548f9fe2\\\",\\\"chainId\\\":\\\"TBASE_SETH\\\",\\\"eip712ChainId\\\":84532,\\\"usdcProxy\\\":\\\"0x036CbD53842c5426634e7929541eC2318f3dCF7e\\\",\\\"from\\\":\\\"0xab42bb255c4660b0879f007ab3ed9ae049d85859\\\",\\\"recipient\\\":\\\"0xA882b939c4Ca15c904760b8c240124Cb68cc2A88\\\",\\\"requestId\\\":\\\"eip3009_usdc_20260614T011248Z_deny\\\",\\\"shape\\\":\\\"deny\\\",\\\"note\\\":\\\"recipient mismatch for CAW policy denial\\\"}\"",
+  "purpose": "deny probe",
+  "started_at": "2026-06-14T01:21:21.791Z",
+  "finished_at": "2026-06-14T01:21:26.058Z",
+  "exit_code": 1,
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T011248Z/deny_probe.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T011248Z/deny_probe.stderr.txt",
+  "redaction": {
+    "applied": true,
+    "patterns": [
+      "api keys",
+      "authorization header values",
+      "pairing tokens",
+      "private keys",
+      "seed phrases"
+    ]
+  }
+}

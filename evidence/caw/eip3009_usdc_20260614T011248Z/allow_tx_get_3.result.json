@@ -1,0 +1,87 @@
+{
+  "amount": "0",
+  "chain_id": "TBASE_SETH",
+  "created_at": "2026-06-14T01:21:06.816115Z",
+  "data": {
+    "description": "Clear402 allow-shaped TransferWithAuthorization typed-data signing probe",
+    "destination_type": "evm_eip_712",
+    "eip712_typed_data": {
+      "domain": {
+        "chainId": 84532,
+        "name": "USDC",
+        "verifyingContract": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+        "version": "2"
+      },
+      "message": {
+        "from": "0xab42bb255c4660b0879f007ab3ed9ae049d85859",
+        "nonce": "0xb8defc4b25de25dde915a9053e0c9f3e72499596ea3a4da98209296f52d75dd5",
+        "to": "0xA882b939c4Ca15c904760b8c240124Cb68cc2A88",
+        "validAfter": 1781399568,
+        "validBefore": 1781400468,
+        "value": "1"
+      },
+      "primaryType": "TransferWithAuthorization",
+      "types": {
+        "EIP712Domain": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "version",
+            "type": "string"
+          },
+          {
+            "name": "chainId",
+            "type": "uint256"
+          },
+          {
+            "name": "verifyingContract",
+            "type": "address"
+          }
+        ],
+        "TransferWithAuthorization": [
+          {
+            "name": "from",
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "type": "address"
+          },
+          {
+            "name": "value",
+            "type": "uint256"
+          },
+          {
+            "name": "validAfter",
+            "type": "uint256"
+          },
+          {
+            "name": "validBefore",
+            "type": "uint256"
+          },
+          {
+            "name": "nonce",
+            "type": "bytes32"
+          }
+        ]
+      }
+    },
+    "signature": "0x8f7afd61b0f3bbca135920bc37162572e1b274db6b4b31f27fcda58f42ba3324188d1cd6a840a40c2d77bc84e6578a8018283f6c968d2abd782c475ae9e585ef1b"
+  },
+  "description": "Clear402 allow-shaped TransferWithAuthorization typed-data signing probe",
+  "dst_address": "",
+  "id": "c72dcaa3-a1fe-4a2e-b147-e21d070369a8",
+  "pact_id": "4ae3f7a8-ee69-4174-83b5-1063548f9fe2",
+  "request_id": "eip3009_usdc_20260614T011248Z_allow",
+  "request_type": "message_sign",
+  "src_address": "0xab42bb255c4660b0879f007ab3ed9ae049d85859",
+  "status": "Success",
+  "sub_status": "completed",
+  "token_id": "",
+  "transaction_hash": "",
+  "type": "message_sign",
+  "updated_at": "2026-06-14T01:21:19.14088Z",
+  "wallet_id": "5751d798-605b-4723-acf4-e3a03f524511"
+}

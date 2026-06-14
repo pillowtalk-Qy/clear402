@@ -1,0 +1,20 @@
+{
+  "name": "allow_tx_get_3",
+  "cmd": "caw tx get --request-id eip3009_usdc_20260614T011248Z_allow",
+  "purpose": "allow tx get 3",
+  "started_at": "2026-06-14T01:21:19.407Z",
+  "finished_at": "2026-06-14T01:21:21.789Z",
+  "exit_code": 0,
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T011248Z/allow_tx_get_3.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T011248Z/allow_tx_get_3.stderr.txt",
+  "redaction": {
+    "applied": true,
+    "patterns": [
+      "api keys",
+      "authorization header values",
+      "pairing tokens",
+      "private keys",
+      "seed phrases"
+    ]
+  }
+}

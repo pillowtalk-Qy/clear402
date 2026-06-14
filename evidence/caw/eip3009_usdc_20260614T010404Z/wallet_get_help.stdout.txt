@@ -1,0 +1,13 @@
+Get details for the active wallet on the Cobo platform.
+
+Usage:
+  caw wallet get [flags]
+
+Flags:
+  -h, --help   help for get
+
+Global Flags:
+      --api-key string   API key for authentication
+      --api-url string   API base URL to target a specific environment (env: AGENT_WALLET_API_URL)
+      --timeout float    HTTP timeout in seconds (default 30)
+  -v, --verbose          Enable debug logging

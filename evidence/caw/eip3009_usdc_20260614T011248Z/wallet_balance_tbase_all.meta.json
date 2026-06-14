@@ -1,0 +1,20 @@
+{
+  "name": "wallet_balance_tbase_all",
+  "cmd": "caw wallet balance --chain-id TBASE_SETH",
+  "purpose": "confirm current CAW wallet Base Sepolia balances",
+  "started_at": "2026-06-14T01:23:21Z",
+  "finished_at": "2026-06-14T01:23:24Z",
+  "exit_code": 0,
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T011248Z/wallet_balance_tbase_all.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T011248Z/wallet_balance_tbase_all.stderr.txt",
+  "redaction": {
+    "applied": true,
+    "patterns": [
+      "api keys",
+      "authorization header values",
+      "pairing tokens",
+      "private keys",
+      "seed phrases"
+    ]
+  }
+}

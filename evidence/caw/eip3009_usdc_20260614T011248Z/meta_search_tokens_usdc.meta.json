@@ -1,0 +1,20 @@
+{
+  "name": "meta_search_tokens_usdc",
+  "cmd": "caw meta search-tokens --symbol USDC",
+  "purpose": "record CAW token metadata for TBASE_USDC / Base Sepolia USDC",
+  "started_at": "2026-06-14T01:23:26Z",
+  "finished_at": "2026-06-14T01:23:28Z",
+  "exit_code": 0,
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T011248Z/meta_search_tokens_usdc.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T011248Z/meta_search_tokens_usdc.stderr.txt",
+  "redaction": {
+    "applied": true,
+    "patterns": [
+      "api keys",
+      "authorization header values",
+      "pairing tokens",
+      "private keys",
+      "seed phrases"
+    ]
+  }
+}

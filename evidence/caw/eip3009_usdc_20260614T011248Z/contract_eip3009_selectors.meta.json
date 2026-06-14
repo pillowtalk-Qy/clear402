@@ -1,0 +1,20 @@
+{
+  "name": "contract_eip3009_selectors",
+  "cmd": "cast sig transferWithAuthorization/receiveWithAuthorization/authorizationState/DOMAIN_SEPARATOR",
+  "purpose": "record EIP-3009 and EIP-712 function selectors used for the probe",
+  "started_at": "2026-06-14T01:23:41Z",
+  "finished_at": "2026-06-14T01:23:41Z",
+  "exit_code": 0,
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T011248Z/contract_eip3009_selectors.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T011248Z/contract_eip3009_selectors.stderr.txt",
+  "redaction": {
+    "applied": true,
+    "patterns": [
+      "api keys",
+      "authorization header values",
+      "pairing tokens",
+      "private keys",
+      "seed phrases"
+    ]
+  }
+}

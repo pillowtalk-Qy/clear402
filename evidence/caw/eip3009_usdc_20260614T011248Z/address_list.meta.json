@@ -1,0 +1,20 @@
+{
+  "name": "address_list",
+  "cmd": "caw address list",
+  "purpose": "record CAW wallet EVM address compatibility with TBASE_SETH",
+  "started_at": "2026-06-14T01:23:24Z",
+  "finished_at": "2026-06-14T01:23:26Z",
+  "exit_code": 0,
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T011248Z/address_list.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T011248Z/address_list.stderr.txt",
+  "redaction": {
+    "applied": true,
+    "patterns": [
+      "api keys",
+      "authorization header values",
+      "pairing tokens",
+      "private keys",
+      "seed phrases"
+    ]
+  }
+}

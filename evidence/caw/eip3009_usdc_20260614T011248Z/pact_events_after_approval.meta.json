@@ -1,0 +1,20 @@
+{
+  "name": "pact_events_after_approval",
+  "cmd": "caw pact events --pact-id 4ae3f7a8-ee69-4174-83b5-1063548f9fe2",
+  "purpose": "query CAW pact lifecycle events after user-approved EIP-3009 pact",
+  "started_at": "2026-06-14T01:17:52Z",
+  "finished_at": "2026-06-14T01:17:55Z",
+  "exit_code": 0,
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T011248Z/pact_events_after_approval.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T011248Z/pact_events_after_approval.stderr.txt",
+  "redaction": {
+    "applied": true,
+    "patterns": [
+      "api keys",
+      "authorization header values",
+      "pairing tokens",
+      "private keys",
+      "seed phrases"
+    ]
+  }
+}

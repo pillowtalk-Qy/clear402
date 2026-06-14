@@ -22,7 +22,6 @@ This folder collects the files and final links needed for the hackathon portal.
 | Proposal | `docs/proposal.md` | Ready |
 | Demo script | `docs/demo_script.md` and `submission/demo-video/recording-script.md` | Ready |
 | Presentation deck | Google Slides: https://docs.google.com/presentation/d/1oCXVoHJQFKGSCqc57O6KIy-4vmzy6qyrXBj_BPEyrcY/edit | Ready |
-| Presentation deck backup | `submission/ppt/clear402-hackathon-deck.pptx` | Repo backup |
 | Demo video preview | `submission/demo-video/clear402-demo-preview.mp4` | Short repo preview ready; use final portal upload/link for the 3-5 minute demo |
 | Team info | `docs/team.md` | Public profile ready; private wallet/contact fields belong in the portal if required |
 | Chain/testnet evidence | `docs/live_caw_testnet_smoke_report.md`, `docs/live_caw_policy_denial_report.md` | Ready |
@@ -56,7 +55,7 @@ Use the Google Slides deck as the authoritative presentation deck:
 https://docs.google.com/presentation/d/1oCXVoHJQFKGSCqc57O6KIy-4vmzy6qyrXBj_BPEyrcY/edit
 ```
 
-The checked-in PPTX remains a repo backup. The checked-in MP4 is a short repo preview; the portal should receive the final 3-5 minute demo video link or uploaded MP4.
+The checked-in MP4 is a short repo preview; the portal should receive the final 3-5 minute demo video link or uploaded MP4.
 
 ## Final Claims
 

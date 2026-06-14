@@ -28,7 +28,7 @@ Open:
 - GitHub README or local README preview
 - `docs/live_caw_testnet_smoke_report.md`
 - `docs/live_caw_policy_denial_report.md`
-- `submission/ppt/clear402-hackathon-deck.pptx`
+- Google Slides deck: `https://docs.google.com/presentation/d/1oCXVoHJQFKGSCqc57O6KIy-4vmzy6qyrXBj_BPEyrcY/edit?slide=id.g3ebe18728ee_1_6#slide=id.g3ebe18728ee_1_6`
 
 ## Voiceover
 

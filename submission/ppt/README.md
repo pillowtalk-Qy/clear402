@@ -3,7 +3,7 @@
 Current deck:
 
 ```text
-https://docs.google.com/presentation/d/1oCXVoHJQFKGSCqc57O6KIy-4vmzy6qyrXBj_BPEyrcY/edit
+https://docs.google.com/presentation/d/1oCXVoHJQFKGSCqc57O6KIy-4vmzy6qyrXBj_BPEyrcY/edit?slide=id.g3ebe18728ee_1_6#slide=id.g3ebe18728ee_1_6
 ```
 
 Status: Google Slides deck is ready for hackathon submission and presenter walkthrough.

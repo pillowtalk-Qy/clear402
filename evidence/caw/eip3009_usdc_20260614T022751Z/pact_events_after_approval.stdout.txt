@@ -1,0 +1,24 @@
+{
+  "message": "",
+  "meta": {
+    "before": "cAgAGVC14o1B2Razy3vZmTIWuiyrBr-5ANA",
+    "has_more": false
+  },
+  "result": {
+    "events": [
+      {
+        "created_at": "2026-06-14T02:28:54.494326Z",
+        "event_type": "submitted",
+        "id": "45acf2de-f666-4c85-ae8b-2ac1afee4034",
+        "pact_id": "219f8499-bafa-40aa-b6e8-41b41824fbc4"
+      },
+      {
+        "created_at": "2026-06-14T02:31:39.332405Z",
+        "event_type": "activated",
+        "id": "a9fe393d-799b-43b7-a906-88ab1088e898",
+        "pact_id": "219f8499-bafa-40aa-b6e8-41b41824fbc4"
+      }
+    ]
+  },
+  "success": true
+}

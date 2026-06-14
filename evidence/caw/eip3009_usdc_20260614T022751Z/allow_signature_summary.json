@@ -1,0 +1,9 @@
+{
+  "attempt": 1,
+  "status": "Success",
+  "sub_status": "completed",
+  "signature_present": true,
+  "signature": "0xafcf76af9fc10f79243229da15063cd5332bae3ae952ae42516a6d6e5e62388571865b3f2022fb6058fcfb8ab783542a048505317f4e951da92ec314a5b86a2b1b",
+  "tx_id": "a1ae4830-9150-4834-a832-f49f720f7524",
+  "request_id": "eip3009_usdc_20260614T022751Z_allow"
+}

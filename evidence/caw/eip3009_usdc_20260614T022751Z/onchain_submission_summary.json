@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-06-14T02:56:16.073Z",
+  "tx_hash": "0x91f1e0284380b6d50201c95b540e46a68c43cfe0f8e3a5a0c10a3c43fb222b6a",
+  "explorer_link": "https://sepolia.basescan.org/tx/0x91f1e0284380b6d50201c95b540e46a68c43cfe0f8e3a5a0c10a3c43fb222b6a",
+  "receipt_status": "0x1",
+  "receipt_success": true,
+  "block_number": "0x28d5c97",
+  "from_balance_before": "20000000",
+  "from_balance_after": "19999999",
+  "from_balance_delta": "-1",
+  "to_balance_before": "20000000",
+  "to_balance_after": "20000001",
+  "to_balance_delta": "1",
+  "authorization_state_before": "false",
+  "authorization_state_after": "true",
+  "claim_upgrade_allowed": true
+}

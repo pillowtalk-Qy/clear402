@@ -1,0 +1,27 @@
+[
+  {
+    "name": "clear402-eip3009-usdc-contract-call-submit",
+    "type": "contract_call",
+    "rules": {
+      "effect": "allow",
+      "when": {
+        "chain_in": [
+          "TBASE_SETH"
+        ],
+        "target_in": [
+          {
+            "chain_id": "TBASE_SETH",
+            "contract_addr": "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+          }
+        ]
+      },
+      "deny_if": {
+        "usage_limits": {
+          "rolling_24h": {
+            "tx_count_gt": 1
+          }
+        }
+      }
+    }
+  }
+]

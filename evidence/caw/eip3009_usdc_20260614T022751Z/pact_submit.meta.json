@@ -1,0 +1,7 @@
+{
+  "name": "pact_submit",
+  "purpose": "submit fresh exact-match CAW message_sign pact for EIP-3009 authorization",
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T022751Z/pact_submit.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T022751Z/pact_submit.stderr.txt",
+  "generated_at": "2026-06-14T02:28:57.816Z"
+}

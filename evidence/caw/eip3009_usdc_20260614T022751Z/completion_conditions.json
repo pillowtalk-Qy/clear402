@@ -1,0 +1,6 @@
+[
+  {
+    "type": "time_elapsed",
+    "threshold": "1800"
+  }
+]

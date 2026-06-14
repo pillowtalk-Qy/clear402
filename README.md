@@ -8,7 +8,7 @@ Clear402 is a CAW-backed x402 guard and evidence workflow for safer agent-native
 
 ## Project Background
 
-Clear402 is a hackathon demo, not a mainnet production product. It demonstrates how an agent-native HTTP 402 payment flow can be wrapped with provider validation, resource binding, metadata redaction, clear signing, receipt verification, attack-lab checks, and evidence export. Live CAW evidence is limited to the recorded Sepolia tiny transfer and recorded destination-allowlist denial.
+Clear402 is a hackathon demo, not a mainnet production product. It demonstrates how an agent-native HTTP 402 payment flow can be wrapped with provider validation, resource binding, metadata redaction, clear signing, receipt verification, attack-lab checks, and evidence export. Live CAW evidence is limited to the recorded Sepolia tiny transfer, recorded destination-allowlist denial, narrow message-sign verifications, and one EIP-3009 USDC transfer executed on Base Sepolia through CAW-approved contract_call.
 
 ## Why HTTP 402 / x402 Matters
 
@@ -24,8 +24,9 @@ Clear402 treats an x402 payment as an evidence workflow. The payment header is o
 - Recorded Sepolia destination-allowlist denial evidence for one rejected transfer.
 - Official x402 HTTP 402 / dry-run parsing evidence through the official x402 Express example and `caw fetch --dry-run`.
 - Official CAW gateway startup/listening/forwarding evidence through `caw payment gateway`.
+- One EIP-3009 USDC transfer executed on Base Sepolia through CAW-approved contract_call.
 
-Official CAW execute, gateway forwarding, and `message_sign` checks currently prove the permission boundary, not additional successful payments: execute and gateway forwarding reached CAW but stopped on `INSUFFICIENT_PERMISSION` / `can_transfer`, and `message_sign` probes reached CAW but stopped on `INSUFFICIENT_PERMISSION` / `can_message_sign` while the pact waits for CAW App owner approval. Having a testnet asset balance does not make a CAW operation executable without the right approved pact.
+Official CAW execute and gateway forwarding currently prove the permission boundary, not additional successful payments: execute and gateway forwarding reached CAW but stopped on `INSUFFICIENT_PERMISSION` / `can_transfer`. Having a testnet asset balance does not make a CAW operation executable without the right approved pact.
 
 ## What Clear402 Adds
 
@@ -131,7 +132,10 @@ All chain evidence below is Sepolia/testnet evidence.
 | Official x402 HTTP 402 | Official x402 Express example from `x402-foundation/x402` commit `b32a702` returned a real HTTP 402 challenge |
 | Official x402 dry-run | `caw fetch --dry-run` parsed the real 402 challenge without calling the payment API |
 | Official x402 execute | Reached CAW but stopped on `INSUFFICIENT_PERMISSION` / `can_transfer`; no paid retry, tx hash, or successful payment claim |
-| Official `message_sign` | Pact submitted and pending CAW App owner approval; allow-shaped and deny-shaped probes both stopped on `INSUFFICIENT_PERMISSION` / `can_message_sign`; no live allow/deny signing evidence yet |
+| Official `message_sign` | Narrow typed-data pacts produced live allow-shaped signatures and policy-denied mismatches; do not generalize beyond the recorded exact typed-data shapes |
+| Base Sepolia EIP-3009 tx | `0x91f1e0284380b6d50201c95b540e46a68c43cfe0f8e3a5a0c10a3c43fb222b6a` |
+| Base Sepolia EIP-3009 explorer | `https://sepolia.basescan.org/tx/0x91f1e0284380b6d50201c95b540e46a68c43cfe0f8e3a5a0c10a3c43fb222b6a` |
+| Base Sepolia EIP-3009 result | EIP-3009 USDC transfer executed on Base Sepolia through CAW-approved contract_call; source balance `20000000 -> 19999999`, recipient balance `20000000 -> 20000001`, authorizationState `false -> true` |
 | Official gateway mode | `caw payment gateway` forward mode started, listened locally on `127.0.0.1:8404`, and forwarded the official x402 request; no payment execution or production settlement claim |
 
 Detailed reports:
@@ -156,8 +160,8 @@ Clear402 does not currently have a verified live ERC-8004 provider identity. A 8
 - Do not commit private keys, API keys, pairing tokens, seed phrases, wallet secrets, or `.env.caw.local` files.
 - Use Sepolia/testnet evidence only.
 - Ordinary dashboard payment is fallback/demo state.
-- Live CAW evidence is limited to the recorded Sepolia tiny transfer and recorded destination-allowlist denial.
-- Official CAW CLI evidence also covers x402 dry-run parsing and local gateway startup/listening/forwarding; it does not add a successful execute claim.
+- Live CAW evidence is limited to the recorded Sepolia tiny transfer, recorded destination-allowlist denial, narrow message-sign verifications, and one exact Base Sepolia EIP-3009 USDC tx.
+- Official CAW CLI evidence also covers x402 dry-run parsing and local gateway startup/listening/forwarding; it does not add a successful x402 execute claim.
 - Fresh raw CAW CLI stdout/stderr/meta/result evidence is indexed in `evidence/caw/live_verify_20260613T2214Z_summary.json`.
 - Asset availability alone is not execution readiness. CAW operations require the right approved pact and operation permission.
 - Attack lab inputs are mock fixtures, not external exploit traffic, but they run through the real guard pipeline.
@@ -170,7 +174,7 @@ See [Security Boundaries](./docs/security_boundaries.md) and [Limitations](./doc
 - The recorded CAW allow path covers one tiny Sepolia transfer only.
 - The recorded CAW denial covers one destination-allowlist rejection only.
 - Official x402 dry-run evidence proves challenge parsing only; official execute currently stops on CAW pact permission.
-- Official `message_sign` evidence is pact-submitted/pending-approval plus `can_message_sign` blocking only, not approved live signing or live policy-denial evidence.
+- Official `message_sign` evidence covers narrow approved live signing and policy-denial checks only; do not generalize to arbitrary typed data, assets, recipients, pacts, or mainnet.
 - Official gateway evidence proves local startup/listening/forwarding only, not payment execution or production gateway settlement.
 - Provider registry, `demo_erc8004` trust, and capability seed data are demo records. `live_erc8004` trust requires a verified registered agent identity and matching endpoint/payTo evidence.
 - Browser/E2E artifacts are local run evidence and are not committed.

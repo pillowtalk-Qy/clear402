@@ -1,0 +1,7 @@
+{
+  "name": "eth_call_transfer_with_authorization_compact",
+  "purpose": "construct and simulate transferWithAuthorization calldata before broadcast",
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T022751Z/eth_call_transfer_with_authorization_compact.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T022751Z/eth_call_transfer_with_authorization_compact.stderr.txt",
+  "generated_at": "2026-06-14T02:37:40.862Z"
+}

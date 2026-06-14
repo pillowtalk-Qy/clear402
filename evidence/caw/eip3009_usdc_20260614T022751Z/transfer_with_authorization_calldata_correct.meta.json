@@ -1,0 +1,6 @@
+{
+  "name": "transfer_with_authorization_calldata_correct",
+  "purpose": "construct correct 7-arg USDC transferWithAuthorization calldata",
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T022751Z/transfer_with_authorization_calldata_correct.txt",
+  "generated_at": "2026-06-14T02:41:01.661Z"
+}

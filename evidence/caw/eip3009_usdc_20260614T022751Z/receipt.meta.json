@@ -1,0 +1,7 @@
+{
+  "name": "receipt",
+  "purpose": "record final chain result for Base Sepolia USDC transferWithAuthorization",
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T022751Z/receipt.json",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T022751Z/receipt.stderr.txt",
+  "generated_at": "2026-06-14T02:56:16.072Z"
+}

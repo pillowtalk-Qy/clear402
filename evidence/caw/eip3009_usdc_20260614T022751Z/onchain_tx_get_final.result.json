@@ -1,0 +1,41 @@
+{
+  "amount": "0",
+  "chain_id": "TBASE_SETH",
+  "created_at": "2026-06-14T02:54:56.135645Z",
+  "data": {
+    "calldata": "0xe3ee160e000000000000000000000000ab42bb255c4660b0879f007ab3ed9ae049d85859000000000000000000000000a882b939c4ca15c904760b8c240124cb68cc2a880000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000006a2e116b000000000000000000000000000000000000000000000000000000006a2e18afa0ea67f1141a87205c6fb371097fd97d86604fe3b2e5a1b8d418215113bdfe90000000000000000000000000000000000000000000000000000000000000001bafcf76af9fc10f79243229da15063cd5332bae3ae952ae42516a6d6e5e62388571865b3f2022fb6058fcfb8ab783542a048505317f4e951da92ec314a5b86a2b",
+    "contract_addr": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    "description": "Clear402 approved EIP-3009 USDC transferWithAuthorization on Base Sepolia",
+    "fee": {
+      "estimated_fee_used": "0.000001009884",
+      "fee_type": "EVM_EIP_1559",
+      "gas_limit": "84157",
+      "max_fee_per_gas": "12000000",
+      "max_priority_fee_per_gas": "2000000",
+      "token_id": "TBASE_SETH"
+    },
+    "value": "0"
+  },
+  "description": "Clear402 approved EIP-3009 USDC transferWithAuthorization on Base Sepolia",
+  "dst_address": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+  "fee": {
+    "estimated_fee_used": "0.000001009884",
+    "fee_type": "EVM_EIP_1559",
+    "gas_limit": "84157",
+    "max_fee_per_gas": "12000000",
+    "max_priority_fee_per_gas": "2000000",
+    "token_id": "TBASE_SETH"
+  },
+  "id": "1b8825ec-202a-4b4f-8590-c4337cde1a62",
+  "pact_id": "09ae9ce3-68ee-43f7-b0bb-69cec3a01fce",
+  "request_id": "eip3009_usdc_20260614T022751Z_onchain_submit_approved",
+  "request_type": "contract_call",
+  "src_address": "0xab42bb255c4660b0879f007ab3ed9ae049d85859",
+  "status": "Success",
+  "sub_status": "completed",
+  "token_id": "",
+  "transaction_hash": "0x91f1e0284380b6d50201c95b540e46a68c43cfe0f8e3a5a0c10a3c43fb222b6a",
+  "type": "contract_call",
+  "updated_at": "2026-06-14T02:55:15.590624Z",
+  "wallet_id": "5751d798-605b-4723-acf4-e3a03f524511"
+}

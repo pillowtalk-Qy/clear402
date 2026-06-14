@@ -1,0 +1,173 @@
+{
+  "run_id": "eip3009_usdc_20260614T022751Z",
+  "generated_at": "2026-06-14T02:27:51.432Z",
+  "scope": "Fresh EIP-3009 TransferWithAuthorization typed-data signing and onchain submission; Base Sepolia only; no mainnet; no dashboard/runtime main logic changes.",
+  "caw_chain_id": "TBASE_SETH",
+  "eip712_chain_id": 84532,
+  "caw_wallet_address": "0xab42bb255c4660b0879f007ab3ed9ae049d85859",
+  "recipient": "0xA882b939c4Ca15c904760b8c240124Cb68cc2A88",
+  "usdc_contract": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+  "amount_base_units": "1",
+  "valid_after": 1781404011,
+  "valid_before": 1781405871,
+  "nonce": "0xa0ea67f1141a87205c6fb371097fd97d86604fe3b2e5a1b8d418215113bdfe90",
+  "policies": [
+    {
+      "name": "clear402-eip3009-usdc-transfer-auth-fresh",
+      "type": "message_sign",
+      "rules": {
+        "effect": "allow",
+        "when": {
+          "chain_in": [
+            "TBASE_SETH"
+          ],
+          "primary_type_in": [
+            "TransferWithAuthorization"
+          ],
+          "source_address_in": [
+            {
+              "chain_id": "TBASE_SETH",
+              "address": "0xab42bb255c4660b0879f007ab3ed9ae049d85859"
+            }
+          ],
+          "domain_match": [
+            {
+              "param_name": "name",
+              "op": "eq",
+              "value": "USDC"
+            },
+            {
+              "param_name": "version",
+              "op": "eq",
+              "value": "2"
+            },
+            {
+              "param_name": "chainId",
+              "op": "eq",
+              "value": 84532
+            },
+            {
+              "param_name": "verifyingContract",
+              "op": "eq",
+              "value": "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+            }
+          ],
+          "message_match": [
+            {
+              "param_name": "from",
+              "op": "eq",
+              "value": "0xab42bb255c4660b0879f007ab3ed9ae049d85859"
+            },
+            {
+              "param_name": "to",
+              "op": "eq",
+              "value": "0xA882b939c4Ca15c904760b8c240124Cb68cc2A88"
+            },
+            {
+              "param_name": "value",
+              "op": "eq",
+              "value": "1"
+            },
+            {
+              "param_name": "validAfter",
+              "op": "eq",
+              "value": 1781404011
+            },
+            {
+              "param_name": "validBefore",
+              "op": "eq",
+              "value": 1781405871
+            },
+            {
+              "param_name": "nonce",
+              "op": "eq",
+              "value": "0xa0ea67f1141a87205c6fb371097fd97d86604fe3b2e5a1b8d418215113bdfe90"
+            }
+          ]
+        },
+        "deny_if": {
+          "usage_limits": {
+            "rolling_24h": {
+              "request_count_gt": 1
+            }
+          }
+        }
+      }
+    }
+  ],
+  "completion_conditions": [
+    {
+      "type": "time_elapsed",
+      "threshold": "1800"
+    }
+  ],
+  "execution_plan": "# Summary\nExecute one fresh EIP-3009 TransferWithAuthorization for Base Sepolia USDC.\n\n# Operations\n- Sign exactly one TransferWithAuthorization EIP-712 typed-data payload for Base Sepolia USDC 0x036CbD53842c5426634e7929541eC2318f3dCF7e.\n- The authorization is from 0xab42bb255c4660b0879f007ab3ed9ae049d85859 to 0xA882b939c4Ca15c904760b8c240124Cb68cc2A88 for 1 USDC base unit.\n- validAfter is Unix 1781404011; validBefore is Unix 1781405871; nonce is 0xa0ea67f1141a87205c6fb371097fd97d86604fe3b2e5a1b8d418215113bdfe90.\n- After a successful signature, submit transferWithAuthorization on Base Sepolia only.\n\n# Risk Controls\n- message_sign only in this pact; no transfer or contract_call permission is granted by this pact.\n- CAW chain is restricted to TBASE_SETH; EIP-712 domain.chainId is fixed at 84532.\n- Source address, primary type, USDC verifying contract, sender, recipient, value, validity window, and nonce are exact-match allowlist conditions.\n- Request-count limit is one signing request per 24h window for this fresh authorization.",
+  "typed_data_allow": {
+    "types": {
+      "EIP712Domain": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "version",
+          "type": "string"
+        },
+        {
+          "name": "chainId",
+          "type": "uint256"
+        },
+        {
+          "name": "verifyingContract",
+          "type": "address"
+        }
+      ],
+      "TransferWithAuthorization": [
+        {
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "name": "validAfter",
+          "type": "uint256"
+        },
+        {
+          "name": "validBefore",
+          "type": "uint256"
+        },
+        {
+          "name": "nonce",
+          "type": "bytes32"
+        }
+      ]
+    },
+    "primaryType": "TransferWithAuthorization",
+    "domain": {
+      "name": "USDC",
+      "version": "2",
+      "chainId": 84532,
+      "verifyingContract": "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+    },
+    "message": {
+      "from": "0xab42bb255c4660b0879f007ab3ed9ae049d85859",
+      "to": "0xA882b939c4Ca15c904760b8c240124Cb68cc2A88",
+      "value": "1",
+      "validAfter": 1781404011,
+      "validBefore": 1781405871,
+      "nonce": "0xa0ea67f1141a87205c6fb371097fd97d86604fe3b2e5a1b8d418215113bdfe90"
+    }
+  },
+  "request_ids": {
+    "pact_submit": "eip3009_usdc_20260614T022751Z_pact_submit",
+    "allow_sign": "eip3009_usdc_20260614T022751Z_allow",
+    "onchain_submit": "eip3009_usdc_20260614T022751Z_onchain_submit"
+  }
+}

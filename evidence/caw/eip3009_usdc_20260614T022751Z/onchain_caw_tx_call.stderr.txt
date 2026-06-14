@@ -1,0 +1,115 @@
+{
+  "code": "CONTRACT_NOT_WHITELISTED",
+  "details": {},
+  "error": true,
+  "message": "403 Forbidden {\"success\":false,\"error\":{\"code\":\"CONTRACT_NOT_WHITELISTED\",\"reason\":\"no_pact_contract_call_allow_policy_matched\",\"details\":{\"reason\":\"no_pact_contract_call_allow_policy_matched\",\"chain_id\":\"TBASE_SETH\",\"contract_addr\":\"0x036CbD53842c5426634e7929541eC2318f3dCF7e\",\"function_id\":\"0xe3ee160e\"}},\"suggestion\":\"Wallet owner must whitelist this contract before you can retry.\",\"api_request_uuid\":\"6c45e094b6f7d76ce60bf2e3db78f28e\"}",
+  "suggestion": "Wallet owner must whitelist this contract before you can retry.",
+  "suggestions": [
+    {
+      "command": "caw tx call",
+      "description": "Submit a smart contract call from a wallet. For EVM chains (e.g. SETH, BASE_ETH), provide --contract and --calldata. EVM addresses must be exactly 42 characters (0x + 40 hex digits). For Solana (SOL), provide --instructions as a JSON array of SolInstruction objects and optionally --address-lookup-tables. Solana addresses must be 43–44 characters (Base58). The call is evaluated against active policies before submission.",
+      "usage": "caw tx call [flags]",
+      "flags": [
+        {
+          "name": "address-lookup-tables",
+          "type": "string",
+          "description": "Solana address lookup table accounts as a JSON array"
+        },
+        {
+          "name": "api-key",
+          "type": "string",
+          "description": "API key for authentication"
+        },
+        {
+          "name": "api-url",
+          "type": "string",
+          "description": "API base URL to target a specific environment (env: AGENT_WALLET_API_URL)"
+        },
+        {
+          "name": "calldata",
+          "type": "string",
+          "description": "EVM calldata as a hex-encoded string (0x-prefixed)"
+        },
+        {
+          "name": "chain-id",
+          "type": "string",
+          "default": "ETH",
+          "description": "Chain ID, e.g. SETH, BASE_ETH, SOL. Defaults to ETH. Use the List supported chains operation to retrieve all supported chain IDs"
+        },
+        {
+          "name": "context",
+          "type": "string",
+          "description": "Request context as JSON, saved with the response ID for tracking"
+        },
+        {
+          "name": "contract",
+          "type": "string",
+          "description": "EVM contract address to call"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "description": "Optional description for this transaction"
+        },
+        {
+          "name": "fee",
+          "type": "string",
+          "description": "Custom fee parameters as a JSON object (EIP-1559 or SOL). If omitted, the network default is used"
+        },
+        {
+          "name": "help",
+          "type": "bool",
+          "default": "false",
+          "description": "help for call"
+        },
+        {
+          "name": "instructions",
+          "type": "string",
+          "description": "Solana instructions as a JSON array of SolInstruction objects"
+        },
+        {
+          "name": "pact-id",
+          "type": "string",
+          "required": true,
+          "description": "Pact UUID [required]"
+        },
+        {
+          "name": "request-id",
+          "type": "string",
+          "description": "Client-supplied idempotency key. If a call with the same request-id already exists, the existing record is returned"
+        },
+        {
+          "name": "src-address",
+          "type": "string",
+          "description": "Source address to call from. If omitted, the server auto-selects the wallet address on this chain with the highest available native token balance (explicit src-address takes precedence)"
+        },
+        {
+          "name": "timeout",
+          "type": "float64",
+          "default": "30",
+          "description": "HTTP timeout in seconds"
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "default": "0",
+          "description": "Native token amount to send with the call as a decimal string, e.g. 0.01"
+        },
+        {
+          "name": "verbose",
+          "type": "bool",
+          "default": "false",
+          "description": "Enable debug logging"
+        }
+      ],
+      "exit_codes": {
+        "0": "success",
+        "1": "generic error",
+        "4": "authentication or permission failure",
+        "5": "policy denied",
+        "6": "insufficient balance",
+        "7": "network error (retryable)"
+      }
+    }
+  ]
+}

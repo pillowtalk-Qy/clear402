@@ -1,0 +1,8 @@
+{
+  "name": "contract_call_pact_events_after_approval",
+  "cmd": "caw pact events --pact-id 09ae9ce3-68ee-43f7-b0bb-69cec3a01fce",
+  "purpose": "record approved contract_call pact events before onchain submission",
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T022751Z/contract_call_pact_events_after_approval.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T022751Z/contract_call_pact_events_after_approval.stderr.txt",
+  "generated_at": "2026-06-14T02:53:54.792Z"
+}

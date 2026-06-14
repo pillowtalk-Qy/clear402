@@ -1,0 +1,7 @@
+{
+  "destination_type": "unknown",
+  "id": "a1ae4830-9150-4834-a832-f49f720f7524",
+  "idempotent": false,
+  "request_id": "eip3009_usdc_20260614T022751Z_allow",
+  "status": "Processing"
+}

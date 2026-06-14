@@ -1,0 +1,9 @@
+{
+  "name": "onchain_caw_tx_call",
+  "purpose": "attempt CAW tx call broadcast of USDC transferWithAuthorization on Base Sepolia",
+  "pact_id": "219f8499-bafa-40aa-b6e8-41b41824fbc4",
+  "request_id": "eip3009_usdc_20260614T022751Z_onchain_submit",
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T022751Z/onchain_caw_tx_call.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T022751Z/onchain_caw_tx_call.stderr.txt",
+  "generated_at": "2026-06-14T02:42:03.849Z"
+}

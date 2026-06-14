@@ -1,0 +1,8 @@
+{
+  "name": "contract_call_pact_status_after_tx",
+  "cmd": "caw pact status --pact-id 09ae9ce3-68ee-43f7-b0bb-69cec3a01fce",
+  "purpose": "record contract_call pact status after successful transferWithAuthorization tx",
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T022751Z/contract_call_pact_status_after_tx.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T022751Z/contract_call_pact_status_after_tx.stderr.txt",
+  "generated_at": "2026-06-14T03:01:01.614Z"
+}

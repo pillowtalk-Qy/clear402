@@ -1,0 +1,7 @@
+{
+  "name": "transfer_with_authorization_calldata",
+  "purpose": "construct and simulate transferWithAuthorization calldata before broadcast",
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T022751Z/transfer_with_authorization_calldata.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T022751Z/transfer_with_authorization_calldata.stderr.txt",
+  "generated_at": "2026-06-14T02:37:40.861Z"
+}

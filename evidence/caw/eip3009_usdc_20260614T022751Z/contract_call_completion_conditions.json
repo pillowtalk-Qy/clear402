@@ -1,0 +1,10 @@
+[
+  {
+    "type": "tx_count",
+    "threshold": "1"
+  },
+  {
+    "type": "time_elapsed",
+    "threshold": "857"
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "name": "allow_tx_get_1",
+  "cmd": "caw tx get --request-id eip3009_usdc_20260614T022751Z_allow",
+  "purpose": "poll CAW message_sign transaction for fresh EIP-3009 authorization signature",
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T022751Z/allow_tx_get_1.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/eip3009_usdc_20260614T022751Z/allow_tx_get_1.stderr.txt",
+  "generated_at": "2026-06-14T02:35:34.239Z"
+}

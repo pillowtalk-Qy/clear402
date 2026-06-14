@@ -1,0 +1,82 @@
+{
+  "activated_at": "2026-06-14T02:52:46.678748Z",
+  "approval_id": "82fa4a75-e19e-47d0-8d99-c36bcdf53978",
+  "created_at": "2026-06-14T02:43:35.735932Z",
+  "expires_at": "2026-06-14T03:07:03.678748Z",
+  "id": "09ae9ce3-68ee-43f7-b0bb-69cec3a01fce",
+  "intent": "Submit one Base Sepolia USDC transferWithAuthorization contract call",
+  "is_default": false,
+  "name": "clear402 fresh EIP3009 USDC onchain submit",
+  "operator": {
+    "created_at": "2026-06-12T11:34:17.324291Z",
+    "external_id": "caw_agent_356d721dc93e6183",
+    "id": "e5a9a8ae-b267-41df-84a4-13584a466841",
+    "is_temporary": false,
+    "metadata": {
+      "source": "self_provision"
+    },
+    "name": "Provisioned Agent",
+    "owner_principal_id": "0b995cfb-85b2-4ed1-92fd-7023b7f235c5",
+    "type": "agent",
+    "updated_at": "2026-06-12T11:44:24.0958Z"
+  },
+  "operator_id": "e5a9a8ae-b267-41df-84a4-13584a466841",
+  "original_intent": "Use the already approved fresh EIP-3009 signature to call Base Sepolia USDC transferWithAuthorization once",
+  "owner_id": "0b995cfb-85b2-4ed1-92fd-7023b7f235c5",
+  "progress_tx_count": 1,
+  "progress_usd_spent": "0",
+  "recent_txs": [
+    {
+      "created_at": "2026-06-14T02:54:56.135645Z",
+      "id": "1b8825ec-202a-4b4f-8590-c4337cde1a62",
+      "operation_type": "contract_call",
+      "request_id": "eip3009_usdc_20260614T022751Z_onchain_submit_approved",
+      "status": "Success"
+    }
+  ],
+  "spec": {
+    "completion_conditions": [
+      {
+        "threshold": "1",
+        "type": "tx_count"
+      },
+      {
+        "threshold": "857",
+        "type": "time_elapsed"
+      }
+    ],
+    "execution_plan": "# Summary\nSubmit one already-signed EIP-3009 transferWithAuthorization call to Base Sepolia USDC.\n\n# Operations\n- Call Base Sepolia USDC 0x036CbD53842c5426634e7929541eC2318f3dCF7e with selector 0xe3ee160e exactly for the fresh authorization nonce 0xa0ea67f1141a87205c6fb371097fd97d86604fe3b2e5a1b8d418215113bdfe90.\n- The authorization transfers 1 USDC base unit from 0xab42bb255c4660b0879f007ab3ed9ae049d85859 to 0xA882b939c4Ca15c904760b8c240124Cb68cc2A88.\n- The signed authorization expires at Unix 1781405871; do not submit after expiry.\n\n# Risk Controls\n- contract_call only on TBASE_SETH.\n- Target restricted to the Base Sepolia USDC contract 0x036CbD53842c5426634e7929541eC2318f3dCF7e.\n- One successful transaction completes the pact; short time window also completes it.\n- No mainnet, no dashboard/runtime code path, no additional signing.",
+    "policies": [
+      {
+        "is_active": true,
+        "name": "clear402-eip3009-usdc-contract-call-submit",
+        "priority": 0,
+        "rules": {
+          "deny_if": {
+            "usage_limits": {
+              "rolling_24h": {
+                "tx_count_gt": 1
+              }
+            }
+          },
+          "effect": "allow",
+          "when": {
+            "chain_in": [
+              "TBASE_SETH"
+            ],
+            "target_in": [
+              {
+                "chain_id": "TBASE_SETH",
+                "contract_addr": "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+              }
+            ]
+          }
+        },
+        "type": "contract_call"
+      }
+    ]
+  },
+  "status": "completed",
+  "updated_at": "2026-06-14T02:54:56.221755Z",
+  "wallet_id": "5751d798-605b-4723-acf4-e3a03f524511"
+}

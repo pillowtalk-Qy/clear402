@@ -44,7 +44,8 @@ The dashboard is an operator console for reviewing live, fallback, and mock evid
 - Attack lab passes with 16/16 blocked scenarios.
 - Recorded live CAW evidence exists for one Sepolia tiny transfer, one Sepolia destination-allowlist denial, one narrow EIP-712 authorization verification, and one exact Base Sepolia EIP-3009 USDC tx.
 - Ordinary dashboard payment remains fallback/demo state.
-- Presentation deck exists at `submission/ppt/clear402-hackathon-deck.pptx`.
+- Presentation deck is available as Google Slides: https://docs.google.com/presentation/d/1oCXVoHJQFKGSCqc57O6KIy-4vmzy6qyrXBj_BPEyrcY/edit
+- Presentation deck backup exists at `submission/ppt/clear402-hackathon-deck.pptx`.
 - Recording script and short preview media exist under `submission/demo-video/`; the final 3-5 minute demo video is provided through the hackathon portal.
 - Team wallet/contact details are intentionally kept out of the public repo and supplied through the hackathon portal if required.
 

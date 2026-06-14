@@ -105,7 +105,8 @@ pnpm exec playwright install chromium
 - [Submission Package](./submission/README.md)
 - [Demo Video Recording Script](./submission/demo-video/recording-script.md)
 - [Demo Video Short Preview MP4](./submission/demo-video/clear402-demo-preview.mp4)
-- [Presentation Deck](./submission/ppt/clear402-hackathon-deck.pptx)
+- [Presentation Deck - Google Slides](https://docs.google.com/presentation/d/1oCXVoHJQFKGSCqc57O6KIy-4vmzy6qyrXBj_BPEyrcY/edit)
+- [Presentation Deck - repo backup](./submission/ppt/clear402-hackathon-deck.pptx)
 - [Final Submit Checklist](./submission/final-submit-checklist.md)
 
 The repository includes the presentation deck, recording script, and a short demo preview. The hackathon portal upload should use the final 3-5 minute demo video link or file, showing the dashboard flow, live/fallback/mock labels, evidence export, and 16/16 attack-lab result.
@@ -199,7 +200,8 @@ See [Security Boundaries](./docs/security_boundaries.md) and [Limitations](./doc
 
 - [Clear402 Logo](./docs/assets/project/clear402-logo.png)
 - [Demo Video Short Preview MP4](./submission/demo-video/clear402-demo-preview.mp4)
-- [Presentation Deck](./submission/ppt/clear402-hackathon-deck.pptx)
+- [Presentation Deck - Google Slides](https://docs.google.com/presentation/d/1oCXVoHJQFKGSCqc57O6KIy-4vmzy6qyrXBj_BPEyrcY/edit)
+- [Presentation Deck - repo backup](./submission/ppt/clear402-hackathon-deck.pptx)
 - [Submission Package](./submission/README.md)
 
 ## Additional Docs

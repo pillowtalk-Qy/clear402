@@ -3,10 +3,16 @@
 Current deck:
 
 ```text
-submission/ppt/clear402-hackathon-deck.pptx
+https://docs.google.com/presentation/d/1oCXVoHJQFKGSCqc57O6KIy-4vmzy6qyrXBj_BPEyrcY/edit
 ```
 
-Status: ready for hackathon submission and presenter walkthrough.
+Status: Google Slides deck is ready for hackathon submission and presenter walkthrough.
+
+Repo backup:
+
+```text
+submission/ppt/clear402-hackathon-deck.pptx
+```
 
 Slide list:
 
@@ -26,4 +32,4 @@ The deck uses:
 - OriginShift team logo and member avatars from `docs/assets/team/`
 - Dashboard screenshot artifact from the latest Playwright E2E run
 
-Use this deck for the hackathon portal and presenter walkthrough.
+Use the Google Slides deck for the hackathon portal and presenter walkthrough. Keep the PPTX as an offline backup.

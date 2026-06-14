@@ -11,7 +11,8 @@ Use this as the last checklist before pressing submit in the hackathon portal.
 - Final gate report exists at `docs/final_gate_report.md`.
 - Sample evidence pack exists in `evidence/`.
 - Team page exists at `docs/team.md`.
-- Presentation deck exists at `submission/ppt/clear402-hackathon-deck.pptx`.
+- Presentation deck link is documented in `submission/ppt/README.md`.
+- Presentation deck backup exists at `submission/ppt/clear402-hackathon-deck.pptx`.
 - Short demo preview MP4 exists at `submission/demo-video/clear402-demo-preview.mp4`.
 - Final demo recording script exists at `submission/demo-video/recording-script.md`.
 

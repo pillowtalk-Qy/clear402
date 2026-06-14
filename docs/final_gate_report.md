@@ -62,7 +62,7 @@ All gate commands were run with `CLEAR402_CAW_*` and `CLEAR402_TEST_MERCHANT_ADD
 | Playwright E2E covers happy / denied / attack / evidence export | pass | The browser spec exercises all four paths. |
 | Attack Lab is 16/16 blocked | pass | Standalone `pnpm run attack:all` returned 16 blocked scenarios. |
 | Evidence sample JSON/MD exists and does not impersonate live CAW tx | pass | Sample evidence is labeled fallback/mock and the ordinary dashboard payment tx hash is null. |
-| CAW capability report stays limited to recorded Sepolia/CLI evidence | pass | `docs/caw_capability_report.md` limits live CAW execution claims to the recorded tiny transfer, destination-allowlist denial, and narrow typed-data message-sign verification, while separately recording official x402 dry-run and local gateway startup evidence. |
+| CAW capability report stays limited to recorded Sepolia/Base Sepolia/CLI evidence | pass | `docs/caw_capability_report.md` limits live CAW execution claims to the recorded tiny transfer, destination-allowlist denial, narrow typed-data message-sign verification, exact Base Sepolia EIP-3009 USDC tx, official x402 dry-run, and local gateway startup evidence. |
 | live / fallback / mock boundaries are consistent | pass | README, runbook, demo script, limitations, and sample evidence now agree on server-side export first with frontend fallback, and on the narrow CAW scope. |
 | Phase 16-21 acceptance is satisfied | pass | The repository passes the required gate commands and the review docs are present. |
 | Final No-Go Checklist has P0/P1 blockers | pass | No P0 blocker remains; P1 items are documented as limitations rather than hidden claims. |

@@ -6,9 +6,9 @@ This document defines where Clear402 can make security claims in the Phase 21 de
 
 | Boundary | What Clear402 Owns | What Clear402 Does Not Claim |
 |---|---|---|
-| CAW boundary | PaymentContext validation before adapter handoff; recorded Sepolia evidence references | Mainnet, unrestricted CAW execution, frontend CAW keys, or live execution outside the adapter |
+| CAW boundary | PaymentContext validation before adapter handoff; recorded Sepolia/Base Sepolia CAW evidence references | Mainnet, unrestricted CAW execution, frontend CAW keys, generalized USDC transfer ability, or live execution outside the adapter |
 | Clear402 guard boundary | Provider, metadata, PaymentContext, quote/nonce/budget, clearsig, ServiceEscrow calldata binding, receipt, and evidence decisions | CAW policy replacement or direct money movement outside guard |
-| ServiceEscrow boundary | Minimal onchain escrow source/ABI and guarded `fund`/`refund` calldata generation bound to `paymentContextHash` | Deployed contract evidence, successful live CAW `contract_call`, or chain-native settlement truth without tx/audit evidence |
+| ServiceEscrow boundary | Minimal onchain escrow source/ABI and guarded `fund`/`refund` calldata generation bound to `paymentContextHash` | Deployed ServiceEscrow evidence, successful live ServiceEscrow CAW `contract_call`, or chain-native escrow settlement truth without tx/audit evidence |
 | Provider / ERC-8004 boundary | Local provider health, challenge, receipt, fixture helpers, and source-aware trust adapter output | Live external provider registry truth without verified ERC-8004 registration, reputation, and validation sources |
 | Dashboard boundary | Operator console and labeled evidence display | Source of payment truth or hidden live payment execution |
 | Evidence/redaction boundary | Mode labels, redacted hashes, omitted secrets, sample packs | Raw secrets, pairing tokens, wallet secrets, or unredacted CAW logs in committed artifacts |
@@ -22,9 +22,9 @@ Rules:
 - CAW keys, API keys, pairing tokens, wallet secrets, and local CAW env values must stay in the runtime/operator environment.
 - No CAW key may be placed in frontend code, dashboard state, evidence samples, screenshots, Markdown docs, or JSON exports.
 - Live CAW claims require request ID, wallet/transaction evidence, audit or pact evidence, and a raw evidence reference.
-- The current live CAW scope is only one recorded Sepolia tiny transfer and one recorded Sepolia destination-allowlist denial.
+- The current live CAW scope is one recorded Sepolia tiny transfer, one recorded Sepolia destination-allowlist denial, narrow `message_sign` EIP-712 authorization verification, and one exact Base Sepolia USDC EIP-3009 `transferWithAuthorization` tx executed through CAW-approved contract_call.
 - CAW denial coverage must not be generalized beyond the recorded destination-allowlist denial.
-- CAW `contract_call` may only be claimed live after an approved pact executes against a deployed ServiceEscrow address and returns request ID, wallet, tx or Cobo transaction ID, audit ID, and raw evidence reference.
+- CAW `contract_call` may only be claimed live for the exact operation that has approved-pact, transaction, audit/pact, and raw evidence anchors. In this branch, that means the recorded Base Sepolia USDC EIP-3009 `transferWithAuthorization` tx only; no deployed ServiceEscrow `contract_call` is claimed.
 
 ## Clear402 Guard Boundary
 

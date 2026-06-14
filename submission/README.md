@@ -54,7 +54,7 @@ The PPT and video materials in this folder are current simulation/rehearsal mate
 ## Final Claims
 
 - Clear402 is a hackathon demo, not a mainnet production product.
-- Live CAW evidence is limited to one recorded Sepolia tiny transfer and one recorded Sepolia destination-allowlist denial.
+- Live CAW evidence is limited to one recorded Sepolia tiny transfer, one recorded Sepolia destination-allowlist denial, one live `message_sign` EIP-712 authorization verification, and one Base Sepolia USDC EIP-3009 transfer executed through CAW-approved contract_call.
 - Ordinary dashboard payment is fallback/demo state and does not claim a live CAW tx hash.
 - Attack lab inputs are mock fixtures, but they run through the real local guard pipeline.
 - The current authoritative gate is `pnpm test:e2e` plus `pnpm run attack:all`.
@@ -72,7 +72,7 @@ Long description:
 ```text
 Clear402 demonstrates a hardened agent-native HTTP 402 payment runtime built around Cobo Agentic Wallet boundaries. It wraps an x402-style payment flow with PaymentContext binding, provider/trust checks, quote and nonce locks, budget protection, PII-safe metadata filtering, clear-signing checks, service receipt verification, a 16-scenario attack lab, and an operator dashboard that exports evidence as JSON and Markdown.
 
-The demo includes recorded Sepolia CAW evidence for one tiny allow-path transfer and one destination-allowlist policy denial. The ordinary dashboard payment flow is explicitly fallback/demo state, and the attack lab uses mock attack fixtures executed through the real guard pipeline.
+The demo includes recorded Sepolia CAW evidence for one tiny allow-path transfer and one destination-allowlist policy denial, plus live Base Sepolia CAW evidence for one `message_sign` EIP-712 authorization verification and one EIP-3009 USDC transfer executed through CAW-approved contract_call. The ordinary dashboard payment flow is explicitly fallback/demo state, and the attack lab uses mock attack fixtures executed through the real guard pipeline.
 ```
 
 ## Remaining Manual Fields

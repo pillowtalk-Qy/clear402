@@ -1,6 +1,6 @@
 # Clear402 Five-Minute Demo Script
 
-This is the final Phase 21 demo script. It is intentionally narrow about evidence claims: live CAW means only the recorded Sepolia tiny transfer and the recorded Sepolia destination-allowlist denial. The ordinary dashboard payment is fallback/demo, the attack lab uses mock fixture inputs with real guard execution, and provider/trust/capability seed data is demo/mock rather than live registry truth.
+This is the final Phase 21 demo script. It is intentionally narrow about evidence claims: live CAW means the recorded Sepolia tiny transfer, the recorded Sepolia destination-allowlist denial, the live `message_sign` EIP-712 authorization verification, and the Base Sepolia USDC EIP-3009 transfer executed through CAW-approved contract_call. The ordinary dashboard payment is fallback/demo, the attack lab uses mock fixture inputs with real guard execution, and provider/trust/capability seed data is demo/mock rather than live registry truth.
 
 ## 0:00-0:35 - Problem
 
@@ -12,7 +12,7 @@ This is the final Phase 21 demo script. It is intentionally narrow about evidenc
 
 "CAW remains the spending authority. Clear402 builds a guarded PaymentContext, then crosses the CAW boundary only through the adapter."
 
-"This branch records exactly two live CAW Sepolia facts: one tiny `0.0001` SETH transfer documented in `docs/live_caw_testnet_smoke_report.md`, and one destination-allowlist policy denial documented in `docs/live_caw_policy_denial_report.md`. That is not mainnet, not production readiness, not unrestricted CAW execution, and not proof of every CAW denial type."
+"This branch records four live CAW facts: one tiny `0.0001` SETH transfer documented in `docs/live_caw_testnet_smoke_report.md`, one destination-allowlist policy denial documented in `docs/live_caw_policy_denial_report.md`, one live `message_sign` EIP-712 authorization verification for Base Sepolia USDC, and one Base Sepolia USDC EIP-3009 transfer executed through CAW-approved contract_call. That is not mainnet, not production readiness, not unrestricted CAW execution, and not proof of every CAW denial type."
 
 ## 1:05-1:35 - HTTP 402
 
@@ -34,9 +34,9 @@ This is the final Phase 21 demo script. It is intentionally narrow about evidenc
 
 ## 2:45-3:25 - CAW Payment Evidence
 
-"For CAW payment evidence, the safe wording is precise. The recorded live allow-path evidence is one Sepolia testnet transfer with request ID, pact ID, transaction hash, pact completion, and balance evidence. The recorded denial evidence is one Sepolia destination outside the allowlist rejected with no transaction hash."
+"For CAW payment evidence, the safe wording is precise. The recorded live allow-path evidence is one Sepolia testnet transfer with request ID, pact ID, transaction hash, pact completion, and balance evidence. The recorded denial evidence is one Sepolia destination outside the allowlist rejected with no transaction hash. The Base Sepolia USDC evidence is one EIP-712 authorization approved by CAW `message_sign` and one EIP-3009 `transferWithAuthorization` tx executed through CAW-approved contract_call."
 
-"The current dashboard payment is fallback/demo and does not run another live CAW transfer. The evidence pack sample also does not invent a live CAW transaction."
+"The current dashboard payment is fallback/demo and does not run another live CAW transfer. The evidence pack sample also does not invent a live CAW transaction. Do not generalize the Base Sepolia USDC tx into arbitrary USDC transfer ability."
 
 ## 3:25-3:55 - Provider Delivery
 
@@ -52,7 +52,6 @@ This is the final Phase 21 demo script. It is intentionally narrow about evidenc
 
 ## 4:35-5:00 - Evidence Pack
 
-"The evidence pack is the close. It shows the live/fallback/mock split, records the guard decision, identifies fallback dashboard payment state, names mock attack input provenance, and links back to the two recorded live CAW reports."
+"The evidence pack is the close. It shows the live/fallback/mock split, records the guard decision, identifies fallback dashboard payment state, names mock attack input provenance, and links back to the recorded live CAW reports and Base Sepolia EIP-3009 evidence."
 
-"The final claim is narrow and strong: live local services, real guard execution, fallback-labeled ordinary dashboard payment, 16/16 mock attack fixtures blocked by the real guard pipeline, one recorded CAW Sepolia tiny transfer, and one recorded CAW Sepolia destination-allowlist denial."
-
+"The final claim is narrow and strong: live local services, real guard execution, fallback-labeled ordinary dashboard payment, 16/16 mock attack fixtures blocked by the real guard pipeline, one recorded CAW Sepolia tiny transfer, one recorded CAW Sepolia destination-allowlist denial, one live `message_sign` EIP-712 authorization verification, and one Base Sepolia USDC EIP-3009 transfer executed through CAW-approved contract_call."

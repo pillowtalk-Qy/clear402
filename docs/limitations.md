@@ -4,7 +4,7 @@ This document records the Phase 21 demo boundaries. It is a claims-control docum
 
 ## Current Live Scope
 
-Clear402 has two recorded live CAW Sepolia execution facts:
+Clear402 has these recorded live CAW facts:
 
 - one tiny `0.0001` SETH Sepolia testnet allow-path transfer in `docs/live_caw_testnet_smoke_report.md`;
 - one Sepolia testnet destination-allowlist policy denial in `docs/live_caw_policy_denial_report.md`.

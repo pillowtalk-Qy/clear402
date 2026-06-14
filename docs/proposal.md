@@ -45,12 +45,12 @@ The dashboard is an operator console for reviewing live, fallback, and mock evid
 - Recorded live CAW evidence exists for one Sepolia tiny transfer, one Sepolia destination-allowlist denial, one narrow EIP-712 authorization verification, and one exact Base Sepolia EIP-3009 USDC tx.
 - Ordinary dashboard payment remains fallback/demo state.
 - Presentation deck is available as Google Slides: https://docs.google.com/presentation/d/1oCXVoHJQFKGSCqc57O6KIy-4vmzy6qyrXBj_BPEyrcY/edit
-- Recording script and short preview media exist under `submission/demo-video/`; the final 3-5 minute demo video is provided through the hackathon portal.
+- Final demo video, recording script, and short preview media exist under `submission/demo-video/`.
 - Team wallet/contact details are intentionally kept out of the public repo and supplied through the hackathon portal if required.
 
 ## Roadmap
 
-- Keep the portal demo video link/upload aligned with the final 3-5 minute recording.
+- Keep the portal demo video link/upload aligned with `submission/demo-video/clear402-demo-final.mp4`.
 - Keep public repo media and portal assets aligned as the submission package evolves.
 - Replace demo provider/trust seed data with live registry and attestation sources.
 - Expand CAW denial coverage beyond destination allowlist.

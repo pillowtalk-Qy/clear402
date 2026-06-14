@@ -1,8 +1,14 @@
 # Demo Video
 
-Use `recording-script.md` to record or verify the final 3-5 minute demo video.
+Use `recording-script.md` to verify or re-record the final demo video.
 
-Status: recording script and short repo preview are ready. Upload the final 3-5 minute demo video directly through the hackathon portal or provide its hosted URL there.
+Status: final demo video, recording script, and short repo preview are ready.
+
+Final demo MP4:
+
+```text
+submission/demo-video/clear402-demo-final.mp4
+```
 
 Repository short preview MP4:
 
@@ -10,10 +16,10 @@ Repository short preview MP4:
 submission/demo-video/clear402-demo-preview.mp4
 ```
 
-Recommended final portal filename:
+Recommended portal filename if re-uploading the file:
 
 ```text
-clear402-demo-3to5min.mp4
+clear402-demo-final.mp4
 ```
 
 Recommended recording flow:

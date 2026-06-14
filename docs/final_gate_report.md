@@ -49,7 +49,7 @@ All gate commands were run with `CLEAR402_CAW_*` and `CLEAR402_TEST_MERCHANT_ADD
 | Project logo | pass | `docs/assets/project/clear402-logo.png` is included and referenced from the README. |
 | Submission package index | pass | `submission/README.md` lists portal-ready files, claims, and portal-only fields. |
 | Presentation deck | pass | Google Slides deck link is documented in `submission/ppt/README.md` and ready for the portal and presenter walkthrough. |
-| Demo video script/preview | pass | `submission/demo-video/recording-script.md` gives a 3-5 minute recording flow, and `submission/demo-video/clear402-demo-preview.mp4` is a short repo preview. The final 3-5 minute video should be uploaded or linked through the portal. |
+| Demo video | pass | `submission/demo-video/clear402-demo-final.mp4` is checked in as the final demo video, `submission/demo-video/recording-script.md` documents the recording flow, and `submission/demo-video/clear402-demo-preview.mp4` remains as a short repo preview. |
 | Team wallet/contact fields | portal-only | `docs/team.md` keeps wallet addresses and contact details out of the public repo; provide them in the hackathon portal if required. |
 
 ## Final No-Go Checklist
@@ -94,7 +94,7 @@ No active blocker. The historical audit/code-review P1 issue about evidence-bund
 - Phase 16-21 completion: 100%
 - GitHub hackathon submission readiness: 94%
 - Original championship/full live spec: 82%
-- Portal media package readiness: ready, with final 3-5 minute video supplied through the portal
+- Portal media package readiness: ready, with final demo video checked in under `submission/demo-video/clear402-demo-final.mp4`
 
 ## Recommendation
 

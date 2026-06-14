@@ -106,11 +106,12 @@ pnpm exec playwright install chromium
 - [Demo Operator Runbook](./docs/demo_operator_runbook.md)
 - [Submission Package](./submission/README.md)
 - [Demo Video Recording Script](./submission/demo-video/recording-script.md)
+- [Final Demo Video MP4](./submission/demo-video/clear402-demo-final.mp4)
 - [Demo Video Short Preview MP4](./submission/demo-video/clear402-demo-preview.mp4)
 - [Presentation Deck - Google Slides](https://docs.google.com/presentation/d/1oCXVoHJQFKGSCqc57O6KIy-4vmzy6qyrXBj_BPEyrcY/edit)
 - [Final Submit Checklist](./submission/final-submit-checklist.md)
 
-The repository includes the presentation deck, recording script, and a short demo preview. The hackathon portal upload should use the final 3-5 minute demo video link or file, showing the dashboard flow, live/fallback/mock labels, evidence export, and 16/16 attack-lab result.
+The repository includes the presentation deck, recording script, final demo video, and short demo preview. The final video shows the dashboard flow, live/fallback/mock labels, evidence export, and 16/16 attack-lab result.
 
 ## Proposal Link
 
@@ -200,6 +201,7 @@ See [Security Boundaries](./docs/security_boundaries.md) and [Limitations](./doc
 ## Project Assets
 
 - [Clear402 Logo](./docs/assets/project/clear402-logo.png)
+- [Final Demo Video MP4](./submission/demo-video/clear402-demo-final.mp4)
 - [Demo Video Short Preview MP4](./submission/demo-video/clear402-demo-preview.mp4)
 - [Presentation Deck - Google Slides](https://docs.google.com/presentation/d/1oCXVoHJQFKGSCqc57O6KIy-4vmzy6qyrXBj_BPEyrcY/edit)
 - [Submission Package](./submission/README.md)

@@ -11,7 +11,7 @@ This folder collects the files and final links needed for the hackathon portal.
 | Team | OriginShift |
 | Recommended track | Cobo Agent-Native Payments / HTTP 402 / x402 |
 | GitHub repo | https://github.com/pillowtalk-Qy/clear402 |
-| Demo status | Code, docs, evidence, deck, recording script, and short preview media are submission-ready. The hackathon portal should use the final hosted/uploaded demo video asset. |
+| Demo status | Code, docs, evidence, deck, recording script, final demo video, and short preview media are submission-ready. |
 
 ## Upload Checklist
 
@@ -22,12 +22,19 @@ This folder collects the files and final links needed for the hackathon portal.
 | Proposal | `docs/proposal.md` | Ready |
 | Demo script | `docs/demo_script.md` and `submission/demo-video/recording-script.md` | Ready |
 | Presentation deck | Google Slides: https://docs.google.com/presentation/d/1oCXVoHJQFKGSCqc57O6KIy-4vmzy6qyrXBj_BPEyrcY/edit | Ready |
-| Demo video preview | `submission/demo-video/clear402-demo-preview.mp4` | Short repo preview ready; use final portal upload/link for the 3-5 minute demo |
+| Final demo video | `submission/demo-video/clear402-demo-final.mp4` | Ready |
+| Demo video preview | `submission/demo-video/clear402-demo-preview.mp4` | Short repo preview ready |
 | Team info | `docs/team.md` | Public profile ready; private wallet/contact fields belong in the portal if required |
 | Chain/testnet evidence | `docs/live_caw_testnet_smoke_report.md`, `docs/live_caw_policy_denial_report.md` | Ready |
 | Security boundary | `docs/security_boundaries.md` and `docs/limitations.md` | Ready |
 
 ## Demo Video Link
+
+Final repository demo video:
+
+```text
+submission/demo-video/clear402-demo-final.mp4
+```
 
 Repository short preview video:
 
@@ -35,16 +42,10 @@ Repository short preview video:
 submission/demo-video/clear402-demo-preview.mp4
 ```
 
-Final uploaded demo video link:
+Recommended filename if uploading the file directly:
 
 ```text
-Provide the hosted video URL or upload the final MP4 directly in the hackathon portal.
-```
-
-Recommended filename if uploading a file directly:
-
-```text
-clear402-demo-3to5min.mp4
+clear402-demo-final.mp4
 ```
 
 ## PPT / Video Status Note
@@ -55,7 +56,7 @@ Use the Google Slides deck as the authoritative presentation deck:
 https://docs.google.com/presentation/d/1oCXVoHJQFKGSCqc57O6KIy-4vmzy6qyrXBj_BPEyrcY/edit
 ```
 
-The checked-in MP4 is a short repo preview; the portal should receive the final 3-5 minute demo video link or uploaded MP4.
+The checked-in final MP4 is `submission/demo-video/clear402-demo-final.mp4`. The short preview MP4 remains available as a lightweight repository preview.
 
 ## Final Claims
 

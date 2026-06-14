@@ -12,6 +12,7 @@ Use this as the last checklist before pressing submit in the hackathon portal.
 - Sample evidence pack exists in `evidence/`.
 - Team page exists at `docs/team.md`.
 - Presentation deck link is documented in `submission/ppt/README.md`.
+- Final demo MP4 exists at `submission/demo-video/clear402-demo-final.mp4`.
 - Short demo preview MP4 exists at `submission/demo-video/clear402-demo-preview.mp4`.
 - Final demo recording script exists at `submission/demo-video/recording-script.md`.
 

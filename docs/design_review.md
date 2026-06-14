@@ -11,7 +11,7 @@ AI slop score: B+
 
 The dashboard reads like an operator console, not a marketing page. The live/fallback/mock model is visible, the layout is dense but scannable, and the page avoids the common hero/card-grid trap. The main design risk is that a few visual choices still make fallback/demo actions feel more live than they are.
 
-Update, Phase 19 polish: P1-D1 is closed. The ordinary dashboard payment action now reads as a fallback/demo step, raw evidence is progressively disclosed, touch targets meet 44px, and desktop plus 390px mobile checks show no horizontal overflow.
+Update, final runtime-alignment polish: P1-D1 is closed. The payment-boundary action now reads as `Record CAW boundary`, raw evidence is progressively disclosed, touch targets meet 44px, and desktop plus 390px mobile checks show no horizontal overflow.
 
 ## P0 Findings
 
@@ -28,7 +28,7 @@ Original evidence:
 
 Fix:
 
-- The action now displays `Execute demo payment`.
+- The action now displays `Record CAW boundary`.
 - The stable E2E hook remains `data-testid="action-execute-payment"`.
 - The button tone is warning/fallback aligned, not live green.
 - The Service Receipt panel continues to show `Tx hash n/a` for the ordinary dashboard path.
@@ -65,7 +65,7 @@ The page still uses `Inter, ui-sans-serif, system-ui...` as the primary stack, b
 - Started runtime, provider, and dashboard dev servers against `http://127.0.0.1:3000`.
 - Used the Codex in-app Browser to inspect desktop and 390x844 mobile.
 - Desktop check: `scrollWidth` matched viewport width, no overflow offenders, minimum visible interactive height was 44px, raw evidence panels were folded, and receipt tx hash displayed `n/a`.
-- 390x844 mobile check: `scrollWidth` was 390, no overflow offenders, no small touch targets, and `Execute demo payment` remained visible without button squeeze.
+- 390x844 mobile check: `scrollWidth` was 390, no overflow offenders, no small touch targets, and the payment-boundary action remained visible without button squeeze.
 - Acceptance commands passed:
   - `pnpm --filter dashboard test`
   - `pnpm --filter dashboard build`

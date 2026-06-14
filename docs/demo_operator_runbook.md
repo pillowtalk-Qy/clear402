@@ -13,7 +13,7 @@ This runbook is the operator path for the current Clear402 demo branch. It is in
 | CAW policy denial evidence | live for one recorded Sepolia destination-allowlist denial | Request ID, pact ID, rejected transaction record, denial reason, and no-success evidence are in `docs/live_caw_policy_denial_report.md`. |
 | Attack lab | mock inputs, live guard execution | The 16 scenarios are fixtures run through the real guard pipeline. |
 | Provider/trust/capability seed data | mock | Demo records prove the pipeline shape, not external registry truth. |
-| Dashboard payment/export actions | fallback/demo state | The dashboard labels non-live state; it does not prove funds moved. |
+| Dashboard mission/export actions | runtime-backed local flow with fallback boundaries | Mission, dry-run, guard, verify, timeline, and export prefer runtime APIs; the payment-boundary action does not prove funds moved. |
 
 ## 2. Install
 
@@ -146,7 +146,7 @@ Recommended order:
 3. Click `Create mission`.
 4. Click `Dry run 402` and describe the challenge/registry/fallback settlement labels.
 5. Click `Prepare guard` and describe PaymentContext, nonce, quote lock, clear-signing, and metadata redaction.
-6. Treat `Execute payment` as a fallback demo step only. Preface it before clicking; the ordinary dashboard demo does not run the live CAW testnet smoke.
+6. Click `Record CAW boundary` and explain it as a fallback payment-boundary record only. The ordinary dashboard demo does not run the live CAW testnet smoke.
 7. Click `Verify receipt` as a receipt-verifier demo state, not proof of live delivery.
 8. Run selected attack cards in the dashboard for UI storytelling.
 9. Use the CLI attack lab for the authoritative 16/16 gate.
@@ -162,7 +162,7 @@ Automated browser E2E artifacts are written to `e2e-results/`:
 - `dashboard-evidence-export.md`
 - `playwright-output/` and `playwright-report/` for traces, videos, and the HTML report
 
-The browser E2E covers the operator path: create mission, dry run 402, prepare guard, execute fallback/demo payment, verify fallback receipt, run denied/attack dashboard states, and export evidence. It still treats the CLI attack lab as the authoritative 16/16 security gate.
+The browser E2E covers the operator path: create mission, dry run 402, prepare guard, record the fallback CAW boundary, verify fallback receipt, run denied/attack dashboard states, and export evidence. It still treats the CLI attack lab as the authoritative 16/16 security gate.
 
 For gate evidence:
 

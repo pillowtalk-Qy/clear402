@@ -54,12 +54,12 @@ The risk is that an autonomous payment proof can drift away from the exact resou
 
 ### 0:55-1:40 - Dashboard Flow
 
-Show the dashboard. Create or select a mission, then walk through dry run, guard, demo payment, receipt, and export states.
+Show the dashboard. Create or select a mission, then walk through dry run, guard, CAW boundary recording, receipt, and export states.
 
 Say:
 
 ```text
-The dashboard is an operator console, not a landing page. It shows the x402 challenge, the guard decision, the payment boundary, the receipt state, attack evidence, and export controls. The ordinary dashboard payment is labeled as fallback/demo state and does not claim a live CAW transaction hash.
+The dashboard is an operator console, not a landing page. It is backed by local runtime APIs for mission creation, dry-run challenge inspection, guard preparation, receipt verification, timeline events, and evidence export. The CAW boundary action is labeled as fallback state and does not claim a live CAW transaction hash.
 ```
 
 ### 1:40-2:25 - Guard Pipeline

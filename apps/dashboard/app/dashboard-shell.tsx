@@ -563,7 +563,7 @@ export function DashboardShell({ initialWorkspace, runtime, provider }: Dashboar
               <p className="eyebrow">Champion evidence console</p>
               <h1>Evidence Dashboard</h1>
               <p>
-                The main view is a live operator table: challenge, guard, receipt, attack, and export are all present, and the non-live branches are explicitly marked.
+                The main view is backed by runtime mission, guard, receipt, timeline, and export APIs; payment movement stays explicitly labeled when it is fallback.
               </p>
             </div>
             <div className="topbar-actions">
@@ -582,7 +582,7 @@ export function DashboardShell({ initialWorkspace, runtime, provider }: Dashboar
             <ActionButton label="Create mission" icon={<ClipboardList size={16} />} onClick={() => runMissionFlow("create-mission")} tone="success" />
             <ActionButton label="Dry run 402" icon={<FileSearch size={16} />} onClick={() => runMissionFlow("dry-run")} />
             <ActionButton label="Prepare guard" icon={<ShieldPlus size={16} />} onClick={() => runMissionFlow("prepare-guard")} tone="warning" />
-            <ActionButton label="Execute demo payment" icon={<ArrowRightLeft size={16} />} onClick={() => runMissionFlow("execute-payment")} tone="warning" testId="action-execute-payment" />
+            <ActionButton label="Record CAW boundary" icon={<ArrowRightLeft size={16} />} onClick={() => runMissionFlow("execute-payment")} tone="warning" testId="action-execute-payment" />
             <ActionButton label="Verify receipt" icon={<ShieldCheck size={16} />} onClick={() => runMissionFlow("verify-receipt")} tone="success" />
             <ActionButton label={isExporting ? "Exporting evidence" : "Export evidence"} icon={<ArrowDownToLine size={16} />} onClick={() => void handleEvidenceExport()} tone="fallback" disabled={isExporting} />
           </section>
@@ -740,7 +740,7 @@ export function DashboardShell({ initialWorkspace, runtime, provider }: Dashboar
 
             <SectionCard
               title="CAW Execution Timeline"
-              subtitle="Guard pass, CAW submit, pending approval, tx hash, and audit logs."
+              subtitle="Runtime guard events, CAW boundary state, receipt verification, and audit logs."
               icon={<TimerReset size={18} />}
               state={workspace.caw.evidenceMode}
               tone={workspace.caw.transactionStatus === "finalized" ? "success" : "warning"}
@@ -864,7 +864,7 @@ export function DashboardShell({ initialWorkspace, runtime, provider }: Dashboar
         </div>
         <div className="strip-item">
           <strong>Mode guard</strong>
-          <p>Fallback and mock are intentionally visible. Ordinary dashboard payment is fallback/demo and never claims live CAW funds movement.</p>
+          <p>Fallback and mock are intentionally visible. The dashboard records the CAW payment boundary but never claims unrecorded live funds movement.</p>
         </div>
       </section>
     </main>

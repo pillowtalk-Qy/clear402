@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Clear402 Foundation",
-  description: "Foundation dashboard for the Clear402 monorepo."
+  title: "Clear402 Evidence Dashboard",
+  description: "Runtime-backed operator console for Clear402 x402 guard evidence."
 };
 
 export default function RootLayout({

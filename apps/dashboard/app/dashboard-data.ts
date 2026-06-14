@@ -654,13 +654,13 @@ export function createInitialWorkspace(options: DashboardInitOptions): Dashboard
         status: "needs_manual_step",
         evidenceMode: "fallback",
         rawEvidenceRef: "docs/caw_capability_report.md",
-        notes: "CAW side capabilities are not wired in this branch."
+        notes: "Recorded CAW evidence is reviewed from the capability report; ordinary dashboard payment stays fallback."
       },
       {
         capability: "request_tracking",
         status: "fallback_required",
         evidenceMode: "mock",
-        notes: "Dashboard is using a deterministic demo request id."
+        notes: "Initial dashboard state uses a deterministic demo request id until the runtime mission flow runs."
       }
     ],
     auditLogs: [
@@ -675,7 +675,7 @@ export function createInitialWorkspace(options: DashboardInitOptions): Dashboard
         id: "audit-002",
         outcome: "fallback",
         evidenceMode: "fallback",
-        note: "CAW execution path is not yet available in this branch.",
+        note: "Runtime mission APIs are available; ordinary dashboard payment does not attempt live CAW funds movement.",
         timestamp: createdAt - 30_000
       }
     ]
@@ -1071,7 +1071,7 @@ export function applyDashboardAction(
       id: "audit-submit",
       outcome: "allow",
       evidenceMode: "fallback",
-      note: "Demo execution uses fallback state until CAW live execution is wired.",
+      note: "Dashboard records the CAW payment boundary as fallback; live CAW movement is limited to the recorded evidence reports.",
       timestamp: now
     });
     next.receipt = {
@@ -1088,8 +1088,8 @@ export function applyDashboardAction(
     next.timeline.unshift(
       buildTimelineItem(
         "timeline-execute",
-        "CAW execution step",
-        "Fallback/demo execution records payment intent state without claiming live CAW funds movement.",
+        "CAW boundary recorded",
+        "Fallback payment-boundary event recorded without claiming live CAW funds movement.",
         "success",
         "fallback",
         now,
@@ -1188,7 +1188,7 @@ export async function runPreferredMissionFlowAction(
       },
       usedRuntime: false,
       source: "frontend_fallback",
-      fallbackReason: "Dashboard execute payment is a fallback/demo step; runtime CAW execution is disabled."
+      fallbackReason: "Dashboard payment-boundary recording is a fallback/demo step and intentionally does not attempt live CAW funds movement."
     };
   }
 

@@ -314,7 +314,7 @@ describe("dashboard data", () => {
     expect(result.workspace.mission.evidenceMode).not.toBe("live");
   });
 
-  test("keeps dashboard execute payment as fallback demo state without calling runtime guard", async () => {
+  test("keeps dashboard CAW boundary recording as fallback demo state without calling runtime guard", async () => {
     let workspace = createInitialWorkspace({
       runtime,
       provider,
@@ -336,7 +336,7 @@ describe("dashboard data", () => {
     expect(called).toBe(false);
     expect(result.usedRuntime).toBe(false);
     expect(result.source).toBe("frontend_fallback");
-    expect(result.fallbackReason).toContain("fallback/demo step");
+    expect(result.fallbackReason).toContain("payment-boundary recording");
     expect(result.workspace.receipt.evidenceMode).toBe("fallback");
     expect(result.workspace.receipt.paymentReceipt.txHash).toBeUndefined();
     expect(result.workspace.timeline[0]?.detail).toContain("without claiming live CAW funds movement");

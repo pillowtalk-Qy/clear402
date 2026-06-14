@@ -52,7 +52,7 @@ This is the safe demo script for the current Clear402 demo branch. It is written
 
 "The dashboard starts from the operator view: mission, budget, resource, CAW panel, challenge inspector, provider trust, metadata firewall, PaymentContext, clear signing, receipt, attack lab, and export."
 
-"The health badges are live facts from local services. The mission/payment actions are demo/fallback state unless they are backed by a runtime response. That is why the badges matter."
+"The health badges are live facts from local services. Mission creation, dry-run, guard preparation, receipt verification, timeline events, and evidence export prefer runtime APIs. The payment-boundary action remains fallback because the ordinary dashboard flow does not move live CAW funds."
 
 "The dashboard is not a landing page; it is a control surface for evidence."
 
@@ -116,7 +116,7 @@ Use this wording when asked about production readiness:
 | "These are real attacks." | "These are fixture attacks executed through the real guard pipeline." |
 | "This tx hash is proof." | "Only the Sepolia tx hash in the live smoke report is live CAW testnet evidence." |
 | "ERC-8004 verified the provider." | "The ERC-8004-style adapter executed over demo trust records." |
-| "The dashboard exported runtime evidence." | "The dashboard rendered an in-app evidence bundle with mode labels." |
+| "The dashboard payment button moved funds." | "The dashboard recorded a fallback CAW boundary; live CAW movement is limited to the recorded evidence reports." |
 | "Policy denial is live-verified." | "One Sepolia testnet destination-allowlist policy denial is recorded; other CAW denial types are not covered." |
 
 ## Final Demo Claim

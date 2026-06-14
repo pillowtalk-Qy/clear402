@@ -78,7 +78,7 @@ async function happyPath(page: Page, missionId: string, request: APIRequestConte
   expect(verifyPayload.receipt.paymentReceipt.txHash).toBeUndefined();
   expect(verifyPayload.receipt.finalStatus).toBe("failed");
 
-  await expect(page.getByText("Ordinary dashboard payment is fallback/demo")).toBeVisible();
+  await expect(page.locator(".bottom-strip")).toContainText("records the CAW payment boundary");
 }
 
 async function deniedPath(page: Page, request: APIRequestContext) {

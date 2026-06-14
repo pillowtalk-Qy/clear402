@@ -13,6 +13,12 @@ These papers are the research basis for the Clear402 guard design and attack-lab
 | PII-safe x402 metadata filtering and hidden signer intent | Hardening x402: PII-Safe Agentic Payments via Pre-Execution Metadata Filtering | [arXiv:2604.11430](https://arxiv.org/abs/2604.11430) |
 | Binding cryptocurrency payment to service execution and delivery evidence | A402: Binding Cryptocurrency Payments to Service Execution for Agentic Commerce | [arXiv:2603.01179](https://arxiv.org/abs/2603.01179) |
 
+## Technical Security Reference
+
+| Reference | Why it matters to Clear402 | Clear402 scope |
+|---|---|---|
+| [Cyfrin/clearsig](https://github.com/Cyfrin/clearsig) | `clearsig` frames transaction intent verification: raw calldata, typed data, and signing hashes should be explainable before a wallet signs. This directly informs Clear402's clear-signing layer for malicious approvals, hidden multicalls, selector mismatch, amount mismatch, and typed-data context mismatch. | Clear402 implements a local clearsig-style semantic gate in `services/runtime/src/clearsig/adapter.ts`. It does not claim a complete integration of the official Cyfrin/clearsig package or its full ERC-7730 / ERC-8176 / ERC-8213 surface. |
+
 ## Summary
 
 | Paper | Pain Point | Clear402 Protection | Attack Scenarios |

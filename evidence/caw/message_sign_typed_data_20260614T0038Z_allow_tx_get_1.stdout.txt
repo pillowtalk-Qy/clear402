@@ -1,0 +1,62 @@
+{
+  "amount": "0",
+  "chain_id": "SETH",
+  "created_at": "2026-06-14T00:39:33.702401Z",
+  "data": {
+    "description": "Clear402 allow-shaped PaymentContext typed-data signing probe",
+    "destination_type": "evm_eip_712",
+    "eip712_typed_data": {
+      "domain": {
+        "chainId": 11155111,
+        "name": "Clear402",
+        "version": "1"
+      },
+      "message": {
+        "intent": "pay_for_report",
+        "paymentContextHash": "0x4020000000000000000000000000000000000000000000000000000000000000"
+      },
+      "primaryType": "PaymentContext",
+      "types": {
+        "EIP712Domain": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "version",
+            "type": "string"
+          },
+          {
+            "name": "chainId",
+            "type": "uint256"
+          }
+        ],
+        "PaymentContext": [
+          {
+            "name": "paymentContextHash",
+            "type": "bytes32"
+          },
+          {
+            "name": "intent",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "signature": "0x22bd60d8a9c1e643d1270c6e658f060b37f40bb94556129dfe9a6ae3d6f332b25282a6ed0ee9644edd3cbb41e197139ba0c34f86a927ae4b2819c5d24011925a1b"
+  },
+  "description": "Clear402 allow-shaped PaymentContext typed-data signing probe",
+  "dst_address": "",
+  "id": "2aad3eae-fd7d-4e47-8c40-c9d69634119d",
+  "pact_id": "6c27d578-df51-488c-862f-55475bc01190",
+  "request_id": "message_sign_typed_data_20260614T0038Z_allow",
+  "request_type": "message_sign",
+  "src_address": "0xab42bb255c4660b0879f007ab3ed9ae049d85859",
+  "status": "Success",
+  "sub_status": "completed",
+  "token_id": "",
+  "transaction_hash": "",
+  "type": "message_sign",
+  "updated_at": "2026-06-14T00:39:46.163768Z",
+  "wallet_id": "5751d798-605b-4723-acf4-e3a03f524511"
+}

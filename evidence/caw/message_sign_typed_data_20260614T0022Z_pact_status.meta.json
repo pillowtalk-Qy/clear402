@@ -1,0 +1,20 @@
+{
+  "name": "message_sign_typed_data_20260614T0022Z_pact_status",
+  "cmd": "caw pact status --pact-id 6c27d578-df51-488c-862f-55475bc01190",
+  "purpose": "check typed-data message_sign pact status before any signing probe",
+  "started_at": "2026-06-14T00:29:27.417Z",
+  "finished_at": "2026-06-14T00:29:29.818Z",
+  "exit_code": 0,
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_status.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_status.stderr.txt",
+  "redaction": {
+    "applied": true,
+    "patterns": [
+      "api keys",
+      "authorization header values",
+      "pairing tokens",
+      "private keys",
+      "seed phrases"
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "message_sign_typed_data_20260614T0022Z_pact_events",
+  "cmd": "caw pact events --pact-id 6c27d578-df51-488c-862f-55475bc01190",
+  "purpose": "record lifecycle events for newly submitted message_sign typed-data pact",
+  "started_at": "2026-06-14T00:25:55.299Z",
+  "finished_at": "2026-06-14T00:25:57.529Z",
+  "exit_code": 0,
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_events.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_events.stderr.txt",
+  "redaction": {
+    "applied": true,
+    "patterns": [
+      "api keys",
+      "authorization header values",
+      "pairing tokens",
+      "private keys",
+      "seed phrases"
+    ]
+  }
+}

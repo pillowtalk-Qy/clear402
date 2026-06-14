@@ -1,0 +1,7 @@
+{
+  "destination_type": "unknown",
+  "id": "2aad3eae-fd7d-4e47-8c40-c9d69634119d",
+  "idempotent": false,
+  "request_id": "message_sign_typed_data_20260614T0038Z_allow",
+  "status": "Processing"
+}

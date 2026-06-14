@@ -1,0 +1,11 @@
+{
+  "name": "message_sign_typed_data_20260614T0022Z_deny_probe",
+  "command": null,
+  "status": "skipped_pending_approval",
+  "expected": "deny-shaped PaymentContext EIP-712 signing should produce CAW policy denial only after pact approval",
+  "pact_id": "6c27d578-df51-488c-862f-55475bc01190",
+  "pact_status": "pending_approval",
+  "result": "not_run",
+  "stdout": null,
+  "stderr": null
+}

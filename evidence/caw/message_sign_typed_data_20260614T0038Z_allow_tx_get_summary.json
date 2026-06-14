@@ -1,0 +1,19 @@
+{
+  "run_id": "message_sign_typed_data_20260614T0038Z",
+  "generated_at": "2026-06-14T00:40:50.813Z",
+  "request_id": "message_sign_typed_data_20260614T0038Z_allow",
+  "attempts": [
+    {
+      "attempt": 1,
+      "exit_code": 0,
+      "status": "Success"
+    }
+  ],
+  "final_status": "Success",
+  "evidence_refs": [
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_allow_tx_get_1.stdout.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_allow_tx_get_1.stderr.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_allow_tx_get_1.meta.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_allow_tx_get_1.result.json"
+  ]
+}

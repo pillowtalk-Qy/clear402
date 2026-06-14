@@ -1,0 +1,43 @@
+{
+  "run_id": "message_sign_typed_data_20260614T0038Z",
+  "generated_at": "2026-06-14T00:39:46.185Z",
+  "scope": "CAW message_sign typed-data live verification continuation only; no dashboard/runtime main logic or payment/x402/gateway settlement claim expansion.",
+  "pact_id": "6c27d578-df51-488c-862f-55475bc01190",
+  "pact_status_before": "active",
+  "pact_status_after": "active",
+  "caw_wallet_address": "0xab42bb255c4660b0879f007ab3ed9ae049d85859",
+  "payment_context_hash": "0x4020000000000000000000000000000000000000000000000000000000000000",
+  "allow_probe_result": "signed",
+  "allow_exit_code": 0,
+  "deny_probe_result": "policy_denied",
+  "deny_exit_code": 1,
+  "can_upgrade_caw_live_message_sign_claim": true,
+  "manual_step": null,
+  "evidence_refs": [
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_allow_probe.stdout.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_allow_probe.stderr.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_allow_probe.meta.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_allow_probe.result.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_allow_tx_get_1.stdout.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_allow_tx_get_1.stderr.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_allow_tx_get_1.meta.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_allow_tx_get_1.result.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_deny_probe.stdout.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_deny_probe.stderr.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_deny_probe.meta.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_deny_probe.result.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_pact_status_final.stdout.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_pact_status_final.stderr.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_pact_status_final.meta.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_pact_status_final.result.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_pact_events_final.stdout.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_pact_events_final.stderr.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_pact_events_final.meta.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_pact_events_final.result.json"
+  ],
+  "redaction": {
+    "stdout_stderr_raw_results_saved": true,
+    "secret_values_redacted": true,
+    "secret_scan_note": "No API keys, private keys, seed phrases, bearer tokens, or pairing tokens were intentionally written."
+  }
+}

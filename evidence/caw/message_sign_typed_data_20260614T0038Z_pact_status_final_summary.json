@@ -1,0 +1,32 @@
+{
+  "run_id": "message_sign_typed_data_20260614T0038Z",
+  "generated_at": "2026-06-14T00:43:03.480Z",
+  "pact_id": "6c27d578-df51-488c-862f-55475bc01190",
+  "status": "active",
+  "recent_txs": [
+    {
+      "created_at": "2026-06-14T00:39:38.36898Z",
+      "id": "6f5c13a2-c71a-41e5-b3a8-c7f675e3ed6d",
+      "operation_type": "message_sign",
+      "request_id": "message_sign_typed_data_20260614T0038Z_deny",
+      "status": "Rejected"
+    },
+    {
+      "created_at": "2026-06-14T00:39:33.702401Z",
+      "id": "2aad3eae-fd7d-4e47-8c40-c9d69634119d",
+      "operation_type": "message_sign",
+      "request_id": "message_sign_typed_data_20260614T0038Z_allow",
+      "status": "Success"
+    }
+  ],
+  "evidence_refs": [
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_pact_status_final.stdout.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_pact_status_final.stderr.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_pact_status_final.meta.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_pact_status_final.result.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_pact_events_final.stdout.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_pact_events_final.stderr.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_pact_events_final.meta.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_pact_events_final.result.json"
+  ]
+}

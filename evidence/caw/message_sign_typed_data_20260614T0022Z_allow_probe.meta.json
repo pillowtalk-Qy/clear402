@@ -1,0 +1,19 @@
+{
+  "name": "message_sign_typed_data_20260614T0022Z_allow_probe",
+  "cmd": null,
+  "purpose": "allow-shaped PaymentContext EIP-712 sign-message probe",
+  "status": "skipped_pending_approval",
+  "reason": "Pact 6c27d578-df51-488c-862f-55475bc01190 is pending_approval; signing must not run until the CAW owner approves the pact.",
+  "stdout_path": null,
+  "stderr_path": null,
+  "redaction": {
+    "applied": true,
+    "patterns": [
+      "api keys",
+      "authorization header values",
+      "pairing tokens",
+      "private keys",
+      "seed phrases"
+    ]
+  }
+}

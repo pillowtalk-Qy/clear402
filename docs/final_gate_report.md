@@ -33,7 +33,7 @@ All gate commands were run with `CLEAR402_CAW_*` and `CLEAR402_TEST_MERCHANT_ADD
 | Item | Result | Notes |
 |---|---|---|
 | ServiceEscrow onchain-ready path | pass with documented limitation | `contracts/ServiceEscrow.sol`, ABI, Sepolia deployment instructions, runtime `fund`/`refund` calldata generation, and context-hash/policy tests are present. No deployed Sepolia escrow contract or successful CAW `contract_call` is claimed. |
-| `message_sign` PaymentContext | pass | Local/runtime evidence and guard enforcement are complete. Official CAW CLI pact submission reached `pending_approval`; approved live CAW message-sign allow/deny evidence is not claimed. |
+| `message_sign` PaymentContext | pass with narrow live verification | Local/runtime evidence and guard enforcement are complete. Official CAW CLI typed-data pact `6c27d578-df51-488c-862f-55475bc01190` produced one live allow-shaped `message_sign` success and one live deny-shaped policy denial; do not generalize beyond that exact typed-data shape. |
 | `params_match` / `message_match` / `function_abis` | pass | Clear-sign policy enforcement is present in the local guard path. |
 | Signed ProviderQuote | pass | Signed quote creation and verification are wired locally. |
 | local payment gateway | pass | Gateway mode exists as a local provider route, and official `caw payment gateway` forward mode starts/listens locally; this is not a production payment network gateway or settlement claim. |
@@ -61,7 +61,7 @@ All gate commands were run with `CLEAR402_CAW_*` and `CLEAR402_TEST_MERCHANT_ADD
 | Playwright E2E covers happy / denied / attack / evidence export | pass | The browser spec exercises all four paths. |
 | Attack Lab is 16/16 blocked | pass | Standalone `pnpm run attack:all` returned 16 blocked scenarios. |
 | Evidence sample JSON/MD exists and does not impersonate live CAW tx | pass | Sample evidence is labeled fallback/mock and the ordinary dashboard payment tx hash is null. |
-| CAW capability report stays limited to recorded Sepolia/CLI evidence | pass | `docs/caw_capability_report.md` limits live CAW execution claims to the recorded tiny transfer and destination-allowlist denial, while separately recording official x402 dry-run and local gateway startup evidence. |
+| CAW capability report stays limited to recorded Sepolia/CLI evidence | pass | `docs/caw_capability_report.md` limits live CAW execution claims to the recorded tiny transfer, destination-allowlist denial, and narrow typed-data message-sign verification, while separately recording official x402 dry-run and local gateway startup evidence. |
 | live / fallback / mock boundaries are consistent | pass | README, runbook, demo script, limitations, and sample evidence now agree on server-side export first with frontend fallback, and on the narrow CAW scope. |
 | Phase 16-21 acceptance is satisfied | pass | The repository passes the required gate commands and the review docs are present. |
 | Final No-Go Checklist has P0/P1 blockers | pass | No P0 blocker remains; P1 items are documented as limitations rather than hidden claims. |
@@ -79,7 +79,6 @@ None.
 No active blocker. The historical audit/code-review P1 issue about evidence-bundle provenance is now reflected in the current baseline and in `docs/limitations.md`. The remaining live claims are intentionally incomplete:
 
 - CAW official x402 live dashboard flow
-- approved live CAW `message_sign` allow/deny evidence
 - deployed ServiceEscrow address and successful live CAW `contract_call` escrow funding evidence
 - verified Clear402 ERC-8004 provider registration
 - production payment gateway
@@ -101,4 +100,4 @@ No active blocker. The historical audit/code-review P1 issue about evidence-bund
 
 Recommended: demo and submit.
 
-Clear402 is demo-ready for GitHub hackathon submission: the local guard, onchain-ready escrow path, clear-sign, signed-quote, gateway, dual receipt, append-only local SSE timeline, and source-aware ERC-8004 trust adapter paths are in place. The live CAW execution claim remains limited to the recorded tiny transfer and destination-allowlist denial; approved live message signing, deployed escrow funding, verified Clear402 ERC-8004 registration, production gateway, and production dual receipt claims remain intentionally open.
+Clear402 is demo-ready for GitHub hackathon submission: the local guard, onchain-ready escrow path, clear-sign, signed-quote, gateway, dual receipt, append-only local SSE timeline, source-aware ERC-8004 trust adapter paths, and one narrowly scoped live CAW message-sign typed-data verification are in place. The live CAW execution claim remains limited to the recorded tiny transfer, destination-allowlist denial, and that exact message-sign typed-data allow/deny verification; deployed escrow funding, verified Clear402 ERC-8004 registration, production gateway, and production dual receipt claims remain intentionally open.

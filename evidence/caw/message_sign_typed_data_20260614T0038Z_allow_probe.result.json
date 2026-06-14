@@ -1,0 +1,30 @@
+{
+  "name": "message_sign_typed_data_20260614T0038Z_allow_probe",
+  "cmd": "caw tx sign-message --pact-id 6c27d578-df51-488c-862f-55475bc01190 --chain-id SETH --src-address 0xab42bb255c4660b0879f007ab3ed9ae049d85859 --destination-type eip712 --eip712-typed-data \"{\\\"types\\\":{\\\"EIP712Domain\\\":[{\\\"name\\\":\\\"name\\\",\\\"type\\\":\\\"string\\\"},{\\\"name\\\":\\\"version\\\",\\\"type\\\":\\\"string\\\"},{\\\"name\\\":\\\"chainId\\\",\\\"type\\\":\\\"uint256\\\"}],\\\"PaymentContext\\\":[{\\\"name\\\":\\\"paymentContextHash\\\",\\\"type\\\":\\\"bytes32\\\"},{\\\"name\\\":\\\"intent\\\",\\\"type\\\":\\\"string\\\"}]},\\\"primaryType\\\":\\\"PaymentContext\\\",\\\"domain\\\":{\\\"name\\\":\\\"Clear402\\\",\\\"version\\\":\\\"1\\\",\\\"chainId\\\":11155111},\\\"message\\\":{\\\"paymentContextHash\\\":\\\"0x4020000000000000000000000000000000000000000000000000000000000000\\\",\\\"intent\\\":\\\"pay_for_report\\\"}}\" --request-id message_sign_typed_data_20260614T0038Z_allow --description \"Clear402 allow-shaped PaymentContext typed-data signing probe\" --context \"{\\\"purpose\\\":\\\"clear402_message_sign_typed_data_allow_probe\\\",\\\"runId\\\":\\\"message_sign_typed_data_20260614T0038Z\\\",\\\"paymentContextHash\\\":\\\"0x4020000000000000000000000000000000000000000000000000000000000000\\\"}\"",
+  "purpose": "allow-shaped PaymentContext EIP-712 sign-message probe",
+  "started_at": "2026-06-14T00:39:32.117Z",
+  "finished_at": "2026-06-14T00:39:36.991Z",
+  "exit_code": 0,
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_allow_probe.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_allow_probe.stderr.txt",
+  "redaction": {
+    "applied": true,
+    "patterns": [
+      "api keys",
+      "authorization header values",
+      "pairing tokens",
+      "private keys",
+      "seed phrases"
+    ]
+  },
+  "stdout": "{\n  \"destination_type\": \"unknown\",\n  \"id\": \"2aad3eae-fd7d-4e47-8c40-c9d69634119d\",\n  \"idempotent\": false,\n  \"request_id\": \"message_sign_typed_data_20260614T0038Z_allow\",\n  \"status\": \"Processing\"\n}\n",
+  "stderr": "",
+  "parsed_stdout": {
+    "destination_type": "unknown",
+    "id": "2aad3eae-fd7d-4e47-8c40-c9d69634119d",
+    "idempotent": false,
+    "request_id": "message_sign_typed_data_20260614T0038Z_allow",
+    "status": "Processing"
+  },
+  "parsed_stderr": null
+}

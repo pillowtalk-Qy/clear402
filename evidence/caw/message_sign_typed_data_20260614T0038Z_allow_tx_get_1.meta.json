@@ -1,0 +1,20 @@
+{
+  "name": "message_sign_typed_data_20260614T0038Z_allow_tx_get_1",
+  "cmd": "caw tx get --request-id message_sign_typed_data_20260614T0038Z_allow",
+  "purpose": "poll allow-shaped sign-message transaction record attempt 1",
+  "started_at": "2026-06-14T00:40:48.065Z",
+  "finished_at": "2026-06-14T00:40:50.809Z",
+  "exit_code": 0,
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_allow_tx_get_1.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_allow_tx_get_1.stderr.txt",
+  "redaction": {
+    "applied": true,
+    "patterns": [
+      "api keys",
+      "authorization header values",
+      "pairing tokens",
+      "private keys",
+      "seed phrases"
+    ]
+  }
+}

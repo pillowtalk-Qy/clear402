@@ -1,0 +1,43 @@
+{
+  "run_id": "message_sign_typed_data_20260614T0022Z",
+  "generated_at": "2026-06-14T00:25:57.530Z",
+  "scope": "CAW message_sign typed-data live verification only; no dashboard/runtime main logic or payment/x402/gateway settlement claim expansion.",
+  "official_docs_source": "https://www.cobo.com/products/agentic-wallet/manual/reference/pact-policies",
+  "pact_id": "6c27d578-df51-488c-862f-55475bc01190",
+  "pact_status": "pending_approval",
+  "caw_wallet_address": "0xab42bb255c4660b0879f007ab3ed9ae049d85859",
+  "payment_context_hash": "0x4020000000000000000000000000000000000000000000000000000000000000",
+  "allow_probe_result": "not_run",
+  "deny_probe_result": "not_run",
+  "can_upgrade_caw_live_claim": false,
+  "manual_step": "Pact is pending owner approval. Stop before signing; owner must approve the pact in CAW App, then rerun allow/deny sign-message probes.",
+  "evidence_refs": [
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_doc_rules_summary.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_spec.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_submit.stdout.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_submit.stderr.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_submit.meta.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_submit.result.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_show.stdout.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_show.stderr.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_show.meta.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_show.result.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_status.stdout.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_status.stderr.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_status.meta.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_status.result.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_events.stdout.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_events.stderr.txt",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_events.meta.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_pact_events.result.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_allow_probe.meta.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_allow_probe.result.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_deny_probe.meta.json",
+    "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0022Z_deny_probe.result.json"
+  ],
+  "redaction": {
+    "stdout_stderr_raw_results_saved": true,
+    "secret_values_redacted": true,
+    "secret_scan_note": "No API keys, private keys, seed phrases, bearer tokens, or pairing tokens were intentionally written."
+  }
+}

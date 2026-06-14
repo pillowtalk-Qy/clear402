@@ -1,0 +1,47 @@
+{
+  "name": "message_sign_typed_data_20260614T0038Z_pact_events_after",
+  "cmd": "caw pact events --pact-id 6c27d578-df51-488c-862f-55475bc01190",
+  "purpose": "query typed-data message_sign pact events after allow/deny probes",
+  "started_at": "2026-06-14T00:39:43.298Z",
+  "finished_at": "2026-06-14T00:39:46.183Z",
+  "exit_code": 0,
+  "stdout_path": "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_pact_events_after.stdout.txt",
+  "stderr_path": "/Users/qy/Documents/clear402/evidence/caw/message_sign_typed_data_20260614T0038Z_pact_events_after.stderr.txt",
+  "redaction": {
+    "applied": true,
+    "patterns": [
+      "api keys",
+      "authorization header values",
+      "pairing tokens",
+      "private keys",
+      "seed phrases"
+    ]
+  },
+  "stdout": "{\n  \"message\": \"\",\n  \"meta\": {\n    \"before\": \"cAgAGVCvAiD0Bstd3q6RdQeWu2zhFFxP3tg\",\n    \"has_more\": false\n  },\n  \"result\": {\n    \"events\": [\n      {\n        \"created_at\": \"2026-06-14T00:25:50.744833Z\",\n        \"event_type\": \"submitted\",\n        \"id\": \"b2d777ab-a45d-41e5-aedb-38451713f7b6\",\n        \"pact_id\": \"6c27d578-df51-488c-862f-55475bc01190\"\n      },\n      {\n        \"created_at\": \"2026-06-14T00:37:32.187702Z\",\n        \"event_type\": \"activated\",\n        \"id\": \"b97e038a-7b7f-4a2b-8c33-7ae3e8763856\",\n        \"pact_id\": \"6c27d578-df51-488c-862f-55475bc01190\"\n      }\n    ]\n  },\n  \"success\": true\n}\n",
+  "stderr": "",
+  "parsed_stdout": {
+    "message": "",
+    "meta": {
+      "before": "cAgAGVCvAiD0Bstd3q6RdQeWu2zhFFxP3tg",
+      "has_more": false
+    },
+    "result": {
+      "events": [
+        {
+          "created_at": "2026-06-14T00:25:50.744833Z",
+          "event_type": "submitted",
+          "id": "b2d777ab-a45d-41e5-aedb-38451713f7b6",
+          "pact_id": "6c27d578-df51-488c-862f-55475bc01190"
+        },
+        {
+          "created_at": "2026-06-14T00:37:32.187702Z",
+          "event_type": "activated",
+          "id": "b97e038a-7b7f-4a2b-8c33-7ae3e8763856",
+          "pact_id": "6c27d578-df51-488c-862f-55475bc01190"
+        }
+      ]
+    },
+    "success": true
+  },
+  "parsed_stderr": null
+}

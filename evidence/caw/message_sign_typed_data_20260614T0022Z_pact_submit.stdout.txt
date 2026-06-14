@@ -1,0 +1,83 @@
+{
+  "message": "",
+  "result": {
+    "approval_id": "be66cf23-4e69-4496-8689-66e16628549e",
+    "message": "Pact submitted. Awaiting owner approval in CAW App.",
+    "pact_id": "6c27d578-df51-488c-862f-55475bc01190",
+    "status": "pending_approval",
+    "submitted_spec": {
+      "completion_conditions": [
+        {
+          "threshold": "3600",
+          "type": "time_elapsed"
+        }
+      ],
+      "execution_plan": "# Summary\nVerify one Clear402 PaymentContext EIP-712 message_sign pact on SETH.\n\n# Operations\n- If owner approval activates this pact, sign one allow-shaped PaymentContext typed-data message.\n- Attempt one deny-shaped PaymentContext typed-data message with mismatched domain/hash for policy denial evidence.\n\n# Risk Controls\n- message_sign only; no transfers or contract calls.\n- Chain restricted to SETH and source address restricted to the current CAW wallet address.\n- EIP-712 domain, primary type, paymentContextHash, and intent are exact-match allowlist conditions.\n- Request-count limit set to two signing requests per rolling 24h window for this verification.",
+      "intent": "Verify Clear402 PaymentContext EIP-712 typed-data message_sign on SETH",
+      "policies": [
+        {
+          "name": "clear402-payment-context-typed-data",
+          "rules": {
+            "deny_if": {
+              "usage_limits": {
+                "rolling_24h": {
+                  "request_count_gt": 2
+                }
+              }
+            },
+            "effect": "allow",
+            "when": {
+              "chain_in": [
+                "SETH"
+              ],
+              "domain_match": [
+                {
+                  "op": "eq",
+                  "param_name": "name",
+                  "value": "Clear402"
+                },
+                {
+                  "op": "eq",
+                  "param_name": "version",
+                  "value": "1"
+                },
+                {
+                  "op": "eq",
+                  "param_name": "chainId",
+                  "value": 11155111
+                }
+              ],
+              "message_match": [
+                {
+                  "op": "eq",
+                  "param_name": "paymentContextHash",
+                  "value": "0x4020000000000000000000000000000000000000000000000000000000000000"
+                },
+                {
+                  "op": "eq",
+                  "param_name": "intent",
+                  "value": "pay_for_report"
+                }
+              ],
+              "primary_type_in": [
+                "PaymentContext"
+              ],
+              "source_address_in": [
+                {
+                  "address": "0xab42bb255c4660b0879f007ab3ed9ae049d85859",
+                  "chain_id": "SETH"
+                }
+              ]
+            }
+          },
+          "type": "message_sign"
+        }
+      ]
+    }
+  },
+  "success": true,
+  "suggestions": [
+    "The pact has been submitted. Tell the user:\nthey should open the Cobo Agentic Wallet app to review and approve it.",
+    "No --recipe-slugs provided. Run 'caw recipe search --query <operation>' to find the matching recipe and resubmit with --recipe-slugs to link this pact to the authoritative recipe source."
+  ]
+}

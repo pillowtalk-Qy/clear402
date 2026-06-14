@@ -1,0 +1,64 @@
+{
+  "run_id": "message_sign_typed_data_20260614T0022Z",
+  "generated_at": "2026-06-14T00:25:49.468Z",
+  "source": "https://www.cobo.com/products/agentic-wallet/manual/reference/pact-policies",
+  "official_documentation_findings": [
+    "Pact policies are fail-closed: an operation that does not match any policy when conditions is denied.",
+    "Within a policy, when fields are AND conditions.",
+    "message_sign controls EIP-712 typed-data signing and supports chain_in, primary_type_in, source_address_in, domain_match, and message_match.",
+    "domain_match and message_match use MatchRule objects with param_name paths, op values such as eq/neq/in/not_in, and value.",
+    "Path syntax supports dot notation for nested fields, [N] for zero-based array indexes, * for all array elements, and .length for arrays.",
+    "For EVM chains, CAW checks the request chain_id against EIP-712 domain.chainId and denies mismatches with eip712_domain_chain_id_mismatch."
+  ],
+  "designed_pact": {
+    "type": "message_sign",
+    "chain_in": [
+      "SETH"
+    ],
+    "primary_type_in": [
+      "PaymentContext"
+    ],
+    "source_address_in": [
+      {
+        "chain_id": "SETH",
+        "address": "0xab42bb255c4660b0879f007ab3ed9ae049d85859"
+      }
+    ],
+    "domain_match": [
+      {
+        "param_name": "name",
+        "op": "eq",
+        "value": "Clear402"
+      },
+      {
+        "param_name": "version",
+        "op": "eq",
+        "value": "1"
+      },
+      {
+        "param_name": "chainId",
+        "op": "eq",
+        "value": 11155111
+      }
+    ],
+    "message_match": [
+      {
+        "param_name": "paymentContextHash",
+        "op": "eq",
+        "value": "0x4020000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "param_name": "intent",
+        "op": "eq",
+        "value": "pay_for_report"
+      }
+    ],
+    "payment_context_hash": "0x4020000000000000000000000000000000000000000000000000000000000000",
+    "allow_typed_data_hash": "0x1a126d2279490d973aa2d6dfbc3ea390ba78a1ce733f461b452f4d374d94ee4c",
+    "deny_typed_data_hash": "0x8ac2c06021a44c8b0dd84b0e158c6d7ba9b0e9d2cf190834c877717db2f077b4"
+  },
+  "notes": [
+    "This evidence is scoped only to CAW message_sign typed-data policy verification.",
+    "No dashboard/runtime main logic, CAW payment, x402 execute, or gateway settlement claim is expanded by this run."
+  ]
+}

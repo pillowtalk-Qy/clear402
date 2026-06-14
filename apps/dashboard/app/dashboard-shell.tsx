@@ -84,6 +84,44 @@ const badgeStyles: Record<BadgeTone, string> = {
 
 const defaultJsonPreview = "{\n  \"status\": \"empty\"\n}";
 
+function resolveBadgeTone(state: string): BadgeTone {
+  const normalizedState = state.toLowerCase();
+
+  if (normalizedState === "live") {
+    return "live";
+  }
+
+  if (normalizedState === "fallback") {
+    return "fallback";
+  }
+
+  if (normalizedState === "mock") {
+    return "mock";
+  }
+
+  if (["blocked", "block", "failed", "paid_but_not_delivered"].includes(normalizedState)) {
+    return "blocked";
+  }
+
+  if (
+    ["warning", "pending_approval", "draft", "needs_manual_step", "fallback_required", "refundable"].includes(
+      normalizedState
+    )
+  ) {
+    return "warning";
+  }
+
+  if (
+    ["success", "allow", "complete", "verified", "delivered", "paid", "finalized", "active", "ok"].includes(
+      normalizedState
+    )
+  ) {
+    return "success";
+  }
+
+  return "neutral";
+}
+
 function timelineSseUrl(runtimeEndpoint: string, missionId: string) {
   const url = new URL(runtimeEndpoint);
   url.pathname = `/api/missions/${encodeURIComponent(missionId)}/timeline.sse`;
@@ -92,8 +130,10 @@ function timelineSseUrl(runtimeEndpoint: string, missionId: string) {
 }
 
 function Badge({ state, tone }: { state: string; tone?: BadgeTone | undefined }) {
-  const resolvedTone = tone ?? (state === "live" ? "live" : state === "fallback" ? "fallback" : state === "mock" ? "mock" : "neutral");
-  return <span className={badgeStyles[resolvedTone]}>{toCompactModeLabel(state)}</span>;
+  const resolvedTone = tone ?? resolveBadgeTone(state);
+  const stateClass = state.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+  return <span className={`${badgeStyles[resolvedTone]} badge-state-${stateClass}`}>{toCompactModeLabel(state)}</span>;
 }
 
 function SectionCard({ title, subtitle, icon, state, tone, rightSlot, children, dense }: PanelCardProps) {
@@ -105,7 +145,10 @@ function SectionCard({ title, subtitle, icon, state, tone, rightSlot, children, 
     .replace(/^-|-$/g, "")}`;
 
   return (
-    <section className={`panel-card${dense ? " panel-card-dense" : ""}`} data-testid={testId}>
+    <section
+      className={`panel-card${dense ? " panel-card-dense" : ""} panel-tone-${tone ?? resolveBadgeTone(state)}`}
+      data-testid={testId}
+    >
       <div className="panel-card-head">
         <div className="panel-card-title-wrap">
           <div className="panel-card-icon">{icon}</div>
@@ -495,11 +538,11 @@ export function DashboardShell({ initialWorkspace, runtime, provider }: Dashboar
       <div className="dashboard-grid">
         <aside className={`sidebar${isMobileNavOpen ? " sidebar-open" : ""}`}>
           <div className="brand-line">
-            <div className="brand-mark">
-              <ShieldCheck size={18} />
+            <div className="brand-logo-card" aria-label="Clear402">
+              <img src="/brand/clear402-lockup.png" alt="" />
             </div>
-            <div>
-              <strong>Clear402 Evidence Dashboard</strong>
+            <div className="brand-copy">
+              <strong>Evidence Dashboard</strong>
               <p>Runtime facts first. No invented security verdicts.</p>
             </div>
           </div>
